@@ -52,7 +52,7 @@ function ResponsiveAppBar() {
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#0E1241", borderBottom: "2px solid #F0E" }}>
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{paddingInline:0}}>
         <Toolbar disableGutters sx={{ justifyContent: 'space-between' }} >
           {/*<IconButton size="small" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
             <img src="/logoMenuDown.svg" alt="" width={100} />
