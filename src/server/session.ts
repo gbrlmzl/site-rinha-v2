@@ -1,0 +1,1 @@
+//Aqui será implementada a lógica de sessão do usuário, como autenticação, armazenamento de tokens, etc.
