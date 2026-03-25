@@ -23,6 +23,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useAuth } from '@/hooks/useAuth';
 
 type LoginState = {
   success: boolean | null;
@@ -42,13 +43,17 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  
+  const { user, isLoading, isAuthenticated, refreshUser, logout } = useAuth();
+
+
   useEffect(() => {
     if (state.success) {
-      router.push('/');
+
+      refreshUser().then(() => { router.push('/'); });
+
     }
   }, [state.success, router]);
-  
+
 
   const dadosPreenchidos = username.trim().length > 0 && password.trim().length > 0;
 
@@ -60,6 +65,20 @@ export default function LoginForm() {
     setGoogleLoading(false);
   }
     */
+
+  if (false) {
+    return (
+      <Card sx={{ maxWidth: 500, mx: 'auto', p: 3, mt: 2, paddingInline: { xs: '2rem', md: '8rem' } }}>
+        <Typography variant="h4" component="h1" mb={2} sx={{ textAlign: 'center', fontWeight: 500 }}>
+          Fazer login
+        </Typography>
+        <div style={{ display: 'flex', justifyContent: 'center'}}>
+          <CircularProgress size={80}  />
+        </div>
+        
+      </Card>
+    );
+  }
 
   return (
     <Card sx={{ maxWidth: 500, mx: 'auto', p: 3, mt: 2, paddingInline: { xs: '2rem', md: '8rem' } }}>
@@ -123,6 +142,11 @@ export default function LoginForm() {
           </Stack>
           */}
 
+          {isLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <CircularProgress size={40} />
+            </div>
+          ) : (
           <Button
             type="submit"
             variant="contained"
@@ -130,15 +154,22 @@ export default function LoginForm() {
             endIcon={isPending ? <CircularProgress color="inherit" size={16} /> : <ArrowForwardIcon />}
           >
             {isPending ? 'Entrando...' : 'Entrar'}
-          </Button>
+          </Button>) 
+          }
+
+          
         </Stack>
       </Form>
-
-      <Box mt={2} textAlign="center">
-        <Link href="/cadastro" style={{ textDecoration: 'none' }}>
-          Criar conta
-        </Link>
-      </Box>
+      
+      {!isLoading && (
+        <Box mt={2} textAlign="center" >
+          <Link href="/cadastro" style={{ textDecoration: 'none' }}>
+            Criar conta
+          </Link>
+        </Box>
+      )
+    }
+      
     </Card>
   );
 }

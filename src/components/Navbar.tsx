@@ -26,6 +26,7 @@ function ResponsiveAppBar() {
   const [isNavDrawerOpen, setIsNavDrawerOpen] = React.useState(false);
   const [isNavDrawerOptionsOpen, setIsNavDrawerOptionsOpen] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  
 
   const handleOpenNavMenu = () => {
     setIsNavDrawerOpen(true);
@@ -154,7 +155,7 @@ function ResponsiveAppBar() {
             </Box>
             {/* Login Button -> Aparecer quando o usuário não estiver autenticado */}
             <Box sx={{ pt: 3, width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <Button variant='contained' sx={{width: '75%', borderRadius: 8}}>
+              <Button variant='contained' sx={{width: '75%', borderRadius: 8}} onClick={handleCloseNavOptions}>
                 <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
                   Fazer Login
                 </Link>

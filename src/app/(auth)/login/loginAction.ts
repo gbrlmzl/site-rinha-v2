@@ -26,10 +26,12 @@ export default async function loginAction(
         });
 
         if (!response.ok) {
+            
             const errorBody = await response.json();
+            console.log(errorBody);
             return {
                 success: false,
-                message: errorBody.message || 'Erro ao fazer login',
+                message: errorBody.error || 'Erro ao fazer login',
             };
         }
 
@@ -43,6 +45,7 @@ export default async function loginAction(
 
 
     } catch (error) {
+        console.log('Erro de rede ou outro:', error);
         return {
             success: false,
             message: 'Erro ao conectar à API.',

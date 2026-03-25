@@ -37,7 +37,7 @@ export default async function registerAction(
   };
 
   try {
-    const response = await fetch('http://localhost:8080/auth/register', { //URL da API de cadastro, posteriomente colocar isso em uma variável de ambiente
+    const response = await fetch(`${process.env.API_URL}/auth/register`, { //URL da API de cadastro, posteriomente colocar isso em uma variável de ambiente
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,13 +47,8 @@ export default async function registerAction(
     });
 
     if (!response.ok) {
-      let message = 'Erro ao cadastrar usuário';
-      try {
-        const errorBody = await response.json();
-        message = errorBody?.message ?? message;
-      } catch {
-        // sem body json
-      }
+      const errorBody = await response.json();
+      const message = errorBody?.error ?? 'Erro ao cadastrar usuário';
 
       return {
         success: false,
@@ -65,7 +60,7 @@ export default async function registerAction(
       success: true,
       message: 'Usuário cadastrado com sucesso!',
     };
-  } catch {
+  } catch (error) {
     return {
       success: false,
       message: 'Não foi possível conectar à API de cadastro.',

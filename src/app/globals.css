@@ -3,6 +3,13 @@
   --foreground: #171717;
 }
 
+@media (min-width: 900px) {
+  html {
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+  }
+}
+
 
 a {
     text-decoration: none;

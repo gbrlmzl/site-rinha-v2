@@ -1,17 +1,16 @@
+// src/app/registro/page.tsx
 import RegisterForm from "./RegisterForm";
 import { redirect } from "next/navigation";
+import { isAuthenticated } from "@/utils/auth";
 
-export default async function paginaRegistro() {
+export default async function PaginaRegistro() {
+  const isUserAuthenticated = await isAuthenticated();
 
+  if (isUserAuthenticated) {
+    redirect('/'); // já autenticado, redireciona antes de renderizar qualquer coisa
+  }
 
-    /*if () {
-        return redirect('/'); //caso o usuário esteja logado, ele é redirecionado para a página inicial.
-    }*/
-    return (
-        <div>
-            <RegisterForm />
-        </div>
-        
-    )
-
+  return (
+  <RegisterForm />
+)
 }
