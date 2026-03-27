@@ -1,21 +1,20 @@
 import {User} from '@/types/User';
+import { apiFetch } from '@/services/interceptor';
 
 export async function getUser() : Promise<User | null> {
-    try {
-        console.log('Fetching user data from /auth/me');
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
-            method: 'GET',
-            credentials: 'include', // Incluir os cookies para autenticação
-        });
+  try {
+    const response = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+      method: 'GET',
+      credentials: 'include',
+    });
 
-        if (!response.ok) {
-            return null; // Se a resposta não for OK, retornamos null para indicar que o usuário não está autenticado
-        }
 
-        const userData: User = await response.json();
-        return userData;
-    } catch (error) {
-        console.error('Error fetching user data:', error);
-        return null;
+    if (response.ok) {
+      return await response.json();
     }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
 }

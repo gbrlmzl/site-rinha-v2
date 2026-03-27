@@ -1,9 +1,11 @@
 'use client';
 
-import Form from 'next/form';
 import Link from 'next/link';
-import loginAction from './loginAction';
-import { useActionState, useEffect, useState } from 'react';
+import Form from 'next/form';
+import { useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
+import loginAction from '@/hooks/authentication/useLogin'
+import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -17,13 +19,15 @@ import {
   Stack,
   TextField,
   Typography,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/authentication/useAuth';
 
 type LoginState = {
   success: boolean | null;
@@ -37,48 +41,32 @@ const initialState: LoginState = {
 
 export default function LoginForm() {
   const [state, formAction, isPending] = useActionState<LoginState, FormData>(loginAction, initialState);
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  
+  
 
-  const { user, isLoading, isAuthenticated, refreshUser, logout } = useAuth();
-
+  const { isLoading, refreshUser } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    if (state.success) {
-
-      refreshUser().then(() => { router.push('/'); });
-
+    if (state?.success) {
+      console.log("Login bem-sucedido, atualizando usuário...");
+      refreshUser().then(() => {
+        router.push('/');
+      });
     }
-  }, [state.success, router]);
+  }, [state?.success, refreshUser]);
 
+  useEffect(() => {
+    if (state?.success === false) {
+      setPassword('');
+    }
+  }, [state?.success]);
 
   const dadosPreenchidos = username.trim().length > 0 && password.trim().length > 0;
-
-  /*
-  async function handleGoogleSignIn() {
-    if (googleLoading) return;
-    setGoogleLoading(true);
-    await signIn('google');
-    setGoogleLoading(false);
-  }
-    */
-
-  if (false) {
-    return (
-      <Card sx={{ maxWidth: 500, mx: 'auto', p: 3, mt: 2, paddingInline: { xs: '2rem', md: '8rem' } }}>
-        <Typography variant="h4" component="h1" mb={2} sx={{ textAlign: 'center', fontWeight: 500 }}>
-          Fazer login
-        </Typography>
-        <div style={{ display: 'flex', justifyContent: 'center'}}>
-          <CircularProgress size={80}  />
-        </div>
-        
-      </Card>
-    );
-  }
 
   return (
     <Card sx={{ maxWidth: 500, mx: 'auto', p: 3, mt: 2, paddingInline: { xs: '2rem', md: '8rem' } }}>
@@ -93,23 +81,25 @@ export default function LoginForm() {
       )}
 
       <Form action={formAction}>
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           <TextField
             fullWidth
+            name='username'
             type="text"
-            name="username"
             label="Usuário"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            disabled={isPending}
           />
 
           <TextField
             fullWidth
             type={showPassword ? 'text' : 'password'}
-            name="password"
             label="Senha"
+            name='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isPending}
             slotProps={{
               input: {
                 endAdornment: (
@@ -118,6 +108,8 @@ export default function LoginForm() {
                       onClick={() => setShowPassword((prev) => !prev)}
                       edge="end"
                       aria-label="Mostrar/Ocultar senha"
+                      tabIndex={-1}
+                      disabled={isPending}
                     >
                       {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                     </IconButton>
@@ -126,50 +118,49 @@ export default function LoginForm() {
               },
             }}
           />
+        </Stack>
 
-          {/*
-          <Stack spacing={1} alignItems="center" pt={1}>
-            <Typography variant="body2">Ou entrar com</Typography>
-            <Button
-              type="button"
-              variant="outlined"
-              onClick={handleGoogleSignIn}
-              disabled={googleLoading}
-              startIcon={googleLoading ? <CircularProgress size={16} /> : <GoogleIcon />}
-            >
-              Google
-            </Button>
-          </Stack>
-          */}
+        <Box sx={{ width: '100%', paddingBlock: 0.5, paddingInline: 1 }}>
+          <FormControlLabel
+            control={<Checkbox />}
+            name='keepLoggedIn'
+            checked={keepLoggedIn}
+            onChange={() => setKeepLoggedIn(!keepLoggedIn)}
+            label="Manter login"
+            disabled={isPending}
+            sx={{
+              '& .MuiSvgIcon-root': { fontSize: '1rem' },
+              '& .MuiFormControlLabel-label': { fontSize: '0.875rem' },
+              '& .MuiButtonBase-root': { paddingInline: 0.5, paddingBlock: 0 },
+            }}
+          />
+        </Box>
 
+        <Stack spacing={2} mt={2}>
           {isLoading ? (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <CircularProgress size={40} />
             </div>
           ) : (
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isPending || !dadosPreenchidos}
-            endIcon={isPending ? <CircularProgress color="inherit" size={16} /> : <ArrowForwardIcon />}
-          >
-            {isPending ? 'Entrando...' : 'Entrar'}
-          </Button>) 
-          }
-
-          
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isPending || !dadosPreenchidos}
+              endIcon={isPending ? <CircularProgress color="inherit" size={16} /> : <ArrowForwardIcon />}
+            >
+              {isPending ? 'Entrando...' : 'Entrar'}
+            </Button>
+          )}
         </Stack>
       </Form>
-      
+
       {!isLoading && (
-        <Box mt={2} textAlign="center" >
+        <Box mt={2} textAlign="center">
           <Link href="/cadastro" style={{ textDecoration: 'none' }}>
             Criar conta
           </Link>
         </Box>
-      )
-    }
-      
+      )}
     </Card>
   );
 }

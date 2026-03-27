@@ -13,6 +13,7 @@ export const registerSchema = z
       .min(8, 'A senha deve ter ao menos 8 caracteres')
       .regex(/[\d\W]/, 'A senha deve conter um número ou símbolo'),
     confirmPassword: z.string(),
+    keepLoggedIn: z.boolean(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ['confirmPassword'],

@@ -7,7 +7,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import Drawer from '@mui/material/Drawer';
-import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
@@ -20,7 +19,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Button, ListItemIcon } from '@mui/material';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/authentication/useAuth';
 import { useRouter } from 'next/navigation';
 
 
@@ -38,6 +37,7 @@ const games = [
 function ResponsiveAppBar() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
+  
 
   const [isNavDrawerOpen, setIsNavDrawerOpen] = React.useState(false);
   const [isNavDrawerOptionsOpen, setIsNavDrawerOptionsOpen] = React.useState(false);
@@ -110,34 +110,36 @@ function ResponsiveAppBar() {
     if (isMobile) {
       return (
         <Box sx={{ pt: 3, width: '100%', display: 'flex', justifyContent: 'center' }}>
-          <Button
-            variant="contained"
-            sx={{ width: '75%', borderRadius: 8 }}
-            onClick={handleCloseNavOptions}
-          >
-            <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
-              Fazer Login
-            </Link>
-          </Button>
+          <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Button
+              variant="contained"
+              sx={{ width: '100%', borderRadius: 8, paddingInline:6 }}
+              onClick={handleCloseNavOptions}
+            >
+                Fazer Login 
+            </Button>
+          </Link>
         </Box>
       );
     }
 
     return (
-      <Button
-        variant="contained"
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          width: 150,
-          borderRadius: 4,
-          backgroundColor: '#11B5E4',
-          '&:hover': { backgroundColor: '#0b80a0' },
-        }}
-      >
-        <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
-          Fazer Login
-        </Link>
-      </Button>
+      <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Button
+          variant="contained"
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            width: 150,
+            borderRadius: 4,
+            backgroundColor: '#11B5E4',
+            '&:hover': { backgroundColor: '#0b80a0' },
+          }}
+        >
+          
+            Fazer Login
+          
+        </Button>
+      </Link>
     );
   };
 
@@ -287,7 +289,7 @@ function ResponsiveAppBar() {
             {!isLoading && isAuthenticated && (
               <Box sx={{ pt: 2, pl: 2 }}>
                 <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 1 }} />
-                <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/conta'); }}>
+                <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/perfil'); }}>
                   <ListItemIcon sx={{ color: 'white', minWidth: 36 }}>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
@@ -400,15 +402,17 @@ function ResponsiveAppBar() {
             )}
 
             {!isLoading && !isAuthenticated && (
-              <Button variant="contained" sx={{
-                width: 150, borderRadius: 4,
-                backgroundColor: '#11B5E4',
-                '&:hover': { backgroundColor: '#0b80a0' },
-              }}>
-                <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  Fazer Login
-                </Link>
-              </Button>
+              <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Button variant="contained" sx={{
+                  width: 150, borderRadius: 4,
+                  backgroundColor: '#11B5E4',
+                  '&:hover': { backgroundColor: '#0b80a0' },
+                }}>
+                  
+                    Fazer Login
+                  
+                </Button>
+              </Link>
             )}
           </Box>
 
@@ -446,7 +450,7 @@ function ResponsiveAppBar() {
               </Box>
             )}
 
-            <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/conta'); }}>
+            <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/perfil'); }}>
               <ListItemIcon sx={{ color: 'white', minWidth: 36 }}>
                 <AccountCircleIcon fontSize="small" />
               </ListItemIcon>

@@ -6,6 +6,9 @@ import Navbar from "../components/ResponsiveAppBar";
 import AppThemeProvider from "./theme-provider";
 
 import { AuthProvider } from '@/contexts/AuthContext';
+import { isAuthenticated } from '@/utils/auth';
+
+const hasToken = await isAuthenticated();
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -29,7 +32,7 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <AppThemeProvider>
-            <AuthProvider>
+            <AuthProvider hasToken={hasToken}>
               <header>
                 <Navbar></Navbar>
               </header>

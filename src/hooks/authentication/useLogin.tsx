@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 export type LoginState = {
     success: boolean | null;
     message: string;
@@ -8,15 +6,16 @@ export type LoginState = {
 export default async function loginAction(
     _prevState: LoginState,
     formData: FormData
-): Promise<LoginState> {
-    const data = Object.fromEntries(formData.entries());
-    const payload = {
+    ): Promise<LoginState> {
+        const data = Object.fromEntries(formData.entries());
+        const payload = {
         username: data.username,
         password: data.password,
+        keepLoggedIn: data.keepLoggedIn ? true : false,
     };
 
     try {
-        const response = await fetch('http://localhost:8080/auth/login', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -28,7 +27,6 @@ export default async function loginAction(
         if (!response.ok) {
             
             const errorBody = await response.json();
-            console.log(errorBody);
             return {
                 success: false,
                 message: errorBody.error || 'Erro ao fazer login',
@@ -36,7 +34,6 @@ export default async function loginAction(
         }
 
 
-        console.log('Login bem-sucedido');
         return {
             success: true,
             message: 'Login realizado com sucesso',
@@ -45,7 +42,6 @@ export default async function loginAction(
 
 
     } catch (error) {
-        console.log('Erro de rede ou outro:', error);
         return {
             success: false,
             message: 'Erro ao conectar à API.',

@@ -13,17 +13,25 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthProviderProps {
+  children: ReactNode;
+  hasToken: boolean; // vem do servidor — sem tocar no cookie no cliente
+}
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children, hasToken }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // começa true para evitar flash de conteúdo
+  // Se não há token, já inicia como false — sem loading desnecessário
+  const [isLoading, setIsLoading] = useState(hasToken);
 
   const refreshUser = useCallback(async () => {
     setIsLoading(true);
     try {
       const userData = await getUser();
       setUser(userData);
+    } catch {
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -36,14 +44,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: 'include',
       });
     } finally {
-      setUser(null); // limpa o estado independente da resposta
+      setUser(null);
     }
   }, []);
 
-  // Busca o usuário UMA única vez ao montar a aplicação
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    // Só busca os dados se o servidor confirmou que o cookie existe
+    if (hasToken) {
+      refreshUser();
+    }
+  }, [hasToken, refreshUser]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, refreshUser, logout }}>
