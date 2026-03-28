@@ -2,7 +2,8 @@
 import React from 'react';
 import {
     Box, Typography, Avatar, IconButton, TextField, Button,
-    InputAdornment, Divider, Chip, Fade, Tooltip, Paper
+    InputAdornment, Divider, Chip, Fade, Tooltip, Paper, Snackbar, Alert,
+    Stack
 } from '@mui/material';
 import CameraAltRoundedIcon from '@mui/icons-material/CameraAltRounded';
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
@@ -12,8 +13,13 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useProfile } from '@/hooks/useProfile';
-
+import Slide, { SlideProps } from '@mui/material/Slide';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 // ─── Paleta coesa com o resto do projeto ───────────────────────────────────
 const C = {
     bg: '#080d2e',
@@ -45,16 +51,38 @@ const inputSx = {
 // ═══════════════════════════════════════════════════════════════════════════
 // ProfilePage — responsável exclusivamente pela renderização
 // ═══════════════════════════════════════════════════════════════════════════
+
+
 export default function ProfilePage() {
     const {
         nickname, email, username, avatarLetter, profilePic,
+        isEditingNickname, nicknameInput, nicknameError,
+        startNicknameEdit, cancelNicknameEdit, handleNicknameInputChange, confirmNicknameEdit,
         view, goToPassword, goToProfile,
         fileInputRef, openFilePicker, handleFileChange,
         passwordForm, updatePasswordField,
-        passwordErrors, passwordSuccess, passwordStrength,
+        passwordSuccess, passwordStrength,
         visibility, toggleVisibility,
         handlePasswordSubmit,
+        snackbar,
+        handleCloseSnackbar,
+        passwordFieldsValidated,
+        passwordRequirements
     } = useProfile();
+
+    const Condition = ({ ok, text }: { ok: boolean; text: string }) => (
+            <Stack direction="row" spacing={1} alignItems="center">
+                {ok ? (
+                    <CheckCircleIcon sx={{color: 'rgb(0, 255, 21)'}} fontSize="small" />
+                ) : (
+                    <RadioButtonUncheckedIcon
+                        fontSize="small"
+                        sx={{ color: 'rgba(255,255,255,0.55)' }}
+                    />
+                )}
+                <Typography variant="body2">{text}</Typography>
+            </Stack>
+        );
 
     return (
         <Box sx={{
@@ -63,7 +91,7 @@ export default function ProfilePage() {
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
-            pt: { xs: 4, md: 8 },
+            pt: { xs: 2, md: 4 },
             px: 2,
         }}>
             <Paper elevation={0} sx={{
@@ -128,14 +156,12 @@ export default function ProfilePage() {
                                     type={visibility.showCurrent ? 'text' : 'password'}
                                     value={passwordForm.currentPassword}
                                     onChange={updatePasswordField('currentPassword')}
-                                    error={!!passwordErrors.current}
-                                    helperText={passwordErrors.current}
                                     sx={inputSx}
                                     slotProps={{
                                         input: {
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <IconButton onClick={toggleVisibility('showCurrent')} sx={{ color: C.textMuted }}>
+                                                    <IconButton tabIndex={-1} onClick={toggleVisibility('showCurrent')} sx={{ color: C.textMuted }}>
                                                         {visibility.showCurrent
                                                             ? <VisibilityOffRoundedIcon fontSize="small" />
                                                             : <VisibilityRoundedIcon fontSize="small" />}
@@ -154,14 +180,12 @@ export default function ProfilePage() {
                                         type={visibility.showNew ? 'text' : 'password'}
                                         value={passwordForm.newPassword}
                                         onChange={updatePasswordField('newPassword')}
-                                        error={!!passwordErrors.new}
-                                        helperText={passwordErrors.new}
                                         sx={inputSx}
                                         slotProps={{
                                             input: {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <IconButton onClick={toggleVisibility('showNew')} sx={{ color: C.textMuted }}>
+                                                        <IconButton tabIndex={-1} onClick={toggleVisibility('showNew')} sx={{ color: C.textMuted }}>
                                                             {visibility.showNew
                                                                 ? <VisibilityOffRoundedIcon fontSize="small" />
                                                                 : <VisibilityRoundedIcon fontSize="small" />}
@@ -173,6 +197,7 @@ export default function ProfilePage() {
                                     />
 
                                     {passwordForm.newPassword.length > 0 && (
+                                        <>
                                         <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Box sx={{ flex: 1, display: 'flex', gap: 0.5 }}>
                                                 {[1, 2, 3, 4].map(i => (
@@ -187,6 +212,15 @@ export default function ProfilePage() {
                                                 {passwordStrength.label}
                                             </Typography>
                                         </Box>
+                                        <Box sx={{color : "white"}}>
+                                                <Stack spacing={1} sx={{ mt: 1 }} >
+                                                    <Condition ok={passwordRequirements.atLeast8Chars} text="Ao menos 8 caracteres" />
+                                                    <Condition ok={passwordRequirements.hasNumberOrSymbol} text="Deve conter um número ou símbolo" />
+                                                    <Condition ok={passwordRequirements.passwordsMatch} text="As senhas devem coincidir" />
+                                                </Stack>
+
+                                        </Box>
+                                        </>
                                     )}
                                 </Box>
 
@@ -197,19 +231,20 @@ export default function ProfilePage() {
                                     type={visibility.showConfirm ? 'text' : 'password'}
                                     value={passwordForm.confirmPassword}
                                     onChange={updatePasswordField('confirmPassword')}
-                                    error={!!passwordErrors.confirm}
-                                    helperText={passwordErrors.confirm}
                                     sx={inputSx}
                                     slotProps={{
-                                        input:{endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton onClick={toggleVisibility('showConfirm')} sx={{ color: C.textMuted }}>
-                                                    {visibility.showConfirm
-                                                        ? <VisibilityOffRoundedIcon fontSize="small" />
-                                                        : <VisibilityRoundedIcon fontSize="small" />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        )}}
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton tabIndex={-1} onClick={toggleVisibility('showConfirm')} sx={{ color: C.textMuted }}>
+                                                        {visibility.showConfirm
+                                                            ? <VisibilityOffRoundedIcon fontSize="small" />
+                                                            : <VisibilityRoundedIcon fontSize="small" />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            )
+                                        }
+                                    }
                                     }
                                 />
                             </Box>
@@ -219,11 +254,17 @@ export default function ProfilePage() {
                                 fullWidth
                                 variant="contained"
                                 onClick={handlePasswordSubmit}
+                                disabled={!passwordFieldsValidated}
                                 sx={{
                                     mt: 4, py: 1.5, borderRadius: 3,
                                     fontWeight: 700, fontSize: '0.95rem', letterSpacing: 1,
                                     backgroundColor: passwordSuccess ? '#4caf50' : C.accent,
                                     '&:hover': { backgroundColor: passwordSuccess ? '#4caf50' : C.accentHover },
+                                    '&.Mui-disabled': {
+                                        backgroundColor: 'rgba(9, 65, 80, 0.35)',
+                                        color: 'rgba(255, 255, 255, 0.46)',
+                                        border: '1px solid rgba(9, 98, 122, 0.45)',
+                                    },
                                     transition: 'background-color 0.3s',
                                 }}
                                 startIcon={passwordSuccess ? <CheckCircleRoundedIcon /> : <LockRoundedIcon />}
@@ -240,11 +281,14 @@ export default function ProfilePage() {
                         <Box>
 
                             {/* Título */}
-                            <Box sx={{ mb: 4 }}>
+                            <Box sx={{ mb: 2 }}>
+                                {/*
                                 <Typography sx={{ fontSize: '0.72rem', color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', mb: 0.5 }}>
                                     Perfil
                                 </Typography>
-                                <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: C.text }}>
+                                */}
+
+                                <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: C.text, textAlign: 'center' }}>
                                     Minha conta
                                 </Typography>
                             </Box>
@@ -266,6 +310,7 @@ export default function ProfilePage() {
                                         {!profilePic && avatarLetter}
                                     </Avatar>
 
+                                    {/*
                                     <Tooltip title="Alterar foto">
                                         <IconButton
                                             onClick={openFilePicker}
@@ -282,6 +327,7 @@ export default function ProfilePage() {
                                             <CameraAltRoundedIcon sx={{ fontSize: 16 }} />
                                         </IconButton>
                                     </Tooltip>
+                                    
 
                                     <input
                                         ref={fileInputRef}
@@ -290,6 +336,7 @@ export default function ProfilePage() {
                                         hidden
                                         onChange={handleFileChange}
                                     />
+                                    */}
                                 </Box>
 
                                 <Typography sx={{ mt: 1.5, fontWeight: 700, fontSize: '1.1rem', color: C.text }}>
@@ -307,9 +354,64 @@ export default function ProfilePage() {
                                     <PersonRoundedIcon sx={{ color: C.textMuted, fontSize: 20 }} />
                                     <Box sx={{ flex: 1 }}>
                                         <Typography sx={{ fontSize: '0.68rem', color: C.textMuted, mb: 0.2, letterSpacing: 1 }}>NICKNAME</Typography>
-                                        <Typography sx={{ color: C.text, fontWeight: 600 }}>{nickname}</Typography>
+                                        {isEditingNickname ? (
+                                            <TextField
+                                                size="small"
+                                                value={nicknameInput}
+                                                onChange={handleNicknameInputChange}
+                                                error={!!nicknameError}
+                                                helperText={nicknameError || ''}
+                                                sx={{
+                                                    width: '100%',
+                                                    ...inputSx,
+                                                    '& .MuiFormHelperText-root': {
+                                                        color: C.danger,
+                                                        marginLeft: 0,
+                                                    },
+                                                    '& .MuiOutlinedInput-input': {
+                                                        padding: '4px 4px',
+                                                        fontSize: '0.99rem',
+                                                        color: C.text,
+                                                    }
+                                                }}
+
+                                            />
+                                        ) : (
+                                            <Typography sx={{ color: C.text, fontWeight: 600 }}>{nickname}</Typography>
+                                        )}
                                     </Box>
-                                    <Chip label="Público" size="small" sx={{ bgcolor: `${C.accent}20`, color: C.accent, fontSize: '0.65rem', height: 20, border: `1px solid ${C.accent}40` }} />
+                                    {isEditingNickname ? (
+                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                            <Tooltip title="Confirmar">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={confirmNicknameEdit}
+                                                    sx={{ color: C.accent }}
+                                                >
+                                                    <CheckRoundedIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Cancelar">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={cancelNicknameEdit}
+                                                    sx={{ color: C.textMuted }}
+                                                >
+                                                    <CloseRoundedIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+                                    ) : (
+                                        <Tooltip title="Editar nickname">
+                                            <IconButton
+                                                size="small"
+                                                onClick={startNicknameEdit}
+                                                sx={{ color: C.accent }}
+                                            >
+                                                <EditRoundedIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    )}
                                 </Box>
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: C.surfaceHigh, borderRadius: 2, px: 2, py: 1.8, border: `1px solid ${C.border}` }}>
@@ -347,6 +449,21 @@ export default function ProfilePage() {
                 )}
 
             </Paper>
+            <Snackbar
+                open={snackbar?.open || false}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                /*message={snackbar?.message}*/
+                /*severity={snackbar?.severity}*/
+                slots={{ transition: Slide }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar?.severity}
+                    variant='filled'
+                    sx={{ width: '100%' }}
+                > {snackbar?.message} </Alert>
+            </Snackbar>
         </Box>
     );
 }

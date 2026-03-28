@@ -53,7 +53,6 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (state?.success) {
-      console.log("Login bem-sucedido, atualizando usuário...");
       refreshUser().then(() => {
         router.push('/');
       });
