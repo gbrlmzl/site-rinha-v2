@@ -1,0 +1,129 @@
+'use client';
+
+/**
+ * Passo 1: Informações da Equipe
+ * Coleta: Nome e Escudo
+ */
+
+import React from 'react';
+import {
+  Box,
+  TextField,
+  Stack,
+  Typography,
+  Divider,
+} from '@mui/material';
+import { Team } from '@/types/teamRegistration';
+import { ShieldUploader } from '../shared/ShieldUploader';
+import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+
+interface TeamInfoStepProps {
+  data: Team;
+  shieldPreview: string | null;
+  onTeamChange: (updates: Partial<Team>) => void;
+  onShieldFileSelected: (file: File | null) => void;
+  loading?: boolean;
+  error?: string | null;
+}
+
+export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
+  data,
+  shieldPreview,
+  onTeamChange,
+  onShieldFileSelected,
+  loading = false,
+  error = null,
+}) => {
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onTeamChange({ nomeEquipe: e.target.value });
+  };
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Stack
+        spacing={1}
+        sx={{
+          width: '100%',
+          maxWidth: 500,
+          p: { xs: 2, md: 3 },
+        }}
+      >
+        {/* Title */}
+        <Typography
+          variant="h5"
+          sx={{
+            color: THEME_COLORS.accent,
+            fontWeight: 700,
+            textAlign: 'center',
+            fontSize: '1.4rem',
+          }}
+        >
+          Equipe
+        </Typography>
+
+        {/* Shield Upload */}
+        <Box>
+          
+          <ShieldUploader
+            preview={shieldPreview}
+            onFileSelected={onShieldFileSelected}
+            loading={loading}
+            error={error}
+            success={data.escudo !== null && data.escudo !== ''}
+          />
+        </Box>
+
+        <Divider sx={{ borderColor: THEME_COLORS.border }} />
+
+        {/* Team Name */}
+        <Box>
+          <TextField
+            fullWidth
+            placeholder="Nome da equipe"
+            value={data.nomeEquipe}
+            onChange={handleNameChange}
+            disabled={loading}
+            slotProps={{
+                htmlInput:{
+                    maxLength: 30
+                },
+                formHelperText: {
+                    sx: { color: THEME_COLORS.textMuted, textAlign: 'right' },
+                },
+
+
+            }}
+            
+            helperText={`${data.nomeEquipe.length}/30 caracteres`}
+            
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: THEME_COLORS.surfaceHigh,
+                borderRadius: 2,
+                color: THEME_COLORS.text,
+                '& fieldset': { borderColor: THEME_COLORS.border },
+                '&:hover fieldset': { borderColor: THEME_COLORS.accent },
+                '&.Mui-focused fieldset': { borderColor: THEME_COLORS.accent },
+              },
+              '& .MuiInputLabel-root': { color: THEME_COLORS.textMuted },
+            }}
+          />
+        </Box>
+        {/* Error Alert 
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+          */}
+      </Stack>
+    </Box>
+  );
+};
