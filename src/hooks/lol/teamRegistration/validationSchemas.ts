@@ -4,14 +4,13 @@
  */
 
 import { z } from 'zod';
-import { PlayerPosition } from '@/types/teamRegistration';
 
 // ─── Base Schemas ─────────────────────────────────────────────────────────
 
-const PositionEnum = z.enum(['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT', 'FILL'] as const);
+const PositionEnum = z.enum(['TOP_LANER', 'JUNGLER', 'MID_LANER', 'AD_CARRY', 'SUPPORT', 'FILL'] as const);
 
 const BasePlayerSchema = z.object({
-  nomeJogador: z
+  playerName: z
     .string()
     .min(3, 'Nome do jogador deve ter pelo menos 3 caracteres')
     .max(50, 'Nome do jogador deve ter no máximo 50 caracteres'),
@@ -23,7 +22,7 @@ const BasePlayerSchema = z.object({
     .string()
     .min(2, 'Discord user deve ter pelo menos 2 caracteres')
     .max(50, 'Discord user deve ter no máximo 50 caracteres'),
-  posicao: PositionEnum.refine((val) => val !== 'FILL', {
+  role: PositionEnum.refine((val) => val !== null, {
     message: 'Posição inválida',
   }),
   isExternalPlayer: z.boolean(),
@@ -33,14 +32,35 @@ const BasePlayerSchema = z.object({
 // ─── Jogador Titulares (com matrícula obrigatória) ────────────────────────
 
 export const TitularPlayerSchema = BasePlayerSchema.extend({
-  matricula: z
-    .string()
-    .regex(/^\d{6,11}$/, 'Matrícula deve ter 6 a 11 dígitos')
-    .min(6, 'Matrícula obrigatória para jogadores titulares'),
-}).refine(
-  (data) => !data.disabledPlayer,
-  { message: 'Jogadores titulares não podem ser desabilitados' }
-);
+  matricula: z.string().optional(),
+}).superRefine((data, ctx) => {
+
+  // Jogadores titulares não podem ser desabilitados
+  if (data.disabledPlayer) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Jogadores titulares não podem ser desabilitados',
+      path: ['disabledPlayer'],
+    });
+  }
+
+  // Matrícula só é obrigatória se não for jogador externo
+  if (!data.isExternalPlayer) {
+    if (!data.matricula || data.matricula.trim() === '') {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'O capitão deve possuir matrícula na UFPB',
+        path: ['matricula'], // ← aponta o erro para o campo correto
+      });
+    } else if (!/^\d{6,11}$/.test(data.matricula)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Matrícula deve ter entre 6 e 11 dígitos',
+        path: ['matricula'],
+      });
+    }
+  }
+});
 
 // ─── Jogador Reserva (posicao obrigatória, matrícula opcional se externo) ────
 
@@ -64,23 +84,28 @@ export const ReservaPlayerSchema = BasePlayerSchema.extend({
 // ─── Jogador Desabilitado (reserva) ───────────────────────────────────────
 
 export const DisabledPlayerSchema = z.object({
-  nomeJogador: z.string().optional().transform(() => ''),
+  playerName: z.string().optional().transform(() => ''),
   matricula: z.string().optional().transform(() => ''),
   nickname: z.string().optional().transform(() => ''),
   discordUser: z.string().optional().transform(() => ''),
-  posicao: z.string().optional().transform(() => 'FILL'),
+  role: z.string().optional().transform(() => 'FILL'),
   isExternalPlayer: z.boolean().optional().transform(() => false),
   disabledPlayer: z.literal(true),
 });
 
 // ─── Team ─────────────────────────────────────────────────────────────────
 
+//teamShield é opcional(pode ser null), e caso exista, deve ser um arquivo do tipo imagem (jpeg ou png)
 export const TeamSchema = z.object({
-  nomeEquipe: z
+  teamName: z
     .string()
     .min(3, 'Nome da equipe deve ter pelo menos 3 caracteres')
     .max(30, 'Nome da equipe deve ter no máximo 30 caracteres'),
-  escudo: z.string().nullable().optional(),
+  teamShield: z.file().nullable().optional().refine((file) => {
+    if (file == null) return true;
+    const validTypes = ['image/jpeg', 'image/png'];
+    return file instanceof File && validTypes.includes(file.type);
+  }, 'Escudo deve ser um arquivo JPEG ou PNG'),
 });
 
 // ─── Payment ──────────────────────────────────────────────────────────────
@@ -94,8 +119,9 @@ export const PaymentFormSchema = z.object({
     .string()
     .min(1, 'Sobrenome é obrigatório')
     .max(50, 'Sobrenome deve ter no máximo 50 caracteres'),
-  email: z.
-  email('Email deve ser válido').max(100, 'Email deve ter no máximo 100 caracteres'),
+  email: z
+    .email('Email deve ser válido')
+    .max(100, 'Email deve ter no máximo 100 caracteres'),
   cpf: z
     .string()
     .regex(/^\d{11}$/, 'CPF deve conter 11 dígitos'),
@@ -151,9 +177,9 @@ export function validatePaymentForm(form: any) {
 }
 
 /**
- * Valida equipe + jogadores (matrículas únicas)
+ * Valida equipe + jogadores (matrículas, nickname, unicos)
  */
-export function validatePlayers(players: any[]) {
+export function validateAllPLayers(players: any[]) {
 
   // Validar cada jogador
   const playersValidation = players.map((player, idx) => validatePlayer(player, idx));
@@ -182,6 +208,21 @@ export function validatePlayers(players: any[]) {
       success: false,
       step: 'players',
       message: 'Matrículas dos jogadores titulares devem ser únicas',
+    };
+  }
+
+  // Verificar nicknames únicos (case-insensitive) entre jogadores ativos
+  const nicknames = players
+    .filter((p) => !p.disabledPlayer)
+    .map((p) => (p.nickname || '').trim().toLowerCase())
+    .filter((n) => n !== '');
+
+  const uniqueNicknames = new Set(nicknames);
+  if (nicknames.length !== uniqueNicknames.size) {
+    return {
+      success: false,
+      step: 'players',
+      message: 'Nicknames dos jogadores devem ser únicos',
     };
   }
 

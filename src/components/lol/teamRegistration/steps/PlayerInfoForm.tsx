@@ -83,10 +83,12 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
           fullWidth
           label="Nome do Jogador"
           placeholder="Nome completo"
-          value={data.nomeJogador}
-          onChange={handleChange('nomeJogador')}
+          value={data.playerName}
+          onChange={handleChange('playerName')}
           disabled={isFormDisabled}
-          inputProps={{ maxLength: 50 }}
+          slotProps={{
+            htmlInput:{maxLength: 50}
+          }}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_COLORS.surfaceHigh,
@@ -108,7 +110,9 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
           value={data.nickname}
           onChange={handleChange('nickname')}
           disabled={isFormDisabled}
-          inputProps={{ maxLength: 30 }}
+          slotProps={{
+            htmlInput:{maxLength: 30}
+          }}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_COLORS.surfaceHigh,
@@ -204,15 +208,22 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
             }}
           >
             <FormControlLabel
+              disabled={playerIndex == 0 || isFormDisabled} // O capitão sempre deve ter matrícula
               control={
                 <Checkbox
                   checked={data.isExternalPlayer}
                   onChange={handleExternalToggle}
                   disabled={isFormDisabled}
+                  sx={{
+                    color: '#d0d3d3',
+                    '&.Mui-checked': {
+                      color: 'primary.main',
+                    },
+                  }}
                 />
               }
               label={
-                <Typography sx={{ color: THEME_COLORS.text, fontSize: '0.85rem' }}>
+                <Typography sx={{ color: playerIndex === 0 || isFormDisabled ? THEME_COLORS.textMuted : THEME_COLORS.text, fontSize: '0.85rem' }}>
                   Não possui matrícula
                 </Typography>
               }
@@ -224,8 +235,8 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
         {/* Posição */}
         <Box sx={{width: "100%", display:"flex", justifyContent:"center"}}>
           <PositionSelector
-            value={data.posicao}
-            onChange={(position) => onChange({ posicao: position })}
+            value={data.role}
+            onChange={(position) => onChange({ role: position })}
             disabled={isFormDisabled}
           />
         </Box>

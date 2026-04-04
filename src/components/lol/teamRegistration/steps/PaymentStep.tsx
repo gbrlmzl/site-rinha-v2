@@ -104,13 +104,17 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
         }}
       >
         <Stack spacing={2} sx={{ textAlign: 'center', maxWidth: 500 }}>
-          <CheckCircleIcon
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <CheckCircleIcon
             sx={{
               fontSize: 80,
               color: '#4caf50',
               mx: 'auto',
             }}
           />
+
+          </Box>
+          
 
           <Typography
             variant="h5"
@@ -119,7 +123,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               fontWeight: 700,
             }}
           >
-            Pagamento Aprovado! 🎉
+            Pagamento Aprovado!
           </Typography>
 
           <Typography
@@ -131,6 +135,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             Sua inscrição foi confirmada com sucesso!
           </Typography>
 
+          {/*
           <Typography
             variant="body2"
             sx={{
@@ -139,8 +144,19 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
           >
             Você receberá um email de confirmação em breve com os detalhes da sua equipe e os próximos passos.
           </Typography>
+          */}
 
           <Divider sx={{ borderColor: THEME_COLORS.border, my: 2 }} />
+          <Box>
+            <Image
+              src="/chogat.jpg"
+              alt="Pagamento aprovado"
+              width={300}
+              height={300}
+              style={{ objectFit: 'contain' }}>
+
+            </Image>
+          </Box>
 
           <Typography
             variant="caption"
@@ -206,7 +222,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                 fontWeight: 700,
               }}
             >
-              R$ {(qrCodeData.valor / 100).toFixed(2).replace('.', ',')}
+              R$ {(qrCodeData.valor).toFixed(2).replace('.', ',')}
             </Typography>
           </Box>
 
@@ -224,8 +240,8 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                 alignItems: 'center',
               }}
             >
-              <Image
-                src={qrCodeData.qrCodeBase64}
+              <img
+                src={`data:image/png;base64,${qrCodeData.qrCodeBase64}`}
                 alt="QR Code PIX"
                 width={220}
                 height={220}

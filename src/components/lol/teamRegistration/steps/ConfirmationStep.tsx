@@ -45,7 +45,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   error = null,
 }) => {
   const activePlayers = players.filter((p) => !p.disabledPlayer);
-  const shieldSrc = shieldPreview || team.escudo;
+  const shieldSrc = shieldPreview || team.teamShield;
 
   return (
     <Box
@@ -117,7 +117,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                     textAlign: 'center',
                   }}
                 >
-                  {team.nomeEquipe}
+                  {team.teamName}
                 </Typography>
               </Box>
             )}
@@ -192,7 +192,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                         borderRadius: 1,
                       }}
                     >
-                      {player.posicao}
+                      {player.role}
                     </Typography>
                   </Stack>
                 </AccordionSummary>
@@ -210,7 +210,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                         variant="body2"
                         sx={{ color: THEME_COLORS.text }}
                       >
-                        {player.nomeJogador}
+                        {player.playerName}
                       </Typography>
                     </Box>
 

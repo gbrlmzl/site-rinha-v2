@@ -5,14 +5,14 @@
 
 // ─── Player ───────────────────────────────────────────────────────────────
 
-export type PlayerPosition = 'TOP' | 'JUNGLE' | 'MID' | 'ADC' | 'SUPPORT' | 'FILL';
+export type PlayerPosition = 'TOP_LANER' | 'JUNGLER' | 'MID_LANER' | 'AD_CARRY' | 'SUPPORT' | 'FILL';
 
 export interface Player {
-  nomeJogador: string;
+  playerName: string;
   matricula: string;
   nickname: string;
   discordUser: string;
-  posicao: PlayerPosition;
+  role: PlayerPosition;
   isExternalPlayer: boolean;
   disabledPlayer: boolean;
 }
@@ -20,8 +20,8 @@ export interface Player {
 // ─── Team ─────────────────────────────────────────────────────────────────
 
 export interface Team {
-  nomeEquipe: string;
-  escudo: string | null; // URL da imagem no Imgur (após upload)
+  teamName: string;
+  teamShield: File | null; //File 
 }
 
 // ─── Payment ──────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export interface TeamRegistrationState {
   players: Player[];
   paymentForm: PaymentForm;
   currentStep: StepType;
-  shieldFile: File | null; // Arquivo em memória antes do upload
+  //shieldFile: File | null; // Arquivo em memória antes do upload
   shieldPreview: string | null; // Data URL para preview
 }
 

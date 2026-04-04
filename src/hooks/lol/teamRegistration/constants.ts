@@ -7,7 +7,7 @@ import JungleIcon from '@/assets/icons/Position-Jungle.png';
 import MidIcon from '@/assets/icons/Position-Mid.png';
 import ADCIcon from '@/assets/icons/Position-Bot.png';
 import SupportIcon from '@/assets/icons/Position-Support.png';
-import DefaultIcon from '@/assets/icons/DefaultIcon.svg';
+import DefaultIcon from '@/assets/icons/Position-Fill.png';
 import { StepConfig, PlayerPosition } from '@/types/teamRegistration';
 
 // ─── Steps ────────────────────────────────────────────────────────────────
@@ -53,17 +53,18 @@ export const PLAYER_LABELS = [
 ];
 
 export const PLAYER_POSITIONS = [
-  { key: 'TOP' as const, label: 'Top', icon: TopIcon },
-  { key: 'JUNGLE' as const, label: 'Jungle', icon: JungleIcon },
-  { key: 'MID' as const, label: 'Mid', icon: MidIcon },
-  { key: 'ADC' as const, label: 'ADC', icon: ADCIcon },
-  { key: 'SUPPORT' as const, label: 'Support', icon: SupportIcon },
+  { key: 'TOP_LANER' as const, label: 'Top', icon: TopIcon },
+  { key: 'JUNGLER' as const, label: 'Jungle', icon: JungleIcon },
+  { key: 'MID_LANER' as const, label: 'Mid', icon: MidIcon },
+  { key: 'AD_CARRY' as const, label: 'ADC', icon: ADCIcon },
+  { key: 'SUPPORT' as const, label: 'Suporte', icon: SupportIcon },
+  {key: 'FILL' as const, label: 'Preencher', icon: DefaultIcon },
 ];
 
 export const DEFAULT_POSITION_ICON = DefaultIcon;
 
 export function getPositionIcon(position: PlayerPosition) {
-  if (position === 'FILL') return DEFAULT_POSITION_ICON;
+  //if (position === 'FILL') return DEFAULT_POSITION_ICON;
   const pos = PLAYER_POSITIONS.find((p) => p.key === position);
   return pos?.icon || DEFAULT_POSITION_ICON;
 }
@@ -120,16 +121,16 @@ export const THEME_COLORS = {
 // ─── Initial States ──────────────────────────────────────────────────────
 
 export const INITIAL_TEAM = {
-  nomeEquipe: '',
-  escudo: null,
+  teamName: '',
+  teamShield: null,
 };
 
 export const INITIAL_PLAYER = {
-  nomeJogador: '',
+  playerName: '',
   matricula: '',
   nickname: '',
   discordUser: '',
-  posicao: 'FILL' as const,
+  role: 'FILL' as const,
   isExternalPlayer: false,
   disabledPlayer: false,
 };

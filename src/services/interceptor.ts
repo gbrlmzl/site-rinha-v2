@@ -1,4 +1,4 @@
-let isRefreshing = false; // flag para evitar múltiplos refreshes simultâneos
+let isRefreshing = false;
 
 async function tryRefresh(): Promise<boolean> {
   if (isRefreshing) return false;
@@ -8,34 +8,52 @@ async function tryRefresh(): Promise<boolean> {
     const response = await fetch('/api/auth/refresh', {
       method: 'POST',
       credentials: 'include',
+      cache: 'no-store',
     });
     return response.ok;
-  } catch (error) {
-    
+  } catch {
     return false;
   } finally {
     isRefreshing = false;
   }
 }
 
-// Substitui o fetch nativo em todo o projeto
 export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-  const response = await fetch(input, { ...init, credentials: 'include' });
+
+  // Monta os headers corretamente
+  const headers = new Headers(init?.headers);
+
+  // Só define JSON se NÃO for FormData — FormData precisa do boundary automático do browser
+  if (!(init?.body instanceof FormData)) {
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+  }
+
+  const response = await fetch(input, {
+    ...init,
+    headers,
+    credentials: 'include',
+  });
 
   // Intercepta 401 — tenta renovar silenciosamente
   if (response.status === 401) {
     const body = await response.clone().json().catch(() => ({}));
-    
 
-    // Tenta refresh (independente da mensagem de erro)
+    // Só tenta refresh se o erro for token expirado ou genérico
+    // token_invalid não adianta tentar refresh
+    if (body.error === 'token_invalid') {
+      window.location.href = '/login';
+      return response;
+    }
+
     const refreshed = await tryRefresh();
 
     if (refreshed) {
-      // Repete a requisição original com o novo cookie
-      return fetch(input, { ...init, credentials: 'include' });
+      // Repete com os mesmos headers corrigidos
+      return fetch(input, { ...init, headers, credentials: 'include' });
     }
 
-    // Refresh falhou — redireciona para login
     window.location.href = '/login';
   }
 

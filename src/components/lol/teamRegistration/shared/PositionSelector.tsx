@@ -42,6 +42,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
   };
 
   const handleSelectPosition = (position: PlayerPosition) => {
+    console.log('Posição selecionada:', position);
     onChange(position);
     handleCloseMenu();
   };

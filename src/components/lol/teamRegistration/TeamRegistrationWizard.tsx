@@ -19,7 +19,7 @@ import {
   Paper,
 } from '@mui/material';
 import { useTeamRegistration } from '@/hooks/lol/teamRegistration/useTeamRegistration';
-import { validatePlayer, validatePlayers, validatePaymentForm, validateTeam } from '@/hooks/lol/teamRegistration/validationSchemas';
+import { validatePlayer, validateAllPLayers, validatePaymentForm, validateTeam } from '@/hooks/lol/teamRegistration/validationSchemas';
 import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 import { setupPaymentWebSocketListener } from '@/services/teamRegistrationService';
 
@@ -41,7 +41,6 @@ export const TeamRegistrationWizard: React.FC = () => {
     paymentApproved,
     updateTeam,
     handleShieldFileSelected,
-    uploadShield,
     updatePlayer,
     updatePaymentForm,
     getPaymentValue,
@@ -89,6 +88,7 @@ export const TeamRegistrationWizard: React.FC = () => {
 
       case 'playersInfo': {
         const isLastPlayer = currentPlayerIndex === state.players.length - 1;
+        const lastPlayerIndex = state.players.length - 1;
 
         if (!isLastPlayer) {
           const currentValidation = validatePlayer(
@@ -109,10 +109,12 @@ export const TeamRegistrationWizard: React.FC = () => {
           setCurrentPlayerIndex((prev) => prev + 1);
           return;
         }
-
+        
+        // isLastPlayer === true, validar o conjunto completo antes de avançar
         // No último jogador, valida o conjunto completo antes de avançar
-        const validation = validatePlayers(state.players);
+        const validation = validateAllPLayers(state.players);
         if (!validation.success) {
+          console.log('Erro de validação dos jogadores:', validation.message);
           if (validation.playerIndex !== undefined) {
             const firstIssue = Array.isArray(validation.errors)
               ? validation.errors[0]
@@ -122,7 +124,7 @@ export const TeamRegistrationWizard: React.FC = () => {
             });
           } else {
             setValidationErrors({
-              0: validation.message || 'Erro na validação',
+              [lastPlayerIndex]: validation.message || 'Erro na validação',
             });
           }
           return;

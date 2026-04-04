@@ -35,7 +35,7 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
   error = null,
 }) => {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onTeamChange({ nomeEquipe: e.target.value });
+    onTeamChange({ teamName: e.target.value });
   };
 
   return (
@@ -76,7 +76,7 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
             onFileSelected={onShieldFileSelected}
             loading={loading}
             error={error}
-            success={data.escudo !== null && data.escudo !== ''}
+            success={data.teamShield !== null && data.teamShield !== ''}
           />
         </Box>
 
@@ -87,7 +87,7 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
           <TextField
             fullWidth
             placeholder="Nome da equipe"
-            value={data.nomeEquipe}
+            value={data.teamName}
             onChange={handleNameChange}
             disabled={loading}
             slotProps={{
@@ -101,7 +101,7 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
 
             }}
             
-            helperText={`${data.nomeEquipe.length}/30 caracteres`}
+            helperText={`${data.teamName.length}/30 caracteres`}
             
             sx={{
               '& .MuiOutlinedInput-root': {

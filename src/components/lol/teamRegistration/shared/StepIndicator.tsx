@@ -32,7 +32,7 @@ interface StepIndicatorProps {
 
 const CustomStepConnector = styled(StepConnector)(() => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 22,
+    top: 16,
   },
   [`& .${stepConnectorClasses.line}`]: {
     height: 3,
@@ -54,7 +54,7 @@ const CustomStepIconRoot = styled('div')<{
   ownerState: { completed?: boolean; active?: boolean };
 }>(({ ownerState }) => ({
   display: 'flex',
-  height: 22,
+  height: 32,
   alignItems: 'center',
   ...(ownerState.active && {
     color: THEME_COLORS.accent,
@@ -76,20 +76,21 @@ function CustomStepIcon(props: CustomStepIconProps) {
   return (
     <CustomStepIconRoot ownerState={{ active, completed }}>
       {completed ? (
-        <CheckCircleIcon sx={{ color: THEME_COLORS.accent, fontSize: 28 }} />
+        <CheckCircleIcon sx={{ color: THEME_COLORS.accent, fontSize: 32 }} />
       ) : (
         <Box
           sx={{
-            width: 28,
-            height: 28,
+            width: 32,
+            height: 32,
             borderRadius: '50%',
             backgroundColor: active ? THEME_COLORS.accent : THEME_COLORS.surfaceHigh,
             border: `2px solid ${active ? THEME_COLORS.accent : THEME_COLORS.border}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 12,
+            fontSize: 16,
             fontWeight: 600,
+            padding: 2,
             color: active ? '#000' : THEME_COLORS.textMuted,
             transition: 'all 0.3s',
           }}
@@ -161,7 +162,9 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
           >
             <CustomStepLabel
               icon={index + 1}
-              StepIconComponent={CustomStepIcon}
+              slots={{
+                stepIcon: CustomStepIcon
+              }}
             >
               {step.label}
             </CustomStepLabel>

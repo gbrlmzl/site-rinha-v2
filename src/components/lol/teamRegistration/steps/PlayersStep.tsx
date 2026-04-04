@@ -53,11 +53,11 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
     if (checked) {
       onPlayerChange(5, {
         disabledPlayer: true,
-        nomeJogador: '',
+        playerName: '',
         matricula: '',
         nickname: '',
         discordUser: '',
-        posicao: 'FILL',
+        role: 'FILL',
         isExternalPlayer: false,
       });
       return;
@@ -130,6 +130,12 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
                   checked={Boolean(data[5]?.disabledPlayer)}
                   onChange={(e) => handleReserveToggle(e.target.checked)}
                   disabled={disabled}
+                  sx={{
+                    color: '#d0d3d3',
+                    '&.Mui-checked': {
+                      color: 'primary.main',
+                    },
+                  }}
                 />
               }
               label={
@@ -152,40 +158,6 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
           5 titulares + 1 reserva (opcional)
         </Typography>
 
-        {/* Player Stepper - Desktop 
-        {!isMobile && (
-          <Box sx={{ mb: 2, overflowX: 'auto' }}>
-            <Stepper
-              activeStep={currentPlayerIndex}
-              sx={{
-                backgroundColor: 'transparent',
-                padding: 0,
-                '& .MuiStep-root': {
-                  cursor: 'pointer',
-                  minWidth: 80,
-                },
-                '& .MuiStepLabel-label': {
-                  fontSize: '0.8rem',
-                  color: THEME_COLORS.textMuted,
-                },
-                '& .MuiStepLabel-label.Mui-active': {
-                  color: THEME_COLORS.accent,
-                  fontWeight: 600,
-                },
-              }}
-            >
-              {data.map((_, index) => (
-                <Step
-                  key={index}
-                  onClick={() => handlePlayerClick(index)}
-                >
-                  <StepLabel>J{index + 1}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </Box>
-        )}
-        */}
 
         {/* Current Player Form */}
         <PlayerInfoForm
@@ -196,115 +168,6 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
           disabled={disabled}
         />
 
-        {/* Player Navigation - Mobile 
-        {isMobile && (
-          <MobileStepper
-            variant="text"
-            steps={6}
-            position="static"
-            activeStep={currentPlayerIndex}
-            nextButton={
-              <Button
-                size="small"
-                onClick={handleNextPlayer}
-                disabled={currentPlayerIndex >= 5 || disabled}
-                sx={{ color: THEME_COLORS.accent }}
-              >
-                Próximo
-                <ChevronRightIcon />
-              </Button>
-            }
-            backButton={
-              <Button
-                size="small"
-                onClick={handlePrevPlayer}
-                disabled={currentPlayerIndex === 0 || disabled}
-                sx={{ color: THEME_COLORS.accent }}
-              >
-                <ChevronLeftIcon />
-                Anterior
-              </Button>
-            }
-            sx={{
-              backgroundColor: THEME_COLORS.surfaceHigh,
-              borderRadius: 2,
-              mt: 2,
-            }}
-          />
-        )}
-
-        {/* Player Navigation - Desktop 
-        {!isMobile && (
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ justifyContent: 'center', mt: 2 }}
-          >
-            <Button
-              variant="outlined"
-              onClick={handlePrevPlayer}
-              disabled={currentPlayerIndex === 0 || disabled}
-              startIcon={<ChevronLeftIcon />}
-              sx={{
-                borderColor: THEME_COLORS.accent,
-                color: THEME_COLORS.accent,
-                '&:hover': {
-                  backgroundColor: 'rgba(17, 181, 228, 0.1)',
-                  borderColor: THEME_COLORS.accent,
-                },
-              }}
-            >
-              Anterior
-            </Button>
-
-            {/* Player Counter 
-            <Box
-              sx={{
-                px: 2,
-                py: 1,
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: THEME_COLORS.surfaceHigh,
-                borderRadius: 1,
-                border: `1px solid ${THEME_COLORS.border}`,
-              }}
-            >
-              <Typography sx={{ color: THEME_COLORS.text, fontSize: '0.9rem' }}>
-                {currentPlayerIndex + 1} / 6
-              </Typography>
-            </Box>
-
-            <Button
-              variant="contained"
-              onClick={handleNextPlayer}
-              disabled={currentPlayerIndex >= 5 || disabled}
-              endIcon={<ChevronRightIcon />}
-              sx={{
-                backgroundColor: THEME_COLORS.accent,
-                '&:hover': { backgroundColor: THEME_COLORS.accentHover },
-              }}
-            >
-              Próximo
-            </Button>
-          </Stack>
-        )}
-          */}
-
-        {/* Summary 
-        <Box
-          sx={{
-            p: 2,
-            backgroundColor: THEME_COLORS.surfaceHigh,
-            borderRadius: 2,
-            border: `1px solid ${THEME_COLORS.border}`,
-          }}
-        >
-          <Typography variant="caption" sx={{ color: THEME_COLORS.textMuted }}>
-            <strong>{data.filter((p) => !p.disabledPlayer).length}</strong> de{' '}
-            <strong>6</strong> jogadores preenchidos
-          </Typography>
-        </Box>
-        */}
       </Stack>
     </Box>
   );
