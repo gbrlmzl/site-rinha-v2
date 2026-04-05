@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Roboto, Russo_One } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import "./globals.css";
 import Navbar from "../components/ResponsiveAppBar";
@@ -17,6 +17,14 @@ const roboto = Roboto({
   variable: "--font-roboto",
 });
 
+const russoOne = Russo_One({
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+  variable: "--font-russo-one",
+});
+
+
 export const metadata: Metadata = {
   title: "Rinha do Campus IV",
   description: "Site oficial da maior rinha da UFPB!",
@@ -28,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={roboto.variable}>
+    <html lang="en" className={`${roboto.variable} ${russoOne.variable}`}>
       <body>
         <AppRouterCacheProvider>
           <AppThemeProvider>

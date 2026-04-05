@@ -45,7 +45,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   error = null,
 }) => {
   const activePlayers = players.filter((p) => !p.disabledPlayer);
-  const shieldSrc = shieldPreview || team.teamShield;
+  const shieldSrc = shieldPreview
 
   return (
     <Box

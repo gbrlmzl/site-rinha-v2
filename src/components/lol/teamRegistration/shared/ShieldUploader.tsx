@@ -5,7 +5,7 @@
  * Inclui preview, upload e feedback visual
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -38,23 +38,27 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
   success = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [shieldFileError, setShieldFileError] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
       if (!file.type.match(/^image\/(png|jpeg|webp|jpg)$/)) {
-        //alert('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG, WebP)');
+        //alert('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
         //Snackbar de erro 
+        setShieldFileError('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
         return;
       }
 
       // Validar tamanho (máx 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        //Snackbar de erro
+        setShieldFileError('O tamanho do arquivo deve ser menor que 5MB');
         return;
       }
-
+      // Se passou nas validações, limpar erros anteriores
+      setShieldFileError(null);
+      
       onFileSelected(file);
     }
   };
@@ -145,6 +149,9 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       />
 
       {/* Upload Button & Actions */}
+      <Box>
+        
+      </Box>
       <Stack
         direction="row"
         spacing={1}
@@ -201,11 +208,15 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       </Stack>
 
       {/* Error Message */}
-      {error && (
+      {error ? (
         <Alert severity="error" sx={{ borderRadius: 2 }}>
           {error}
         </Alert>
-      )}
+      ) : shieldFileError ? (
+        <Alert severity="error" sx={{ borderRadius: 2 }}>
+          {shieldFileError}
+        </Alert>
+      ) : null}
 
     </Stack>
   );

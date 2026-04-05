@@ -289,15 +289,6 @@ export const TeamRegistrationWizard: React.FC = () => {
             border: `1px solid ${THEME_COLORS.border}`,
             p: { xs: 0, md: 1 },
             overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 3,
-              background: `linear-gradient(90deg, transparent, ${THEME_COLORS.accent}, transparent)`,
-            },
           }}
         >
           <Box sx={{ p: { xs: 2, md: 4 } }}>

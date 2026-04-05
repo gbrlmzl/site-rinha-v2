@@ -11,7 +11,7 @@ import {
   TextField,
   Stack,
   Typography,
-  Divider,
+  Divider
 } from '@mui/material';
 import { Team } from '@/types/teamRegistration';
 import { ShieldUploader } from '../shared/ShieldUploader';
@@ -76,7 +76,7 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
             onFileSelected={onShieldFileSelected}
             loading={loading}
             error={error}
-            success={data.teamShield !== null && data.teamShield !== ''}
+            success={data.teamShield !== null && !shieldPreview}
           />
         </Box>
 
@@ -116,13 +116,8 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
             }}
           />
         </Box>
-        {/* Error Alert 
-        {error && (
-          <Alert severity="error" sx={{ borderRadius: 2 }}>
-            {error}
-          </Alert>
-        )}
-          */}
+
+          
       </Stack>
     </Box>
   );
