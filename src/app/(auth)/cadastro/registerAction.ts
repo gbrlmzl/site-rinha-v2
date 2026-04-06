@@ -7,6 +7,7 @@ import { registerSchema } from "@/schemas/users";
 export type RegisterState = {
   success: boolean | null;
   message: string;
+  secondaryMessage?: string;
 };
 
 
@@ -45,6 +46,7 @@ export default async function registerAction(
       body: JSON.stringify(payload),
       cache: 'no-store',
     });
+    console.log('Resposta da API de cadastro:', response);
 
     if (!response.ok) {
       const errorBody = await response.json();
@@ -59,6 +61,7 @@ export default async function registerAction(
     return {
       success: true,
       message: 'Usuário cadastrado com sucesso!',
+      secondaryMessage: 'Verifique seu email para ativar a conta.'
     };
   } catch (error) {
     return {

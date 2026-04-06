@@ -34,6 +34,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 type RegisterState = {
     success: boolean | null;
     message: string;
+    secondaryMessage?: string;
 };
 
 const initialState: RegisterState = {
@@ -99,16 +100,21 @@ export default function RegisterForm() {
     if (state.success) {
         return (
             <Card sx={{ width: 'fit-content', height: 'fit-content', mx: 'auto', paddingBlock: 4, paddingInline: { xs: "1rem", md: "2rem" }, mt: 2 }}>
-                <Typography component="h2" mb={1} sx={{ textAlign: 'center', fontWeight: 500, fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
+                <Typography component="h2" mb={0.75} sx={{whiteSpace: 'pre-line', textAlign: 'center', fontWeight: 500, fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
                     {state.message}
                 </Typography>
+                {state.secondaryMessage && (
+                    <Typography component="p" mb={0.25} sx={{whiteSpace: 'pre-line', textAlign: 'center', fontSize: { xs: '0.8rem', sm: '1rem' }, color: 'text.secondary' }}>
+                        {state.secondaryMessage}
+                    </Typography>
+                )}
                 <div style={{width: "100%", display: "flex", justifyContent: "center", paddingBlock: "2rem"}}>
                     <DoneIcon color="success" sx={{fontSize: 150}}></DoneIcon>
                 </div>
                 
                 <Box display="flex" justifyContent="center">
                     <Link href="/login" passHref>
-                        <Button variant="contained" endIcon={<ArrowForwardIcon />}>
+                        <Button variant="contained">
                             Fazer login
                         </Button>
                     </Link>
