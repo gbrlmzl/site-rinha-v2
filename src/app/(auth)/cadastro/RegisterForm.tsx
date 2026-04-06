@@ -20,6 +20,8 @@ import {
     Icon
 } from '@mui/material';
 
+import Condition from "@/components/shared/Condition";
+
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import DoneIcon from '@mui/icons-material/Done';
@@ -93,12 +95,6 @@ export default function RegisterForm() {
         setGoogleLoading(false);
     }
 
-    const Condition = ({ ok, text }: { ok: boolean; text: string }) => (
-        <Stack direction="row" spacing={1} alignItems="center">
-            {ok ? <CheckCircleIcon color="success" fontSize="small" /> : <RadioButtonUncheckedIcon color="disabled" fontSize="small" />}
-            <Typography variant="body2">{text}</Typography>
-        </Stack>
-    );
 
     if (state.success) {
         return (

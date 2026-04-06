@@ -154,7 +154,10 @@ export default function LoginForm() {
       </Form>
 
       {!isLoading && (
-        <Box mt={2} textAlign="center">
+        <Box mt={2} textAlign="center" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5,  }}>
+          <Link href="/recuperar-senha" style={{ textDecoration: 'none', fontSize: '0.875rem' }}>
+            Esqueceu a senha?
+          </Link>
           <Link href="/cadastro" style={{ textDecoration: 'none' }}>
             Criar conta
           </Link>
