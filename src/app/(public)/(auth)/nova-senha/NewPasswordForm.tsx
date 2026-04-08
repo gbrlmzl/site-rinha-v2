@@ -12,7 +12,7 @@ import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
 import Link from 'next/link';
-import useNewPassword from '../../../hooks/authentication/useNewPassword';
+import useNewPassword from '../../../../hooks/authentication/useNewPassword';
 
 
 

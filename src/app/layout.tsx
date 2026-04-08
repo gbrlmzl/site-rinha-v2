@@ -40,6 +40,7 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <AppThemeProvider>
+            
             <AuthProvider hasToken={hasToken}>
               <header>
                 <Navbar></Navbar>

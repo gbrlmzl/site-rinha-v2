@@ -1,21 +1,33 @@
-let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+let refreshFailed = false;
 
 async function tryRefresh(): Promise<boolean> {
-  if (isRefreshing) return false;
-  isRefreshing = true;
+  if (refreshFailed) return false;
+  if (refreshPromise) return refreshPromise;
 
-  try {
-    const response = await fetch('/api/auth/refresh', {
-      method: 'POST',
-      credentials: 'include',
-      cache: 'no-store',
-    });
-    return response.ok;
-  } catch {
-    return false;
-  } finally {
-    isRefreshing = false;
-  }
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        refreshFailed = true;
+        return false;
+      }
+
+      return true;
+    } catch {
+      refreshFailed = true;
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
@@ -38,6 +50,11 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<
 
   // Intercepta 401 — tenta renovar silenciosamente
   if (response.status === 401) {
+    const requestUrl = typeof input === 'string' ? input : input.url;
+    if (requestUrl.includes('/api/auth/refresh')) {
+      return response;
+    }
+
     const body = await response.clone().json().catch(() => ({}));
 
     // Só tenta refresh se o erro for token expirado ou genérico

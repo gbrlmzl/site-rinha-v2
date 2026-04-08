@@ -21,6 +21,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { Button, ListItemIcon } from '@mui/material';
 import { useAuth } from '@/hooks/authentication/useAuth';
 import { useRouter } from 'next/navigation';
+import RouteProgressBar from '@/components/RouteProgressBar';
 
 
 const pages = [
@@ -144,7 +145,7 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#0E1241', borderBottom: '2px solid #F0E' }}>
+    <AppBar position="static" sx={{ backgroundColor: '#0E1241', borderBottom: 'none' }}>
       <Box sx={{ width: '100%', paddingInline: { xs: 1, md: 3 } }}>
         <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
 
@@ -473,9 +474,13 @@ function ResponsiveAppBar() {
               Encerrar sessão
             </MenuItem>
           </Menu>
-
+          
         </Toolbar>
+        
       </Box>
+      <RouteProgressBar />
+  
+      
     </AppBar>
   );
 }
