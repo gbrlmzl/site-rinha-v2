@@ -26,6 +26,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PaymentForm } from '@/types/teamRegistration';
 import { THEME_COLORS, PAYMENT_TIMEOUT_SECONDS } from '@/hooks/lol/teamRegistration/constants';
 import { formatTimeRemaining, copyToClipboard } from '@/services/teamRegistrationService';
+import { time } from 'console';
 
 interface PaymentStepProps {
   data: PaymentForm;
@@ -103,7 +104,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
           minHeight: 400,
         }}
       >
-        <Stack spacing={2} sx={{ textAlign: 'center', maxWidth: 500 }}>
+        <Stack spacing={1} sx={{ textAlign: 'center', maxWidth: 500 }}>
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <CheckCircleIcon
             sx={{
@@ -135,16 +136,6 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             Sua inscrição foi confirmada com sucesso!
           </Typography>
 
-          {/*
-          <Typography
-            variant="body2"
-            sx={{
-              color: THEME_COLORS.textMuted,
-            }}
-          >
-            Você receberá um email de confirmação em breve com os detalhes da sua equipe e os próximos passos.
-          </Typography>
-          */}
 
           <Divider sx={{ borderColor: THEME_COLORS.border, my: 2 }} />
           <Box>
@@ -152,7 +143,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               src="/chogat.jpg"
               alt="Pagamento aprovado"
               width={300}
-              height={300}
+              height={250}
               style={{ objectFit: 'contain' }}>
 
             </Image>
@@ -164,7 +155,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               color: THEME_COLORS.textMuted,
             }}
           >
-            Acompanhe o torneio em nossa plataforma. Boa sorte! ⚔️
+            Você receberá um email de confirmação. Boa sorte!
           </Typography>
         </Stack>
       </Box>
@@ -274,9 +265,18 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                     ? THEME_COLORS.danger
                     : THEME_COLORS.textMuted,
                 fontWeight: timeRemaining < 60 ? 700 : 500,
+                whiteSpace: 'pre-line',
               }}
             >
-              QR Code expira em: <strong>{formatTimeRemaining(timeRemaining)}</strong>
+              {timeRemaining > 0 ? (
+                <>
+                  QR Code expira em: <strong>{formatTimeRemaining(timeRemaining)}</strong>
+                </>
+              ) : (
+                <>
+                  QR Code expirado.
+                </>
+              )}
             </Typography>
           </Box>
 
@@ -314,11 +314,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             </Button>
           </Box>
 
-          {/* Info */}
-          <Alert severity="info" sx={{ borderRadius: 2 }}>
-            Após confirmar o pagamento, você receberá um email de confirmação.
-            Se o QR Code expirar, será gerado um novo automaticamente.
-          </Alert>
+          
         </Stack>
       </Box>
     );
@@ -336,7 +332,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
       }}
     >
       <Stack
-        spacing={3}
+        spacing={2}
         sx={{
           width: '100%',
           maxWidth: 500,
@@ -347,39 +343,27 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
         <Typography
           variant="h5"
           sx={{
-            color: THEME_COLORS.accent,
+            color: 'white',
             fontWeight: 700,
             textAlign: 'center',
           }}
         >
-          Pagamento de Inscrição
+          Taxa de inscrição
         </Typography>
 
         {/* Payment Info */}
         <Box
           sx={{
             p: 2,
-            backgroundColor: THEME_COLORS.surfaceHigh,
+            //backgroundColor: THEME_COLORS.surfaceHigh,
             borderRadius: 2,
             border: `1px solid ${THEME_COLORS.border}`,
             textAlign: 'center',
           }}
         >
-          <Typography variant="caption" sx={{ color: THEME_COLORS.textMuted }}>
-            Taxa de Inscrição
-          </Typography>
+          
           <Typography
             variant="h6"
-            sx={{
-              color: THEME_COLORS.text,
-              fontWeight: 600,
-            }}
-          >
-            R$ 10,00 por jogador × {Math.ceil(paymentValue / 10)} jogadores
-          </Typography>
-          <Divider sx={{ borderColor: THEME_COLORS.border, my: 1 }} />
-          <Typography
-            variant="h5"
             sx={{
               color: THEME_COLORS.accent,
               fontWeight: 700,

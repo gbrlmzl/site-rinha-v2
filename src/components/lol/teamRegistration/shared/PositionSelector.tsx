@@ -5,7 +5,7 @@
  * Componente reutilizável para seleção de posição de jogador
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IconButton,
   Menu,
@@ -33,6 +33,21 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  useEffect(() => {
+    if (!anchorEl) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [anchorEl]);
+
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -42,7 +57,6 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
   };
 
   const handleSelectPosition = (position: PlayerPosition) => {
-    console.log('Posição selecionada:', position);
     onChange(position);
     handleCloseMenu();
   };
@@ -96,6 +110,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
+        disableScrollLock
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
         slotProps={{
@@ -104,6 +119,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
               backgroundColor: THEME_COLORS.surface,
               border: `1px solid ${THEME_COLORS.border}`,
               borderRadius: 2,
+              overflow: 'hidden',
             },
           },
         }}

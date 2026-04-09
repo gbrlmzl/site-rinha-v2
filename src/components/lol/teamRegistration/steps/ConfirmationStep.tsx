@@ -25,7 +25,7 @@ import MilitaryTechOutlinedIcon from '@mui/icons-material/MilitaryTechOutlined';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import Image from 'next/image';
 import { Team, Player } from '@/types/teamRegistration';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { PLAYER_POSITIONS, THEME_COLORS, getPositionIcon } from '@/hooks/lol/teamRegistration/constants';
 
 interface ConfirmationStepProps {
   team: Team;
@@ -85,21 +85,22 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
             borderRadius: 2,
           }}
         >
-          <Stack spacing={2} sx={{ p: 2 }}>
+          <Stack spacing={1} sx={{ p: 2 }}>
             {/* Shield preview + Team title */}
             {shieldSrc && (
               <Box
                 sx={{
-                  width: '100%',
-                  minHeight: 190,
+                  width: 'fit-content',
+                  minHeight: 150,
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
+                  alignSelf: 'center',
                   alignItems: 'center',
                   backgroundColor: THEME_COLORS.surfaceHigh,
                   borderRadius: 1.5,
                   gap: 1,
-                  py: 1.5,
+                  py: 1,
                 }}
               >
                 <Image
@@ -109,7 +110,12 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                   height={120}
                   style={{ objectFit: 'contain' }}
                 />
-                <Typography
+                
+              </Box>
+            )}
+
+            <Divider sx={{ borderColor: THEME_COLORS.border }} />
+               <Typography
                   variant="h6"
                   sx={{
                     color: THEME_COLORS.text,
@@ -118,11 +124,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                   }}
                 >
                   {team.teamName}
-                </Typography>
-              </Box>
-            )}
-
-            <Divider sx={{ borderColor: THEME_COLORS.border }} />
+              </Typography>
           </Stack>
         </Card>
 
@@ -182,18 +184,36 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                     >
                       {player.nickname}
                     </Typography>
-                    <Typography
-                      variant="caption"
+
+                    <Box
+                      title={PLAYER_POSITIONS.find((position) => position.key === player.role)?.label || player.role}
                       sx={{
-                        color: THEME_COLORS.textMuted,
-                        backgroundColor: THEME_COLORS.surfaceHigh,
-                        px: 1,
-                        py: 0.5,
+                        //backgroundColor: THEME_COLORS.surfaceHigh,
+                        width: 30,
+                        height: 30,
+                        p: 0.5,
                         borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: `1px solid ${THEME_COLORS.border}`,
                       }}
                     >
-                      {player.role}
-                    </Typography>
+                      <Box
+                        sx={{
+                          width: 22,
+                          height: 22,
+                          position: 'relative',
+                        }}
+                      >
+                        <Image
+                          src={getPositionIcon(player.role)}
+                          alt={`Posição: ${player.role}`}
+                          fill
+                          style={{ objectFit: 'contain' }}
+                        />
+                      </Box>
+                    </Box>
                   </Stack>
                 </AccordionSummary>
 
@@ -285,6 +305,10 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
               <Checkbox
                 checked={termsAccepted}
                 onChange={(e) => onTermsChange(e.target.checked)}
+                sx={{
+                  color: "cyan",
+                  opacity: "75%"
+                }}
               />
             }
             label={

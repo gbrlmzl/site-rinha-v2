@@ -1,5 +1,6 @@
 let refreshPromise: Promise<boolean> | null = null;
 let refreshFailed = false;
+const refreshUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`;
 
 async function tryRefresh(): Promise<boolean> {
   if (refreshFailed) return false;
@@ -7,7 +8,7 @@ async function tryRefresh(): Promise<boolean> {
 
   refreshPromise = (async () => {
     try {
-      const response = await fetch('/api/auth/refresh', {
+      const response = await fetch(refreshUrl, {
         method: 'POST',
         credentials: 'include',
         cache: 'no-store',
@@ -51,7 +52,7 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<
   // Intercepta 401 — tenta renovar silenciosamente
   if (response.status === 401) {
     const requestUrl = typeof input === 'string' ? input : input.url;
-    if (requestUrl.includes('/api/auth/refresh')) {
+    if (requestUrl.includes('/auth/refresh')) {
       return response;
     }
 

@@ -106,7 +106,7 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
           sx={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
             gap: 2,
             flexDirection: { xs: 'column', md: 'row' },
           }}
@@ -118,6 +118,7 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
               fontWeight: 700,
               textAlign: 'center',
               fontSize: '1.4rem',
+              
             }}
           >
             {PLAYER_LABELS[currentPlayerIndex]}

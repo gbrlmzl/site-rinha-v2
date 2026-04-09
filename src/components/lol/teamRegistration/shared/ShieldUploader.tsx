@@ -44,7 +44,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
-      if (!file.type.match(/^image\/(png|jpeg|webp|jpg)$/)) {
+      if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
         //alert('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
         //Snackbar de erro 
         setShieldFileError('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
@@ -79,13 +79,14 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       {/* Card Preview */}
       <Card
         sx={{
-          width: '100%',
-          height: 220,
+          width: 250,
+          height: 250,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          alignSelf: 'center',
           backgroundColor: THEME_COLORS.surfaceHigh,
-          border: `2px dashed ${THEME_COLORS.border}`,
+          border: `1px solid goldenrod`,
           borderRadius: 3,
           position: 'relative',
           overflow: 'hidden',
@@ -97,7 +98,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
               src={preview}
               alt="Preview do escudo"
               fill
-              style={{ objectFit: 'contain', padding: 12 }}
+              style={{ objectFit: 'contain' }}
             />
             {success && (
               <Box
@@ -127,7 +128,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
               variant="body2"
               sx={{ color: THEME_COLORS.textMuted }}
             >
-              PNG, JPG, JPEG ou WebP
+              PNG, JPG ou JPEG
             </Typography>
             <Typography
               variant="caption"
@@ -143,7 +144,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       <input
         ref={fileInputRef}
         type="file"
-        accept=".png,.jpg,.jpeg,.webp"
+        accept=".png,.jpg,.jpeg"
         onChange={handleFileChange}
         style={{ display: 'none' }}
       />
@@ -152,11 +153,13 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       <Box>
         
       </Box>
-      <Stack
-        direction="row"
-        spacing={1}
+      <Box
         sx={{
-          justifyContent: 'center',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          alignItems: 'center',
+          columnGap: 1,
+          width: '100%',
         }}
       >
         <Button
@@ -165,8 +168,13 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
           onClick={handleClick}
           disabled={loading}
           sx={{
+            gridColumn: 2,
+            justifySelf: 'center',
             display: 'inline-flex',
             alignItems: 'center',
+            height: 40,
+            width: 180,
+            fontSize: '1rem',
             backgroundColor: THEME_COLORS.accent,
             '&:hover': { backgroundColor: THEME_COLORS.accentHover },
             '& .MuiButton-endIcon': {
@@ -178,7 +186,8 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
             },
             '& .MuiButton-endIcon .MuiSvgIcon-root': {
               display: 'block',
-              fontSize: 22,
+              fontSize: 20,
+              marginLeft: 1,
             },
             '& .MuiButton-endIcon .MuiCircularProgress-root': {
               display: 'block',
@@ -189,12 +198,14 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
         >
           {loading ? 'Carregando...' : preview ? 'Mudar Escudo' : 'Escudo'}
         </Button>
-
+ 
         {preview && (
           <IconButton
             onClick={handleRemoveFile}
             disabled={loading}
             sx={{
+              gridColumn: 3,
+              justifySelf: 'start',
               color: THEME_COLORS.danger,
               border: `1px solid ${THEME_COLORS.danger}`,
               '&:hover': {
@@ -205,7 +216,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
             <DeleteIcon />
           </IconButton>
         )}
-      </Stack>
+      </Box>
 
       {/* Error Message */}
       {error ? (

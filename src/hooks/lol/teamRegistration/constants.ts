@@ -166,7 +166,7 @@ export const API_ENDPOINTS = {
 
 // ─── WebSocket ───────────────────────────────────────────────────────────
 
-export const PAYMENT_TIMEOUT_SECONDS = 599; // 9:59 minutos
+export const PAYMENT_TIMEOUT_SECONDS = 3599; // 1 hora menos 1 segundo para evitar expiração exata
 export const PAYMENT_STATUS = {
   PENDING: 'PAGAMENTO PENDENTE',
   APPROVED: 'PAGAMENTO REALIZADO',

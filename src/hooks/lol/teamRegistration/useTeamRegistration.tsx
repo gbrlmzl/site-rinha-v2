@@ -56,6 +56,7 @@ export const useTeamRegistration = () => {
     const [paymentApproved, setPaymentApproved] = useState(false);
 
     const paymentSubscriptionRef = useRef<(() => void) | null>(null); // Ref para guardar função de cleanup do WebSocket
+    const teamNameAvailabilityCacheRef = useRef<Record<string, boolean>>({});
 
     // ─── Handlers: Team ────────────────────────────────────────────────────
 
@@ -209,79 +210,106 @@ export const useTeamRegistration = () => {
         };
     }, []);
 
-        // ─── Async: Upload Shield ──────────────────────────────────────────────
+    const checkTeamNameAvailability = useCallback(async (
+        name: string
+    ): Promise<boolean> => {
+        const normalizedName = name.trim();
 
-   const submitRegistration = useCallback(async (): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-
-    try {
-        const activePlayers = state.players.filter((p) => !p.disabledPlayer);
-
-        const payload = new FormData();
-
-        // ✅ Blob com Content-Type application/json — Spring consegue deserializar
-        payload.append(
-            'teamData',
-            new Blob(
-                [JSON.stringify({
-                    teamName: state.team.teamName,
-                    players: activePlayers,
-                })],
-                { type: 'application/json' }
-            )
-        );
-
-        payload.append(
-            'paymentData',
-            new Blob(
-                [JSON.stringify(state.paymentForm)],
-                { type: 'application/json' }
-            )
-        );
-
-        // Arquivo direto — sem Blob, sem JSON
-        if (state.team.teamShield) {
-            payload.append('teamShield', state.team.teamShield);
+        if (!normalizedName) {
+            return false;
         }
 
+        const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
+        if (cachedResult !== undefined) {
+            return cachedResult;
+        }
+
+        const tournamentId = 1;  //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
         const response = await apiFetch(
-            `http://localhost:8080/tournaments/1/registrations`,
-            {
-                method: 'POST',
-                body: payload,
-                // SEM Content-Type — browser define multipart/form-data + boundary automaticamente
-            }
+            `http://localhost:8080/tournaments/${tournamentId}/teams/check-name?name=${encodeURIComponent(normalizedName)}`,
+            { method: 'GET' }
         );
 
-        if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            throw new Error(errorBody.error ?? 'Erro ao enviar inscrição');
+        // 204 → disponível, 409 → já existe
+        const isAvailable = response.status === 204;
+        teamNameAvailabilityCacheRef.current[normalizedName] = isAvailable;
+
+        return isAvailable;
+    }, []);
+
+    // ─── Submit Registration ────────────────────────────────────────────────
+
+    const submitRegistration = useCallback(async (): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const activePlayers = state.players.filter((p) => !p.disabledPlayer);
+
+            const payload = new FormData();
+
+            // ✅ Blob com Content-Type application/json — Spring consegue deserializar
+            payload.append(
+                'teamData',
+                new Blob(
+                    [JSON.stringify({
+                        teamName: state.team.teamName,
+                        players: activePlayers,
+                    })],
+                    { type: 'application/json' }
+                )
+            );
+
+            payload.append(
+                'paymentData',
+                new Blob(
+                    [JSON.stringify(state.paymentForm)],
+                    { type: 'application/json' }
+                )
+            );
+
+            // Arquivo direto — sem Blob, sem JSON
+            if (state.team.teamShield) {
+                payload.append('teamShield', state.team.teamShield);
+            }
+            const tournamentId = 1;  //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
+            const response = await apiFetch(
+                `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+                {
+                    method: 'POST',
+                    body: payload,
+                    // SEM Content-Type — browser define multipart/form-data + boundary automaticamente
+                }
+            );
+
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}));
+                throw new Error(errorBody.error ?? 'Erro ao enviar inscrição');
+            }
+
+            const data = await response.json();
+
+            if (!data.uuid || !data.qrCode) {
+                throw new Error('Resposta inválida do servidor');
+            }
+
+            setQrCodeData({
+                uuid: data.uuid,
+                qrCode: data.qrCode,
+                qrCodeBase64: data.qrCodeBase64 ?? null,
+                valor: data.value,
+            });
+
+            await handlePaymentWebSocketSubscribe(data.uuid);
+            return true;
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao processar inscrição');
+            return false;
+        } finally {
+            setLoading(false);
         }
-
-        const data = await response.json();
-
-        if (!data.uuid || !data.qrCode) {
-            throw new Error('Resposta inválida do servidor');
-        }
-
-        setQrCodeData({
-            uuid:         data.uuid,
-            qrCode:       data.qrCode,
-            qrCodeBase64: data.qrCodeBase64 ?? null,
-            valor:        data.value,
-        });
-
-        await handlePaymentWebSocketSubscribe(data.uuid);
-        return true;
-
-    } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao processar inscrição');
-        return false;
-    } finally {
-        setLoading(false);
-    }
-}, [state.team, state.players, state.paymentForm, handlePaymentWebSocketSubscribe]);
+    }, [state.team, state.players, state.paymentForm, handlePaymentWebSocketSubscribe]);
 
     // ─── Getters ────────────────────────────────────────────────────────────
 
@@ -323,6 +351,7 @@ export const useTeamRegistration = () => {
         // Team
         updateTeam,
         setTeamShield,
+        checkTeamNameAvailability,
 
         // Shield
         handleShieldFileSelected,

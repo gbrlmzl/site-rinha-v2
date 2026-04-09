@@ -84,6 +84,13 @@ export default function ProfilePage() {
             </Stack>
         );
 
+    const handleNicknameInputKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            confirmNicknameEdit();
+        }
+    };
+
     return (
         <Box sx={{
             minHeight: '100vh',
@@ -359,6 +366,7 @@ export default function ProfilePage() {
                                                 size="small"
                                                 value={nicknameInput}
                                                 onChange={handleNicknameInputChange}
+                                                onKeyDown={handleNicknameInputKeyDown}
                                                 error={!!nicknameError}
                                                 helperText={nicknameError || ''}
                                                 sx={{

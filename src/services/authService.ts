@@ -1,3 +1,4 @@
+'use client';
 import {User} from '@/types/User';
 import { apiFetch } from '@/services/interceptor';
 

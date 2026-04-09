@@ -5,7 +5,7 @@ import "./globals.css";
 import Navbar from "../components/ResponsiveAppBar";
 import AppThemeProvider from "./theme-provider";
 
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthContextProvider } from '@/contexts/AuthContext';
 import { isAuthenticated } from '@/utils/auth';
 
 const hasToken = await isAuthenticated();
@@ -36,17 +36,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${roboto.variable} ${russoOne.variable}`}>
+    <html lang="pt-br" className={`${roboto.variable} ${russoOne.variable}`}>
       <body>
         <AppRouterCacheProvider>
           <AppThemeProvider>
             
-            <AuthProvider hasToken={hasToken}>
+            <AuthContextProvider hasToken={hasToken}>
               <header>
                 <Navbar></Navbar>
               </header>
               {children}
-            </AuthProvider>
+            </AuthContextProvider>
           </AppThemeProvider>
         </AppRouterCacheProvider>
       </body>

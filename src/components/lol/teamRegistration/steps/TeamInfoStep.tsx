@@ -17,6 +17,7 @@ import { Team } from '@/types/teamRegistration';
 import { ShieldUploader } from '../shared/ShieldUploader';
 import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 
+
 interface TeamInfoStepProps {
   data: Team;
   shieldPreview: string | null;
@@ -80,19 +81,21 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
           />
         </Box>
 
-        <Divider sx={{ borderColor: THEME_COLORS.border }} />
+        {/* <Divider sx={{ borderColor: THEME_COLORS.border }} /> */}
 
         {/* Team Name */}
         <Box>
           <TextField
-            fullWidth
-            placeholder="Nome da equipe"
+            fullWidth            
             value={data.teamName}
             onChange={handleNameChange}
             disabled={loading}
+            placeholder='Nome da equipe'
+            
             slotProps={{
                 htmlInput:{
-                    maxLength: 30
+                    maxLength: 30,
+                    
                 },
                 formHelperText: {
                     sx: { color: THEME_COLORS.textMuted, textAlign: 'right' },
@@ -104,13 +107,31 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
             helperText={`${data.teamName.length}/30 caracteres`}
             
             sx={{
+              mt: 2,
+              '& .MuiFormLabel-root': {
+                color: THEME_COLORS.textMuted,
+                fontFamily: 'var(--font-russo-one), sans-serif',
+                fontSize: '1rem',
+                alignContent: 'center',
+                justifyContent: 'center',
+              },
               '& .MuiOutlinedInput-root': {
+                
                 backgroundColor: THEME_COLORS.surfaceHigh,
                 borderRadius: 2,
                 color: THEME_COLORS.text,
+                fontFamily: 'var(--font-russo-one), sans-serif',
+                fontSize: '1.5rem',
                 '& fieldset': { borderColor: THEME_COLORS.border },
                 '&:hover fieldset': { borderColor: THEME_COLORS.accent },
                 '&.Mui-focused fieldset': { borderColor: THEME_COLORS.accent },
+              },
+              '& .MuiOutlinedInput-input': {
+                textAlign: 'center',
+                paddingBlock: 1,
+              },
+              '& .MuiOutlinedInput-input::placeholder': {
+                textAlign: 'center'
               },
               '& .MuiInputLabel-root': { color: THEME_COLORS.textMuted },
             }}

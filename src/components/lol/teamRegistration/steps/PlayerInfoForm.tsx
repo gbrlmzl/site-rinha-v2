@@ -41,6 +41,15 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    if(field === 'matricula') {
+      // Permitir apenas números na matrícula
+      //se o valor não for um número, não atualizar
+      if (isNaN(Number(value))) {
+        return;
+      }
+    }
+
+
     onChange({ [field]: value } as Partial<Player>);
   };
 

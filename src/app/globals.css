@@ -1,14 +1,28 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0A122A;
+  --foreground: #171717
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+  background-color: #0A122A;
+}
+
+body[data-scroll-locked] {
+  padding-right: 0 !important;
+  overflow-y: auto !important; /* Opcional: mantém a barra visível */
+  
+}
+
+/*
 @media (min-width: 900px) {
   html {
     scrollbar-gutter: stable;
     overflow-y: scroll;
   }
 }
+*/
 
 
 a {

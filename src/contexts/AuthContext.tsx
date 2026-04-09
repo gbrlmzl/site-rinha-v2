@@ -20,12 +20,12 @@ interface AuthProviderProps {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children, hasToken }: AuthProviderProps) {
+export function AuthContextProvider({ children, hasToken }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   // Se não há token, já inicia como false — sem loading desnecessário
   const [isLoading, setIsLoading] = useState(hasToken);
 
-  const refreshUser = useCallback(async () => {
+  const refreshUser = useCallback(async () => { //useCalback para evitar recriar a função desnecessariamente
     setIsLoading(true);
     try {
       const userData = await getUser();
@@ -65,7 +65,7 @@ export function AuthProvider({ children, hasToken }: AuthProviderProps) {
 export function useAuthContext() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuthContext deve ser usado dentro de <AuthProvider>');
+    throw new Error('useAuthContext deve ser usado dentro de <AuthContextProvider>');
   }
   return context;
 }
