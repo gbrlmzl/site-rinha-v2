@@ -301,7 +301,7 @@ export const TeamRegistrationWizard: React.FC = () => {
 
   const nextButtonLabel =
     state.currentStep === 'playersInfo' && currentPlayerIndex < state.players.length - 1
-      ? 'Próximo Jogador'
+      ? 'Próximo'
       : isLastStep && !isPaymentScreen
         ? 'Gerar QR code PIX'
         : 'Próximo';
@@ -382,7 +382,7 @@ export const TeamRegistrationWizard: React.FC = () => {
                     sx={{
                       backgroundColor: THEME_COLORS.accent,
                       color: THEME_COLORS.text,
-                      width: isMobile ? '33%' : 'auto',
+                      width: isMobile ? '33%' : '20%',
                       '&:hover': {
                         backgroundColor: 'rgba(17, 181, 228, 0.1)',
                         borderColor: THEME_COLORS.accent,
@@ -415,7 +415,7 @@ export const TeamRegistrationWizard: React.FC = () => {
                   sx={{
                     backgroundColor: isPaymentStep ? '#16a34a' : THEME_COLORS.accent,
                     color: '#ffffff',
-                    width: isPaymentStep ? (isMobile ? '100%' : '33%') : (isMobile ? '100%' : '33%'),
+                    width: isPaymentStep ? (isMobile ? '75%' : '33%') : (isMobile ? '33%' : '25%'),
                     '&:hover': {
                       backgroundColor: isPaymentStep ? '#15803d' : THEME_COLORS.accentHover,
                     },

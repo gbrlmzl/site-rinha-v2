@@ -181,7 +181,6 @@ function ResponsiveAppBar() {
             anchor="left"
             open={isNavDrawerOpen}
             onClose={handleCloseNavMenu}
-            disableScrollLock
             ModalProps={{ keepMounted: true }}
             sx={{
               display: { xs: 'block', md: 'none' },
@@ -216,7 +215,6 @@ function ResponsiveAppBar() {
             anchor="right"
             open={isNavDrawerOptionsOpen}
             onClose={handleCloseNavOptions}
-            disableScrollLock
             ModalProps={{ keepMounted: true }}
             sx={{
               display: { xs: 'block', md: 'none' },
@@ -317,7 +315,6 @@ function ResponsiveAppBar() {
             anchor="top"
             open={isNavDrawerOpen}
             onClose={handleCloseNavMenu}
-            disableScrollLock
             ModalProps={{ keepMounted: true }}
             sx={{
               display: { xs: 'none', md: 'block' },
@@ -423,7 +420,7 @@ function ResponsiveAppBar() {
             id="menu-appbar"
             anchorEl={anchorElUser}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            disableScrollLock
+            //disableScrollLock
             keepMounted
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             open={Boolean(anchorElUser)}

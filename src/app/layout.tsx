@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Roboto, Russo_One } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import "./globals.css";
 import Navbar from "../components/ResponsiveAppBar";
 import AppThemeProvider from "./theme-provider";
 
