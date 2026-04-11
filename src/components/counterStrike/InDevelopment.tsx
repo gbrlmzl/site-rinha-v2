@@ -1,13 +1,14 @@
 "use client";
 
 import { Box, Button, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
-import InDevArtMobile from '@/assets/imgs/valorant/InDevArtMobile.svg';
-import InDevArtDesktop from '@/assets/imgs/valorant/InDevArtDesktop.svg';
+import KnifeArt from '@/assets/imgs/cs/Cs2Knife.svg';
+import InDevArtDesktop from '@/assets/imgs/cs/Cs2InDevArtDesktop.svg';
+import inDevArtMobile from '@/assets/imgs/cs/Cs2InDevArtMobile.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 
-export default function InDevelopmentValorant() {
+export default function InDevelopmentCounterStrike() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const router = useRouter();
@@ -27,14 +28,18 @@ export default function InDevelopmentValorant() {
                 overflow: 'hidden',
             }}
         >
+
             <Image
-                src={isMobile ? InDevArtMobile : InDevArtDesktop}
+                src={InDevArtDesktop}
                 alt="Em desenvolvimento"
                 fill
                 priority
                 sizes="100vw"
                 style={{ objectFit: 'cover', objectPosition: 'center' }}
             />
+
+
+
 
             <Box
                 sx={{
@@ -68,22 +73,44 @@ export default function InDevelopmentValorant() {
                     >
                         Em desenvolvimento...
                     </Typography>
+                    <Box
+                        sx={{
+                            pt: '12vh',
+                            display: 'inline-flex',
+                            animation: 'spinCounterClockwise 9s linear infinite',
+                            transformOrigin: 'center center',
+                            '@keyframes spinCounterClockwise': {
+                                from: { transform: 'rotate(0deg)' },
+                                to: { transform: 'rotate(-360deg)' },
+                            },
+                        }}
+                    >
+                        <Image
+                            src={KnifeArt}
+                            alt="Karambit"
+                            //fill
+                            priority
+                            //sizes="20vw"
+                            style={{ objectFit: 'cover', objectPosition: '' }}
+                        />
+                    </Box>
 
                     <Button
                         variant="contained"
                         onClick={handleGoBack}
                         sx={{
                             borderRadius: 8,
-                            px: { xs: 4, md: 6},
+                            px: { xs: 4, md: 6 },
                             py: 1,
                             fontWeight: 700,
                             letterSpacing: 0.3,
-                            backgroundColor: '#ff4655',
-                            '&:hover': { backgroundColor: '#d93b49' },
+                            backgroundColor: '#E07F0A',
+                            '&:hover': { backgroundColor: '#ad6307' },
                         }}
                     >
                         Início
                     </Button>
+
                 </Stack>
             </Box>
         </Box>
