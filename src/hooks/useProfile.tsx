@@ -28,15 +28,9 @@ export interface PasswordRequirements {
   passwordsMatch: boolean;
 }
 
-export interface PasswordStrengthInfo {
-  score: number;                // 0–4
-  label: string;                // '', 'Fraca', 'Razoável', 'Boa', 'Forte'
-  color: string;                // cor correspondente ao score
-}
 
-// ─── Constantes de força de senha ──────────────────────────────────────────
-const STRENGTH_LABELS = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
-const STRENGTH_COLORS = ['', '#ff6b6b', '#f0a500', '#11B5E4', '#4caf50'];
+
+
 
 // ───────────────────────────────────────────────────────────────────────────
 
@@ -225,25 +219,7 @@ export function useProfile() {
   const toggleVisibility = (field: keyof PasswordVisibility) => () =>
     setVisibility(prev => ({ ...prev, [field]: !prev[field] }));
 
-  // ── Força da senha ──────────────────────────────────────────────────────
-  const calcPasswordStrength = (p: string): number => {
-    if (!p) return 0;
-    let score = 0;
-    if (p.length >= 8) score++;
-    if (/[A-Z]/.test(p)) score++;
-    if (/[0-9]/.test(p)) score++;
-    if (/[^a-zA-Z0-9]/.test(p)) score++;
-    return score;
-  };
 
-  const passwordStrength: PasswordStrengthInfo = (() => {
-    const score = calcPasswordStrength(passwordForm.newPassword);
-    return {
-      score,
-      label: STRENGTH_LABELS[score],
-      color: STRENGTH_COLORS[score],
-    };
-  })();
 
   // ── Validação ───────────────────────────────────────────────────────────
  /* const validatePasswordForm = (): boolean => {
@@ -345,7 +321,6 @@ export function useProfile() {
     updatePasswordField,
     passwordFieldsValidated,
     passwordSuccess,
-    passwordStrength,
     passwordRequirements,
 
     // visibilidade dos campos de senha

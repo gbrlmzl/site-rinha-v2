@@ -9,7 +9,7 @@ const colors = {
     bg: '#080d2e',
 };
 
-export default function RouteProgressBar() {
+export default function RouteProgressBar({ isScrolled }: { isScrolled: boolean }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
@@ -121,8 +121,8 @@ export default function RouteProgressBar() {
                 sx={{
                     position: 'relative',
                     left: 0,
-                    width: '100%',
-                    height: '2px',
+                    width: isScrolled ? '100%' : '0%',
+                    height: isScrolled ? '2px' : '0%',
                     background: '#F0E',
                     overflow: 'hidden',
                 }}

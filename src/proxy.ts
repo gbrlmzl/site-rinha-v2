@@ -4,7 +4,7 @@ const authRoutes = [
   '/login',
   '/cadastro',
   '/recuperar-senha',
-  '/nova-senha'
+  
 ];
 
 const protectedRoutePrefixes = [

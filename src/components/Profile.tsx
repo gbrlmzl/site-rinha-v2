@@ -20,6 +20,7 @@ import { useProfile } from '@/hooks/useProfile';
 import Slide, { SlideProps } from '@mui/material/Slide';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import ChangePassword from './ChangePassword';
 // ─── Paleta coesa com o resto do projeto ───────────────────────────────────
 const C = {
     bg: '#080d2e',
@@ -61,7 +62,7 @@ export default function ProfilePage() {
         view, goToPassword, goToProfile,
         fileInputRef, openFilePicker, handleFileChange,
         passwordForm, updatePasswordField,
-        passwordSuccess, passwordStrength,
+        passwordSuccess,
         visibility, toggleVisibility,
         handlePasswordSubmit,
         snackbar,
@@ -70,19 +71,6 @@ export default function ProfilePage() {
         passwordRequirements
     } = useProfile();
 
-    const Condition = ({ ok, text }: { ok: boolean; text: string }) => (
-            <Stack direction="row" spacing={1} alignItems="center">
-                {ok ? (
-                    <CheckCircleIcon sx={{color: 'rgb(0, 255, 21)'}} fontSize="small" />
-                ) : (
-                    <RadioButtonUncheckedIcon
-                        fontSize="small"
-                        sx={{ color: 'rgba(255,255,255,0.55)' }}
-                    />
-                )}
-                <Typography variant="body2">{text}</Typography>
-            </Stack>
-        );
 
     const handleNicknameInputKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Enter') {
@@ -122,179 +110,29 @@ export default function ProfilePage() {
                 {view === 'password' ? (
                     // ── Tela: alterar senha ──────────────────────────────────────────
                     <Fade in timeout={300}>
-                        <Box>
-
-                            {/* Header */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 1.5 }}>
-                                <IconButton onClick={goToProfile} sx={{ color: C.textMuted, '&:hover': { color: C.text, bgcolor: C.surfaceHigh } }}>
-                                    <ArrowBackRoundedIcon />
-                                </IconButton>
-                                <Box>
-                                    <Typography sx={{ fontSize: '0.75rem', color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase' }}>
-                                        Segurança
-                                    </Typography>
-                                    <Typography sx={{ fontWeight: 700, fontSize: '1.4rem', color: C.text }}>
-                                        Alterar senha
-                                    </Typography>
-                                </Box>
-                            </Box>
-
-                            {/* Info do usuário (somente leitura) */}
-                            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                                <Box sx={{ flex: 1, bgcolor: C.surfaceHigh, borderRadius: 2, px: 2, py: 1.5, border: `1px solid ${C.border}` }}>
-                                    <Typography sx={{ fontSize: '0.7rem', color: C.textMuted, mb: 0.3 }}>Nickname</Typography>
-                                    <Typography sx={{ color: C.text, fontWeight: 600 }}>{nickname}</Typography>
-                                </Box>
-                                <Box sx={{ flex: 2, bgcolor: C.surfaceHigh, borderRadius: 2, px: 2, py: 1.5, border: `1px solid ${C.border}` }}>
-                                    <Typography sx={{ fontSize: '0.7rem', color: C.textMuted, mb: 0.3 }}>Email</Typography>
-                                    <Typography sx={{ color: C.text, fontWeight: 600 }}>{email}</Typography>
-                                </Box>
-                            </Box>
-
-                            <Divider sx={{ borderColor: C.border, mb: 3 }} />
-
-                            {/* Campos de senha */}
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-
-                                {/* Senha atual */}
-                                <TextField
-                                    fullWidth
-                                    label="Senha atual"
-                                    type={visibility.showCurrent ? 'text' : 'password'}
-                                    value={passwordForm.currentPassword}
-                                    onChange={updatePasswordField('currentPassword')}
-                                    sx={inputSx}
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton tabIndex={-1} onClick={toggleVisibility('showCurrent')} sx={{ color: C.textMuted }}>
-                                                        {visibility.showCurrent
-                                                            ? <VisibilityOffRoundedIcon fontSize="small" />
-                                                            : <VisibilityRoundedIcon fontSize="small" />}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }
-                                    }}
-                                />
-
-                                {/* Nova senha + barra de força */}
-                                <Box>
-                                    <TextField
-                                        fullWidth
-                                        label="Nova senha"
-                                        type={visibility.showNew ? 'text' : 'password'}
-                                        value={passwordForm.newPassword}
-                                        onChange={updatePasswordField('newPassword')}
-                                        sx={inputSx}
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <IconButton tabIndex={-1} onClick={toggleVisibility('showNew')} sx={{ color: C.textMuted }}>
-                                                            {visibility.showNew
-                                                                ? <VisibilityOffRoundedIcon fontSize="small" />
-                                                                : <VisibilityRoundedIcon fontSize="small" />}
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                ),
-                                            }
-                                        }}
-                                    />
-
-                                    {passwordForm.newPassword.length > 0 && (
-                                        <>
-                                        <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Box sx={{ flex: 1, display: 'flex', gap: 0.5 }}>
-                                                {[1, 2, 3, 4].map(i => (
-                                                    <Box key={i} sx={{
-                                                        flex: 1, height: 4, borderRadius: 2,
-                                                        bgcolor: i <= passwordStrength.score ? passwordStrength.color : C.border,
-                                                        transition: 'background-color 0.3s',
-                                                    }} />
-                                                ))}
-                                            </Box>
-                                            <Typography sx={{ fontSize: '0.72rem', color: passwordStrength.color, minWidth: 50 }}>
-                                                {passwordStrength.label}
-                                            </Typography>
-                                        </Box>
-                                        <Box sx={{color : "white"}}>
-                                                <Stack spacing={1} sx={{ mt: 1 }} >
-                                                    <Condition ok={passwordRequirements.atLeast8Chars} text="Ao menos 8 caracteres" />
-                                                    <Condition ok={passwordRequirements.hasNumberOrSymbol} text="Deve conter um número ou símbolo" />
-                                                    <Condition ok={passwordRequirements.passwordsMatch} text="As senhas devem coincidir" />
-                                                </Stack>
-
-                                        </Box>
-                                        </>
-                                    )}
-                                </Box>
-
-                                {/* Confirmar nova senha */}
-                                <TextField
-                                    fullWidth
-                                    label="Confirmar nova senha"
-                                    type={visibility.showConfirm ? 'text' : 'password'}
-                                    value={passwordForm.confirmPassword}
-                                    onChange={updatePasswordField('confirmPassword')}
-                                    sx={inputSx}
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton tabIndex={-1} onClick={toggleVisibility('showConfirm')} sx={{ color: C.textMuted }}>
-                                                        {visibility.showConfirm
-                                                            ? <VisibilityOffRoundedIcon fontSize="small" />
-                                                            : <VisibilityRoundedIcon fontSize="small" />}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            )
-                                        }
-                                    }
-                                    }
-                                />
-                            </Box>
-
-                            {/* Botão confirmar */}
-                            <Button
-                                fullWidth
-                                variant="contained"
-                                onClick={handlePasswordSubmit}
-                                disabled={!passwordFieldsValidated}
-                                sx={{
-                                    mt: 4, py: 1.5, borderRadius: 3,
-                                    fontWeight: 700, fontSize: '0.95rem', letterSpacing: 1,
-                                    backgroundColor: passwordSuccess ? '#4caf50' : C.accent,
-                                    '&:hover': { backgroundColor: passwordSuccess ? '#4caf50' : C.accentHover },
-                                    '&.Mui-disabled': {
-                                        backgroundColor: 'rgba(9, 65, 80, 0.35)',
-                                        color: 'rgba(255, 255, 255, 0.46)',
-                                        border: '1px solid rgba(9, 98, 122, 0.45)',
-                                    },
-                                    transition: 'background-color 0.3s',
-                                }}
-                                startIcon={passwordSuccess ? <CheckCircleRoundedIcon /> : <LockRoundedIcon />}
-                            >
-                                {passwordSuccess ? 'Senha alterada!' : 'Confirmar'}
-                            </Button>
-
-                        </Box>
+                        <ChangePassword
+                            C={C}
+                            inputSx={inputSx}
+                            goToProfile={goToProfile}
+                            nickname={nickname}
+                            email={email}
+                            passwordForm={passwordForm}
+                            updatePasswordField={updatePasswordField}
+                            visibility={visibility}
+                            toggleVisibility={toggleVisibility}
+                            passwordRequirements={passwordRequirements}
+                            passwordFieldsValidated={passwordFieldsValidated}
+                            handlePasswordSubmit={handlePasswordSubmit}
+                            passwordSuccess={passwordSuccess}
+                        />
                     </Fade>
 
                 ) : (
                     // ── Tela: perfil ─────────────────────────────────────────────────
                     <Fade in timeout={300}>
                         <Box>
-
                             {/* Título */}
                             <Box sx={{ mb: 2 }}>
-                                {/*
-                                <Typography sx={{ fontSize: '0.72rem', color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', mb: 0.5 }}>
-                                    Perfil
-                                </Typography>
-                                */}
-
                                 <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: C.text, textAlign: 'center' }}>
                                     Minha conta
                                 </Typography>
@@ -317,7 +155,7 @@ export default function ProfilePage() {
                                         {!profilePic && avatarLetter}
                                     </Avatar>
 
-                                    {/*
+                                    
                                     <Tooltip title="Alterar foto">
                                         <IconButton
                                             onClick={openFilePicker}
@@ -343,7 +181,6 @@ export default function ProfilePage() {
                                         hidden
                                         onChange={handleFileChange}
                                     />
-                                    */}
                                 </Box>
 
                                 <Typography sx={{ mt: 1.5, fontWeight: 700, fontSize: '1.1rem', color: C.text }}>

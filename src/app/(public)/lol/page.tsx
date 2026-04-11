@@ -1,5 +1,5 @@
 'use client'
-import Inicio from "@/components/lol/inicio/Inicio";
+import Inicio from "@/components/lol/inicio/InicioLol";
 
 
 

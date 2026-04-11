@@ -8,8 +8,8 @@ export async function isAuthenticated(): Promise<boolean> {
   const jwt = cookieStore.get('JWT');
   const refresh = cookieStore.get('REFRESH');
   
- console.log('[Auth Check] JWT:', jwt?.value);
- console.log('[Auth Check] REFRESH:', refresh?.value);
+ //console.log('[Auth Check] JWT:', jwt?.value);
+ //console.log('[Auth Check] REFRESH:', refresh?.value);
 
   return !!jwt || !!refresh; // o layout trata o caso de só ter refresh
 }

@@ -196,7 +196,7 @@ export default function NewPasswordPage() {
                                     }}
                                 />
                             </Box>
-                            <Stack spacing={1} sx={{ mt: 2 }} >
+                            <Stack spacing={1} sx={{ mt: 2, '& .MuiSvgIcon-colorDisabled': { color: C.textMuted } }}>
                                 <Condition ok={atLeast8Chars} text="Ao menos 8 caracteres" textColor='white' />
                                 <Condition ok={hasNumberOrSymbol} text="Deve conter um número ou símbolo" textColor='white' />
                                 <Condition ok={passwordsMatch} text="As senhas devem coincidir" textColor='white' />

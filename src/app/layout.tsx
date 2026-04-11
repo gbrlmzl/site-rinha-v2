@@ -41,10 +41,10 @@ export default function RootLayout({
           <AppThemeProvider>
             
             <AuthContextProvider hasToken={hasToken}>
-              <header>
-                <Navbar></Navbar>
-              </header>
-              {children}
+              <Navbar></Navbar>
+              <main style={{/*paddingTop: "64px"*/}}>
+                {children}
+              </main>
             </AuthContextProvider>
           </AppThemeProvider>
         </AppRouterCacheProvider>

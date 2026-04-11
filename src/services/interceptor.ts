@@ -1,6 +1,30 @@
 let refreshPromise: Promise<boolean> | null = null;
 let refreshFailed = false;
 const refreshUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`;
+let redirectingToLogin = false;
+
+const publicAuthPaths = [
+  '/login',
+  '/cadastro',
+  '/recuperar-senha',
+  '/nova-senha',
+  '/ativar-conta',
+  '/reenviar-ativacao',
+];
+
+function shouldRedirectToLogin() {
+  if (typeof window === 'undefined') return false;
+
+  const currentPath = window.location.pathname;
+  return !publicAuthPaths.some((path) => currentPath.startsWith(path));
+}
+
+function redirectToLoginOnce() {
+  if (!shouldRedirectToLogin() || redirectingToLogin) return;
+
+  redirectingToLogin = true;
+  window.location.replace('/login');
+}
 
 async function tryRefresh(): Promise<boolean> {
   if (refreshFailed) return false;
@@ -61,7 +85,7 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<
     // Só tenta refresh se o erro for token expirado ou genérico
     // token_invalid não adianta tentar refresh
     if (body.error === 'token_invalid') {
-      window.location.href = '/login';
+      //window.location.href = '/login';
       return response;
     }
 
@@ -72,7 +96,7 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<
       return fetch(input, { ...init, headers, credentials: 'include' });
     }
 
-    window.location.href = '/login';
+    redirectToLoginOnce();
   }
 
   return response;
