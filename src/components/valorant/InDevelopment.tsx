@@ -2,22 +2,29 @@
 
 import { Box, Button, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import InDevArtMobile from '@/assets/imgs/valorant/InDevArtMobile.svg';
-import InDevArtDesktop from '@/assets/imgs/valorant/InDevArtDesktop.svg';
+import InDevArtDesktop from '@/assets/imgs/valorant/InDevArtDesktop.png';
+import inDevArtDesktopBlur from '@/assets/imgs/valorant/InDevArtDesktopBlur.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
 
 
 export default function InDevelopmentValorant() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const router = useRouter();
+    const [imageLoading, setImageLoading] = useState(true);
 
     const handleGoBack = () => {
         router.push('/');
     };
 
-    const navbarOffset = isMobile ? '17.5vh' : '15vh'; // Ajuste para evitar sobreposição com a navbar
+    //criar Url para o blurDataURL
+    const blurDataURL = `data:image/svg+xml;base64,${btoa(inDevArtDesktopBlur)}`;
 
+    const navbarOffset = isMobile ? '17.5vh' : '15vh'; // Ajuste para evitar sobreposição com a navbar
+    console.log(inDevArtDesktopBlur.src);
     return (
         <Box
             sx={{
@@ -29,11 +36,16 @@ export default function InDevelopmentValorant() {
         >
             <Image
                 src={isMobile ? InDevArtMobile : InDevArtDesktop}
+
                 alt="Em desenvolvimento"
                 fill
-                priority
+                preload
+                loading='eager'
+                placeholder='blur'
+                blurDataURL={blurDataURL}
                 sizes="100vw"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                style={{ objectFit: 'cover', objectPosition: 'center', transition: 'opacity 1s ease-in-out' }}
+                //onLoad={() => setImageLoading(false)}
             />
 
             <Box

@@ -23,9 +23,9 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthContextProvider({ children, hasToken }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   // Se não há token, já inicia como false — sem loading desnecessário
-  const [isLoading, setIsLoading] = useState(hasToken);
+  const [isLoading, setIsLoading] = useState<boolean>(hasToken);
 
-  const refreshUser = useCallback(async () => { //useCalback para evitar recriar a função desnecessariamente
+  const refreshUser = useCallback( async () => { //useCalback para evitar recriar a função desnecessariamente
     setIsLoading(true);
     try {
       const userData = await getUser();

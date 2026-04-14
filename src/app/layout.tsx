@@ -39,7 +39,6 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <AppThemeProvider>
-            
             <AuthContextProvider hasToken={hasToken}>
               <Navbar></Navbar>
               <main style={{/*paddingTop: "64px"*/}}>

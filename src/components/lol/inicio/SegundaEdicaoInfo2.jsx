@@ -1,12 +1,20 @@
 import { Box, Typography, Button } from "@mui/material";
 import Image from "next/image";
-import gravesBackground from "@/assets/imgs/gravesSplashFHD.svg";
-import gravesBackgroundMobile from "@/assets/imgs/gravesSplashMobile.svg";
+import gravesBackground from "@/assets/imgs/gravesSplashFHD.jpg";
+import gravesBackgroundMobile from "@/assets/imgs/gravesSplashMobile.jpg";
 import Link from "next/link";
 
 function InfoBox() {
   return (
-    <Box sx={{ position: "relative", width: "100vw", height: { xs: "140vh", md: "100vh" }, overflowX: "hidden" }}>
+    <Box
+      sx={{
+        position: "relative",
+        width: "100vw",
+        height: { xs: "100dvh", md: "100vh" },
+        overflowX: "hidden",
+        overflowY: { xs: "hidden", md: "visible" },
+      }}
+    >
 
       <Box sx={{ display: { xs: "none", lg: "block" } }}> {/* Imagem de fundo para telas grandes */}
         <Image
@@ -24,23 +32,16 @@ function InfoBox() {
       </Box>
 
 
-      <Box sx={{
-        display: {
-          xs: "block", lg: "none", "& img": {
-            objectFit: "cover",
-            objectPosition: "bottom right",
-            "@media (max-height: 750px)": {
-              objectPosition: "top right",
-              marginTop: "0vh",
-            }
-          }
-        }
-      }}> {/* Imagem de fundo para telas pequenas */}
+      <Box sx={{ display: { xs: "block", lg: "none" } }}> {/* Imagem de fundo para telas pequenas */}
 
         <Image
           src={gravesBackgroundMobile}
           alt="Graves"
           fill
+          style={{
+            objectFit: "cover",
+            objectPosition: "bottom right",
+          }}
 
           priority
         />
@@ -78,28 +79,20 @@ function InfoBox() {
           A SEGUNDA EDIÇÃO VEM AÍ!
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", gap: 2, maxWidth: "30vw", mb: 4 }}>
-          <Typography variant="subtitleWhite">
-            É isso mesmo, meus amigos.
+          <Typography variant="subtitleWhite" >
+            Isso mesmo, meus amigos. {'\n'}
           </Typography>
           <Typography variant="text2White" fontSize={"1.1125rem"} textAlign={"left"}>
-            Formem suas equipes e se preparem, porque no dia <Typography component="span" fontSize={"1.1125rem"} fontWeight="bold" color="cyan"> 12 de maio </Typography> começa a segunda edição da Rinha do Campus IV!
+            Formem suas equipes e se preparem, porque no dia <Typography component="span" fontSize={"1.1125rem"} fontWeight="bold" color="cyan"> 25 de abril </Typography> começa a segunda edição da Rinha da UFPB!
           </Typography>
           <Typography variant="subtitleWhite" >
             Dessa vez, com um novo formato:
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-            <Typography >
-              ● PLAY-IN COM FASE DE GRUPOS
-            </Typography>
-            <Typography>
-              ● PLAYOFFS COM CHAVE SUPERIOR E CHAVE INFERIOR
-            </Typography>
-            <Typography>
-              ● JOGOS NO PERÍODO NOTURNO (19H ÀS 22H)
-            </Typography>
-
-            <Typography>
-              ● CADA EQUIPE PODE TER ATÉ 3 JOGADORES (INCLUINDO O RESERVA) DE FORA DO CAMPUS.
+            <Typography sx={{ whiteSpace: 'pre-line' }} >
+              ● DIA 1: FASE DE GRUPOS {'\n'}  
+              ● DIA 2: FASE FINAL {'\n'}
+              ● MÍNIMO DE UM JOGADOR MATRICULADO NA UFPB POR EQUIPE {'\n'}
             </Typography>
           </Box>
 
@@ -121,7 +114,7 @@ function InfoBox() {
           </Box>
           <Box sx={{ mt: 0.5 }}>
             <Typography fontSize={"0.8rem"} fontFamily={"Roboto"}>
-              O período de inscrições vai até o dia <Typography component="span" fontSize={"0.8rem"} fontWeight="bold" color="cyan"> 8 de maio </Typography>
+              O período de inscrições vai até o dia <Typography component="span" fontSize={"0.8rem"} fontWeight="bold" color="cyan"> 23 de abril </Typography>
             </Typography>
           </Box>
         </Box>
@@ -156,7 +149,7 @@ function InfoBox() {
             É isso mesmo, meus amigos.
           </Typography>
           <Typography variant="text2White" fontSize={"0.9rem"}>
-            Formem suas equipes e se preparem, porque no dia <Typography component="span" fontSize={"0.9rem"} fontWeight="bold" color="cyan"> 12 de maio </Typography> começa a segunda edição da Rinha do Campus IV!
+            Formem suas equipes e se preparem, porque no dia <Typography component="span" fontSize={"0.9rem"} fontWeight="bold" color="cyan"> 25 de abril </Typography> começa a segunda edição da Rinha do Campus IV!
           </Typography>
           <Box>
 
@@ -178,7 +171,7 @@ function InfoBox() {
             </Box>
             <Box>
               <Typography fontSize={"0.75rem"} fontFamily={"Roboto"} mt={0.25}>
-                O período de inscrições vai até o dia <Typography component="span" fontSize={"0.75rem"} fontWeight="bold" color="cyan"> 8 de maio </Typography>
+                O período de inscrições vai até o dia <Typography component="span" fontSize={"0.75rem"} fontWeight="bold" color="cyan"> 23 de abril </Typography>
               </Typography>
             </Box>
           </Box>

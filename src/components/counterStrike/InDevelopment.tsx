@@ -1,9 +1,11 @@
 "use client";
 
 import { Box, Button, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useState } from 'react';
 import KnifeArt from '@/assets/imgs/cs/Cs2Knife.svg';
-import InDevArtDesktop from '@/assets/imgs/cs/Cs2InDevArtDesktop.svg';
+import InDevArtDesktop from '@/assets/imgs/cs/Cs2InDevArtDesktop.jpg';
 import inDevArtMobile from '@/assets/imgs/cs/Cs2InDevArtMobile.svg';
+import inDevArtBlur from '@/assets/imgs/cs/InDevArtBlur.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -12,6 +14,7 @@ export default function InDevelopmentCounterStrike() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const router = useRouter();
+    const [knifeLoaded, setKnifeLoaded] = useState(false);
 
     const handleGoBack = () => {
         router.push('/');
@@ -33,7 +36,10 @@ export default function InDevelopmentCounterStrike() {
                 src={InDevArtDesktop}
                 alt="Em desenvolvimento"
                 fill
-                priority
+                loading='eager'
+                placeholder='blur'
+                blurDataURL={inDevArtBlur.src}
+                preload
                 sizes="100vw"
                 style={{ objectFit: 'cover', objectPosition: 'center' }}
             />
@@ -88,10 +94,15 @@ export default function InDevelopmentCounterStrike() {
                         <Image
                             src={KnifeArt}
                             alt="Karambit"
-                            //fill
-                            priority
-                            //sizes="20vw"
-                            style={{ objectFit: 'cover', objectPosition: '' }}
+                            preload
+                            loading='eager'
+                            onLoadingComplete={() => setKnifeLoaded(true)}
+                            style={{
+                                objectFit: 'cover',
+                                objectPosition: 'center',
+                                opacity: knifeLoaded ? 1 : 0,
+                                transition: 'opacity 1s ease-in-out',
+                            }}
                         />
                     </Box>
 
