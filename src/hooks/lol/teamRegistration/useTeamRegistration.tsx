@@ -44,7 +44,7 @@ export const useTeamRegistration = () => {
     shieldPreview: null,
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [checkingRegisteredTeam, setCheckingRegisteredTeam] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<{
@@ -274,7 +274,7 @@ export const useTeamRegistration = () => {
       const registrationStatus = await checkRegisterStatus(tournamentId);
 
       if (registrationStatus.registered) {
-        if (registrationStatus.paymentStatus === 'pending') {
+        if (registrationStatus.paymentStatus === 'PENDING') {
           setState((prev) => ({
             ...prev,
             currentStep: 'payment',
@@ -288,13 +288,13 @@ export const useTeamRegistration = () => {
           });
 
           await handlePaymentWebSocketSubscribe(registrationStatus.uuid);
-        } else if (registrationStatus.paymentStatus === 'approved') {
+        } else if (registrationStatus.paymentStatus === 'APPROVED') {
           setPaymentApproved(true);
           setState((prev) => ({
             ...prev,
             currentStep: 'payment',
           }));
-        } else if (registrationStatus.paymentStatus === 'expired') {
+        } else if (registrationStatus.paymentStatus === 'CANCELED') {
           setPaymentExpired(true);
         } else {
           //

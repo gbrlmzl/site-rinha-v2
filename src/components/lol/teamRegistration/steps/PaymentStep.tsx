@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, type ChangeEvent } from 'react';
+import Link from 'next/link';
 import {
   Box,
   TextField,
@@ -21,13 +22,12 @@ import Image from 'next/image';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PaymentForm } from '@/types/teamRegistration';
-import {
-  THEME_COLORS
-} from '@/hooks/lol/teamRegistration/constants';
+import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 import {
   formatTimeRemaining,
   copyToClipboard,
 } from '@/services/teamRegistrationUtils';
+import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
 
 interface PaymentStepProps {
   data: PaymentForm;
@@ -246,13 +246,23 @@ export function PaymentStep({
                 alignItems: 'center',
               }}
             >
-              <img
-                src={`data:image/png;base64,${paymentData.qrCodeBase64}`}
-                alt="QR Code PIX"
-                width={220}
-                height={220}
-                style={{ objectFit: 'contain', padding: 8 }}
-              />
+              {timeRemaining > 0 ? (
+                <img
+                  src={`data:image/png;base64,${paymentData.qrCodeBase64}`}
+                  alt="QR Code PIX"
+                  width={220}
+                  height={220}
+                  style={{ objectFit: 'contain', padding: 8 }}
+                />
+              ) : (
+                <Image
+                  src={qrCodeExpiredImage}
+                  alt="QR Code Expirado"
+                  width={220}
+                  height={220}
+                  style={{ objectFit: 'contain', padding: 8 }}
+                />
+              )}
             </Card>
           </Box>
 
@@ -292,38 +302,52 @@ export function PaymentStep({
             </Typography>
           </Box>
 
-          {/* PIX Copy */}
+          {/* PIX Copy // Ou retornar ao inicio caso tenha expirado o QRCODE*/}
           <Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: THEME_COLORS.textMuted,
-                mb: 1,
-              }}
-            >
-              Ou copie a chave PIX:
-            </Typography>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={
-                copied ? (
-                  <CheckCircleIcon sx={{ color: '#4caf50' }} />
-                ) : (
-                  <ContentCopyIcon />
-                )
-              }
-              onClick={handleCopyPix}
-              sx={{
-                borderColor: THEME_COLORS.accent,
-                color: copied ? '#4caf50' : THEME_COLORS.accent,
-                wordBreak: 'break-all',
-                height: 'auto',
-                py: 1.5,
-              }}
-            >
-              {copied ? 'Copiado!' : 'Copiar Chave PIX'}
-            </Button>
+            {timeRemaining > 0 ? (
+              <>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: THEME_COLORS.textMuted,
+                    mb: 1,
+                  }}
+                >
+                  Ou copie a chave PIX:
+                </Typography>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={
+                    copied ? (
+                      <CheckCircleIcon sx={{ color: '#4caf50' }} />
+                    ) : (
+                      <ContentCopyIcon />
+                    )
+                  }
+                  onClick={handleCopyPix}
+                  sx={{
+                    borderColor: THEME_COLORS.accent,
+                    color: copied ? '#4caf50' : THEME_COLORS.accent,
+                    wordBreak: 'break-all',
+                    height: 'auto',
+                    py: 1.5,
+                  }}
+                >
+                  {copied ? 'Copiado!' : 'Copiar Chave PIX'}
+                </Button>
+              </>
+            ) : (
+              <Button
+                component={Link}
+                href="/lol/"
+                fullWidth
+                variant="contained"
+                color="primary"
+              >
+                Inicio
+              </Button>
+            )}
           </Box>
         </Stack>
       </Box>

@@ -75,15 +75,10 @@ export interface PaymentStatusMessage {
 }
 
 type PaymentStatus =
-  | 'approved'
-  | 'pending'
-  | 'authorized'
-  | 'rejected'
-  | 'in_process'
-  | 'in_mediation'
-  | 'canceled'
-  | 'expired'
-  | 'refunded';
+  | 'APPROVED'
+  | 'PENDING'
+  | 'CANCELED'
+  | 'EXPIRED';
 
 export type RegisterStatus =
   | { registered: false;
