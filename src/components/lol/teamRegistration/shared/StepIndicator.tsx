@@ -5,7 +5,7 @@
  * Substitui o Stepper padrão do MUI com visual mais moderno
  */
 
-import React from 'react';
+import type { ReactNode } from 'react';
 import {
   Box,
   Step,
@@ -67,7 +67,7 @@ const CustomStepIconRoot = styled('div')<{
 interface CustomStepIconProps {
   active?: boolean;
   completed?: boolean;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 function CustomStepIcon(props: CustomStepIconProps) {
@@ -83,7 +83,9 @@ function CustomStepIcon(props: CustomStepIconProps) {
             width: 32,
             height: 32,
             borderRadius: '50%',
-            backgroundColor: active ? THEME_COLORS.accent : THEME_COLORS.surfaceHigh,
+            backgroundColor: active
+              ? THEME_COLORS.accent
+              : THEME_COLORS.surfaceHigh,
             border: `2px solid ${active ? THEME_COLORS.accent : THEME_COLORS.border}`,
             display: 'flex',
             alignItems: 'center',
@@ -123,12 +125,12 @@ const CustomStepLabel = styled(StepLabel)({
 
 // ─────────────────────────────────────────────────────────────────────────
 
-export const StepIndicator: React.FC<StepIndicatorProps> = ({
+export function StepIndicator({
   steps,
   activeStep,
   onStepClick,
   clickableSteps = false,
-}) => {
+}: StepIndicatorProps) {
   const handleStepClick = (stepIndex: number) => {
     if (clickableSteps && onStepClick && stepIndex <= activeStep) {
       onStepClick(stepIndex);
@@ -145,7 +147,10 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
           backgroundColor: 'transparent',
           padding: 0,
           '& .MuiStep-root': {
-            cursor: clickableSteps && activeStep >= activeStep ? 'pointer' : 'default',
+            cursor:
+              clickableSteps && activeStep >= activeStep
+                ? 'pointer'
+                : 'default',
           },
         }}
       >
@@ -163,7 +168,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
             <CustomStepLabel
               icon={index + 1}
               slots={{
-                stepIcon: CustomStepIcon
+                stepIcon: CustomStepIcon,
               }}
             >
               {step.label}
@@ -210,4 +215,4 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
       </Box>*/}
     </Box>
   );
-};
+}

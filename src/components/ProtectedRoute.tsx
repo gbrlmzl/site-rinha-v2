@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/hooks/authentication/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { redirect } from 'next/navigation';
 import { useEffect, ReactNode } from 'react';
 
@@ -10,8 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
-  
+  const { isAuthenticated, isLoading } = useAuthContext();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

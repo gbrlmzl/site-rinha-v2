@@ -5,18 +5,11 @@
  * Coleta: Nome e Escudo
  */
 
-import React from 'react';
-import {
-  Box,
-  TextField,
-  Stack,
-  Typography,
-  Divider
-} from '@mui/material';
+import { type ChangeEvent } from 'react';
+import { Box, TextField, Stack, Typography } from '@mui/material';
 import { Team } from '@/types/teamRegistration';
 import { ShieldUploader } from '../shared/ShieldUploader';
 import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
-
 
 interface TeamInfoStepProps {
   data: Team;
@@ -27,15 +20,15 @@ interface TeamInfoStepProps {
   error?: string | null;
 }
 
-export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
+export function TeamInfoStep({
   data,
   shieldPreview,
   onTeamChange,
   onShieldFileSelected,
   loading = false,
   error = null,
-}) => {
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+}: TeamInfoStepProps) {
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     onTeamChange({ teamName: e.target.value });
   };
 
@@ -71,7 +64,6 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
 
         {/* Shield Upload */}
         <Box>
-          
           <ShieldUploader
             preview={shieldPreview}
             onFileSelected={onShieldFileSelected}
@@ -81,31 +73,23 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
           />
         </Box>
 
-        {/* <Divider sx={{ borderColor: THEME_COLORS.border }} /> */}
-
         {/* Team Name */}
         <Box>
           <TextField
-            fullWidth            
+            fullWidth
             value={data.teamName}
             onChange={handleNameChange}
             disabled={loading}
-            placeholder='Nome da equipe'
-            
+            placeholder="Nome da equipe"
             slotProps={{
-                htmlInput:{
-                    maxLength: 30,
-                    
-                },
-                formHelperText: {
-                    sx: { color: THEME_COLORS.textMuted, textAlign: 'right' },
-                },
-
-
+              htmlInput: {
+                maxLength: 30,
+              },
+              formHelperText: {
+                sx: { color: THEME_COLORS.textMuted, textAlign: 'right' },
+              },
             }}
-            
             helperText={`${data.teamName.length}/30 caracteres`}
-            
             sx={{
               mt: 2,
               '& .MuiFormLabel-root': {
@@ -116,7 +100,6 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
                 justifyContent: 'center',
               },
               '& .MuiOutlinedInput-root': {
-                
                 backgroundColor: THEME_COLORS.surfaceHigh,
                 borderRadius: 2,
                 color: THEME_COLORS.text,
@@ -131,15 +114,13 @@ export const TeamInfoStep: React.FC<TeamInfoStepProps> = ({
                 paddingBlock: 1,
               },
               '& .MuiOutlinedInput-input::placeholder': {
-                textAlign: 'center'
+                textAlign: 'center',
               },
               '& .MuiInputLabel-root': { color: THEME_COLORS.textMuted },
             }}
           />
         </Box>
-
-          
       </Stack>
     </Box>
   );
-};
+}

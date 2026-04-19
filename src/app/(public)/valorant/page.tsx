@@ -1,10 +1,5 @@
-import InDevelopment from "@/components/valorant/InDevelopment";
-
-
-
+import InDevelopment from '@/components/valorant/InDevelopment';
 
 export default function Home() {
-  return (
-    <InDevelopment />
-  );
+  return <InDevelopment />;
 }

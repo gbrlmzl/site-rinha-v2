@@ -5,7 +5,7 @@
  * Formulário de dados de pagamento + QR Code + Countdown
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import {
   Box,
   TextField,
@@ -13,77 +13,93 @@ import {
   Typography,
   Button,
   Card,
-  CardContent,
   Alert,
   CircularProgress,
   Divider,
-  IconButton,
-  Tooltip,
 } from '@mui/material';
 import Image from 'next/image';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PaymentForm } from '@/types/teamRegistration';
-import { THEME_COLORS, PAYMENT_TIMEOUT_SECONDS } from '@/hooks/lol/teamRegistration/constants';
-import { formatTimeRemaining, copyToClipboard } from '@/services/teamRegistrationService';
-import { time } from 'console';
+import {
+  THEME_COLORS
+} from '@/hooks/lol/teamRegistration/constants';
+import {
+  formatTimeRemaining,
+  copyToClipboard,
+} from '@/services/teamRegistrationUtils';
 
 interface PaymentStepProps {
   data: PaymentForm;
   onDataChange: (updates: Partial<PaymentForm>) => void;
   paymentValue: number;
-  qrCodeData?: {
+  paymentData?: {
     uuid: string;
     qrCode: string;
     qrCodeBase64: string;
-    valor: number;
+    value: number;
+    expiresAt: string;
   } | null;
   paymentApproved?: boolean;
   loading?: boolean;
   error?: string | null;
 }
 
-export const PaymentStep: React.FC<PaymentStepProps> = ({
+export function PaymentStep({
   data,
   onDataChange,
   paymentValue,
-  qrCodeData,
+  paymentData,
   paymentApproved = false,
   loading = false,
   error = null,
-}) => {
-  const [timeRemaining, setTimeRemaining] = useState(PAYMENT_TIMEOUT_SECONDS);
-  const [copied, setCopied] = useState(false);
+}: PaymentStepProps) {
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [copied, setCopied] = useState<boolean>(false);
+  //console.log(paymentData?.expiresAt);
 
   // Timer para QR Code
   useEffect(() => {
-    if (!qrCodeData || paymentApproved) {
-      setTimeRemaining(PAYMENT_TIMEOUT_SECONDS);
+    if (!paymentData?.expiresAt || paymentApproved) {
+      setTimeRemaining(0);
+      return;
+    }
+
+    const expiresAtMs = new Date(paymentData.expiresAt).getTime();
+
+    if (Number.isNaN(expiresAtMs)) {
+      setTimeRemaining(0);
+      return;
+    }
+
+    const initialRemaining = Math.max(
+      Math.floor((expiresAtMs - Date.now()) / 1000),
+      0
+    );
+
+    setTimeRemaining(initialRemaining);
+
+    if (initialRemaining <= 0) {
       return;
     }
 
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
+        return prev > 0 ? prev - 1 : 0;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [qrCodeData, paymentApproved]);
+  }, [paymentData?.expiresAt, paymentApproved]);
 
-  const handleChange = (field: keyof PaymentForm) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    onDataChange({ [field]: e.target.value });
-  };
+  const handleChange =
+    (field: keyof PaymentForm) => (e: ChangeEvent<HTMLInputElement>) => {
+      onDataChange({ [field]: e.target.value });
+    };
 
   const handleCopyPix = async () => {
-    if (qrCodeData?.qrCode) {
-      const success = await copyToClipboard(qrCodeData.qrCode);
+    if (paymentData?.qrCode) {
+      const success = await copyToClipboard(paymentData.qrCode);
       if (success) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -107,15 +123,13 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
         <Stack spacing={1} sx={{ textAlign: 'center', maxWidth: 500 }}>
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <CheckCircleIcon
-            sx={{
-              fontSize: 80,
-              color: '#4caf50',
-              mx: 'auto',
-            }}
-          />
-
+              sx={{
+                fontSize: 80,
+                color: '#4caf50',
+                mx: 'auto',
+              }}
+            />
           </Box>
-          
 
           <Typography
             variant="h5"
@@ -136,7 +150,6 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             Sua inscrição foi confirmada com sucesso!
           </Typography>
 
-
           <Divider sx={{ borderColor: THEME_COLORS.border, my: 2 }} />
           <Box>
             <Image
@@ -144,9 +157,8 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               alt="Pagamento aprovado"
               width={300}
               height={250}
-              style={{ objectFit: 'contain' }}>
-
-            </Image>
+              style={{ objectFit: 'contain' }}
+            ></Image>
           </Box>
 
           <Typography
@@ -164,7 +176,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
 
   // ─── Tela: QR Code Gerado ───────────────────────────────────────────────
 
-  if (qrCodeData) {
+  if (paymentData) {
     return (
       <Box
         sx={{
@@ -203,7 +215,10 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               border: `1px solid ${THEME_COLORS.accent}`,
             }}
           >
-            <Typography variant="caption" sx={{ color: THEME_COLORS.textMuted }}>
+            <Typography
+              variant="caption"
+              sx={{ color: THEME_COLORS.textMuted }}
+            >
               Valor a Pagar
             </Typography>
             <Typography
@@ -213,7 +228,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                 fontWeight: 700,
               }}
             >
-              R$ {(qrCodeData.valor).toFixed(2).replace('.', ',')}
+              R$ {paymentData.value.toFixed(2).replace('.', ',')}
             </Typography>
           </Box>
 
@@ -232,7 +247,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               }}
             >
               <img
-                src={`data:image/png;base64,${qrCodeData.qrCodeBase64}`}
+                src={`data:image/png;base64,${paymentData.qrCodeBase64}`}
                 alt="QR Code PIX"
                 width={220}
                 height={220}
@@ -250,9 +265,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                   ? 'rgba(255, 107, 107, 0.1)'
                   : THEME_COLORS.surfaceHigh,
               border: `1px solid ${
-                timeRemaining < 60
-                  ? THEME_COLORS.danger
-                  : THEME_COLORS.border
+                timeRemaining < 60 ? THEME_COLORS.danger : THEME_COLORS.border
               }`,
               borderRadius: 2,
             }}
@@ -270,12 +283,11 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             >
               {timeRemaining > 0 ? (
                 <>
-                  QR Code expira em: <strong>{formatTimeRemaining(timeRemaining)}</strong>
+                  QR Code expira em:{' '}
+                  <strong>{formatTimeRemaining(timeRemaining)}</strong>
                 </>
               ) : (
-                <>
-                  QR Code expirado.
-                </>
+                <>QR Code expirado.</>
               )}
             </Typography>
           </Box>
@@ -313,8 +325,6 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               {copied ? 'Copiado!' : 'Copiar Chave PIX'}
             </Button>
           </Box>
-
-          
         </Stack>
       </Box>
     );
@@ -361,7 +371,6 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             textAlign: 'center',
           }}
         >
-          
           <Typography
             variant="h6"
             sx={{
@@ -443,9 +452,11 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             value={data.cpf}
             onChange={handleChange('cpf')}
             disabled={loading}
-            inputProps={{
-              pattern: '[0-9]*',
-              maxLength: 11,
+            slotProps={{
+              htmlInput: {
+                pattern: '[0-9]*',
+                maxLength: 11,
+              },
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -477,9 +488,10 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
 
         {/* Info */}
         <Alert severity="info" sx={{ borderRadius: 2 }}>
-          Seus dados serão usados para gerar o QR Code PIX. Eles não serão compartilhados.
+          Seus dados serão usados para gerar o QR Code PIX. Eles não serão
+          compartilhados.
         </Alert>
       </Stack>
     </Box>
   );
-};
+}

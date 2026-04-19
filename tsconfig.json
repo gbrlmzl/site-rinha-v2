@@ -22,6 +22,7 @@
       "@/*": ["./src/*"]
     }
   },
+  "extends": "@tsconfig/next/tsconfig.json",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -30,5 +31,6 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
+  
 }

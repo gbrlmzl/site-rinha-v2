@@ -7,7 +7,14 @@ import { z } from 'zod';
 
 // ─── Base Schemas ─────────────────────────────────────────────────────────
 
-const PositionEnum = z.enum(['TOP_LANER', 'JUNGLER', 'MID_LANER', 'AD_CARRY', 'SUPPORT', 'FILL'] as const);
+const PositionEnum = z.enum([
+  'TOP_LANER',
+  'JUNGLER',
+  'MID_LANER',
+  'AD_CARRY',
+  'SUPPORT',
+  'FILL',
+] as const);
 
 const BasePlayerSchema = z.object({
   playerName: z
@@ -32,9 +39,8 @@ const BasePlayerSchema = z.object({
 // ─── Jogador Titulares (com matrícula obrigatória) ────────────────────────
 
 export const TitularPlayerSchema = BasePlayerSchema.extend({
-  matricula: z.string().optional(),
+  schoolId: z.string().optional(),
 }).superRefine((data, ctx) => {
-
   // Jogadores titulares não podem ser desabilitados
   if (data.disabledPlayer) {
     ctx.addIssue({
@@ -46,17 +52,17 @@ export const TitularPlayerSchema = BasePlayerSchema.extend({
 
   // Matrícula só é obrigatória se não for jogador externo
   if (!data.isExternalPlayer) {
-    if (!data.matricula || data.matricula.trim() === '') {
+    if (!data.schoolId || data.schoolId.trim() === '') {
       ctx.addIssue({
         code: 'custom',
         message: 'O capitão deve possuir matrícula na UFPB',
-        path: ['matricula'], // ← aponta o erro para o campo correto
+        path: ['schoolId'], // ← aponta o erro para o campo correto
       });
-    } else if (!/^\d{6,11}$/.test(data.matricula)) {
+    } else if (!/^\d{6,11}$/.test(data.schoolId)) {
       ctx.addIssue({
         code: 'custom',
         message: 'Matrícula deve ter entre 6 e 11 dígitos',
-        path: ['matricula'],
+        path: ['schoolId'],
       });
     }
   }
@@ -65,7 +71,7 @@ export const TitularPlayerSchema = BasePlayerSchema.extend({
 // ─── Jogador Reserva (posicao obrigatória, matrícula opcional se externo) ────
 
 export const ReservaPlayerSchema = BasePlayerSchema.extend({
-  matricula: z
+  schoolId: z
     .string()
     .regex(/^\d{6,11}$/, 'Matrícula deve ter 6 a 11 dígitos')
     .optional()
@@ -73,7 +79,7 @@ export const ReservaPlayerSchema = BasePlayerSchema.extend({
 }).refine(
   (data) => {
     // Se NÃO é jogador externo e NÃO está desabilitado, precisa de matrícula
-    if (!data.isExternalPlayer && !data.disabledPlayer && !data.matricula) {
+    if (!data.isExternalPlayer && !data.disabledPlayer && !data.schoolId) {
       return false;
     }
     return true;
@@ -84,12 +90,30 @@ export const ReservaPlayerSchema = BasePlayerSchema.extend({
 // ─── Jogador Desabilitado (reserva) ───────────────────────────────────────
 
 export const DisabledPlayerSchema = z.object({
-  playerName: z.string().optional().transform(() => ''),
-  matricula: z.string().optional().transform(() => ''),
-  nickname: z.string().optional().transform(() => ''),
-  discordUser: z.string().optional().transform(() => ''),
-  role: z.string().optional().transform(() => 'FILL'),
-  isExternalPlayer: z.boolean().optional().transform(() => false),
+  playerName: z
+    .string()
+    .optional()
+    .transform(() => ''),
+  schoolId: z
+    .string()
+    .optional()
+    .transform(() => ''),
+  nickname: z
+    .string()
+    .optional()
+    .transform(() => ''),
+  discordUser: z
+    .string()
+    .optional()
+    .transform(() => ''),
+  role: z
+    .string()
+    .optional()
+    .transform(() => 'FILL'),
+  isExternalPlayer: z
+    .boolean()
+    .optional()
+    .transform(() => false),
   disabledPlayer: z.literal(true),
 });
 
@@ -101,11 +125,15 @@ export const TeamSchema = z.object({
     .string()
     .min(3, 'Nome da equipe deve ter pelo menos 3 caracteres')
     .max(30, 'Nome da equipe deve ter no máximo 30 caracteres'),
-  teamShield: z.file().nullable().optional().refine((file) => {
-    if (file == null) return true;
-    const validTypes = ['image/jpeg', 'image/png'];
-    return file instanceof File && validTypes.includes(file.type);
-  }, 'Escudo deve ser um arquivo JPEG ou PNG'),
+  teamShield: z
+    .file()
+    .nullable()
+    .optional()
+    .refine((file) => {
+      if (file == null) return true;
+      const validTypes = ['image/jpeg', 'image/png'];
+      return file instanceof File && validTypes.includes(file.type);
+    }, 'Escudo deve ser um arquivo JPEG ou PNG'),
 });
 
 // ─── Payment ──────────────────────────────────────────────────────────────
@@ -122,9 +150,7 @@ export const PaymentFormSchema = z.object({
   email: z
     .email('Email deve ser válido')
     .max(100, 'Email deve ter no máximo 100 caracteres'),
-  cpf: z
-    .string()
-    .regex(/^\d{11}$/, 'CPF deve conter 11 dígitos'),
+  cpf: z.string().regex(/^\d{11}$/, 'CPF deve conter 11 dígitos'),
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -150,7 +176,7 @@ export function validatePlayer(player: any, playerIndex: number) {
 
   return {
     success: result.success,
-    errors: result.success ? {} : result.error.issues
+    errors: result.success ? {} : result.error.issues,
   };
 }
 
@@ -161,7 +187,7 @@ export function validateTeam(team: any) {
   const result = TeamSchema.safeParse(team);
   return {
     success: result.success,
-    errors: result.success ? {} : result.error.issues
+    errors: result.success ? {} : result.error.issues,
   };
 }
 
@@ -172,7 +198,7 @@ export function validatePaymentForm(form: any) {
   const result = PaymentFormSchema.safeParse(form);
   return {
     success: result.success,
-    errors: result.success ? {} : result.error.issues
+    errors: result.success ? {} : result.error.issues,
   };
 }
 
@@ -180,9 +206,10 @@ export function validatePaymentForm(form: any) {
  * Valida equipe + jogadores (matrículas, nickname, unicos)
  */
 export function validateAllPLayers(players: any[]) {
-
   // Validar cada jogador
-  const playersValidation = players.map((player, idx) => validatePlayer(player, idx));
+  const playersValidation = players.map((player, idx) =>
+    validatePlayer(player, idx)
+  );
   const hasInvalidPlayers = playersValidation.some((v) => !v.success);
 
   if (hasInvalidPlayers) {
@@ -196,14 +223,14 @@ export function validateAllPLayers(players: any[]) {
   }
 
   // Verificar matrículas únicas entre titulares
-  const matriculas = players
+  const schoolIds = players
     .slice(0, 5) // Apenas titulares
     .filter((p) => !p.disabledPlayer)
-    .map((p) => p.matricula)
+    .map((p) => p.schoolId)
     .filter((m) => m !== '');
 
-  const uniqueMatriculas = new Set(matriculas);
-  if (matriculas.length !== uniqueMatriculas.size) {
+  const uniqueschoolIds = new Set(schoolIds);
+  if (schoolIds.length !== uniqueschoolIds.size) {
     return {
       success: false,
       step: 'players',

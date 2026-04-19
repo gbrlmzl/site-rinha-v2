@@ -1,7 +1,5 @@
-'use client'
-import { Box, Button, Card} from "@mui/material";
-
-
+'use client';
+import { Box, Button, Card } from '@mui/material';
 
 export default function Home() {
   return (

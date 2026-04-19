@@ -1,12 +1,14 @@
-'use client'
-import styles from "./page.module.css";
-import { Button, Card} from "@mui/material";
-import chogat from "../../public/chogat.jpg";
-import Image from "next/image";
-import Inicio from "@/components/Inicio";
+'use client';
+import Inicio from '@/components/Inicio';
 
 export default function Home() {
-  return (
-      <Inicio></Inicio>
-  );
+  const colors = {
+    bg: '#080d2e',
+    surface: '#0E1241',
+    surfaceHigh: '#151a54',
+    border: 'rgba(255,255,255,0.08)',
+    accent: '#11B5E4',
+    accentHover: '#0b80a0',
+  };
+  return <Inicio></Inicio>;
 }

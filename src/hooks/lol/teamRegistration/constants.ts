@@ -39,7 +39,12 @@ export const STEPS: StepConfig[] = [
   },
 ];
 
-export const STEP_LIST = ['teamInfo', 'playersInfo', 'confirmation', 'payment'] as const;
+export const STEP_LIST = [
+  'teamInfo',
+  'playersInfo',
+  'confirmation',
+  'payment',
+] as const;
 
 // ─── Players ──────────────────────────────────────────────────────────────
 
@@ -58,7 +63,7 @@ export const PLAYER_POSITIONS = [
   { key: 'MID_LANER' as const, label: 'Mid', icon: MidIcon },
   { key: 'AD_CARRY' as const, label: 'ADC', icon: ADCIcon },
   { key: 'SUPPORT' as const, label: 'Suporte', icon: SupportIcon },
-  {key: 'FILL' as const, label: 'Preencher', icon: DefaultIcon },
+  { key: 'FILL' as const, label: 'Preencher', icon: DefaultIcon },
 ];
 
 export const DEFAULT_POSITION_ICON = DefaultIcon;
@@ -85,22 +90,22 @@ export const VALIDATION_MESSAGES = {
   SHIELD_REQUIRED: 'Escudo da equipe é obrigatório',
   SHIELD_UPLOADING: 'Carregando escudo...',
   SHIELD_UPLOAD_ERROR: 'Erro ao fazer upload do escudo',
-  
+
   PLAYER_NAME_REQUIRED: 'Nome do jogador é obrigatório',
   PLAYER_NICKNAME_REQUIRED: 'Nickname é obrigatório',
   PLAYER_DISCORD_REQUIRED: 'Discord é obrigatório',
-  PLAYER_MATRICULA_REQUIRED: 'Matrícula é obrigatória',
-  PLAYER_MATRICULA_INVALID: 'Matrícula inválida (6-11 dígitos)',
+  PLAYER_SCHOOL_ID_REQUIRED: 'Matrícula é obrigatória',
+  PLAYER_SCHOOL_ID_INVALID: 'Matrícula inválida (6-11 dígitos)',
   PLAYER_POSITION_REQUIRED: 'Selecione uma posição',
-  PLAYERS_MATRICULA_UNIQUE: 'Matrículas dos jogadores devem ser únicas',
-  
+  PLAYERS_SCHOOL_ID_UNIQUE: 'Matrículas dos jogadores devem ser únicas',
+
   CPF_REQUIRED: 'CPF é obrigatório',
   CPF_INVALID: 'CPF inválido (deve ter 11 dígitos)',
   PAYMENT_NAME_REQUIRED: 'Nome é obrigatório',
   PAYMENT_SURNAME_REQUIRED: 'Sobrenome é obrigatório',
   PAYMENT_EMAIL_REQUIRED: 'Email é obrigatório',
   PAYMENT_EMAIL_INVALID: 'Email deve ser válido',
-  
+
   TERMS_REQUIRED: 'Você deve concordar com os termos',
 };
 
@@ -127,7 +132,7 @@ export const INITIAL_TEAM = {
 
 export const INITIAL_PLAYER = {
   playerName: '',
-  matricula: '',
+  schoolId: '',
   nickname: '',
   discordUser: '',
   role: 'FILL' as const,
@@ -135,10 +140,12 @@ export const INITIAL_PLAYER = {
   disabledPlayer: false,
 };
 
-export const INITIAL_PLAYERS = Array(6).fill(null).map((_, i) => ({
-  ...INITIAL_PLAYER,
-  disabledPlayer: false,
-}));
+export const INITIAL_PLAYERS = Array(6)
+  .fill(null)
+  .map((_, i) => ({
+    ...INITIAL_PLAYER,
+    disabledPlayer: false,
+  }));
 
 export const INITIAL_PAYMENT_FORM = {
   nome: '',
@@ -151,7 +158,7 @@ export const INITIAL_PAYMENT_FORM = {
 
 export const REGEX = {
   CPF: /^\d{11}$/,
-  MATRICULA: /^\d{6,11}$/,
+  SCHOOL_ID: /^\d{6,11}$/,
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   DISCORD_USER: /^.{2,50}$/,
 };
@@ -159,15 +166,6 @@ export const REGEX = {
 // ─── API Endpoints ───────────────────────────────────────────────────────
 
 export const API_ENDPOINTS = {
-  UPLOAD_SHIELD: '/api/upload-imgur',
-  SUBMIT_REGISTRATION: 'http://localhost:8080/teams',
   WEBSOCKET_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
 };
 
-// ─── WebSocket ───────────────────────────────────────────────────────────
-
-export const PAYMENT_TIMEOUT_SECONDS = 3599; // 1 hora menos 1 segundo para evitar expiração exata
-export const PAYMENT_STATUS = {
-  PENDING: 'PAGAMENTO PENDENTE',
-  APPROVED: 'PAGAMENTO REALIZADO',
-} as const;

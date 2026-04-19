@@ -1,7 +1,12 @@
-"use client";
-import { CssBaseline, ThemeProvider, createTheme, darkScrollbar } from "@mui/material";
+'use client';
+import {
+  CssBaseline,
+  ThemeProvider,
+  createTheme,
+  darkScrollbar,
+} from '@mui/material';
 
-import theme from "@/theme";
+import theme from '@/theme';
 
 type AppThemeProviderProps = {
   children: React.ReactNode;

@@ -5,11 +5,17 @@
 
 // ─── Player ───────────────────────────────────────────────────────────────
 
-export type PlayerPosition = 'TOP_LANER' | 'JUNGLER' | 'MID_LANER' | 'AD_CARRY' | 'SUPPORT' | 'FILL';
+export type PlayerPosition =
+  | 'TOP_LANER'
+  | 'JUNGLER'
+  | 'MID_LANER'
+  | 'AD_CARRY'
+  | 'SUPPORT'
+  | 'FILL';
 
 export interface Player {
   playerName: string;
-  matricula: string;
+  schoolId: string;
   nickname: string;
   discordUser: string;
   role: PlayerPosition;
@@ -21,7 +27,7 @@ export interface Player {
 
 export interface Team {
   teamName: string;
-  teamShield: File | null; //File 
+  teamShield: File | null; //File
 }
 
 // ─── Payment ──────────────────────────────────────────────────────────────
@@ -67,6 +73,38 @@ export interface PaymentStatusMessage {
   uuid: string;
   timestamp?: string;
 }
+
+type PaymentStatus =
+  | 'approved'
+  | 'pending'
+  | 'authorized'
+  | 'rejected'
+  | 'in_process'
+  | 'in_mediation'
+  | 'canceled'
+  | 'expired'
+  | 'refunded';
+
+export type RegisterStatus =
+  | { registered: false;
+      /*
+      paymentStatus: null;
+      uuid: null;
+      value: null;
+      qrCode: null;
+      qrCodeBase64: null;
+      expiresAt: null;
+      */
+   }
+  | {
+      registered: true;
+      paymentStatus: PaymentStatus;
+      uuid: string;
+      value: number;
+      qrCode: string;
+      qrCodeBase64: string;
+      expiresAt: string;
+    };
 
 // ─── UI/UX Types ──────────────────────────────────────────────────────────
 

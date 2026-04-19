@@ -1,26 +1,25 @@
 'use client';
 
-import registerAction from "./registerAction";
-import { use, useActionState, useEffect, useState } from 'react';
+import registerAction from './registerAction';
+import { useActionState, useEffect, useState } from 'react';
 import Form from 'next/form';
 import Link from 'next/link';
 
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    IconButton,
-    InputAdornment,
-    Stack,
-    TextField,
-    Typography,
-    Card,
-    Paper,
-    Icon
+  Alert,
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+  Card,
 } from '@mui/material';
 
-import Condition from "@/components/shared/Condition";
+import { RegisterState } from '@/types/auth/authTypes';
+
+import Condition from '@/components/shared/Condition';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -30,167 +29,279 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
+type RegisterFormEntries = {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
-type RegisterState = {
-    success: boolean | null;
-    message: string;
-    secondaryMessage?: string;
+type passwordConditions = {
+  atLeast8Chars: boolean;
+  hasNumberOrSymbol: boolean;
+  passwordsMatch: boolean;
 };
 
 const initialState: RegisterState = {
-    success: null,
-    message: '',
+  success: null,
+  message: '',
 };
 
 export default function RegisterForm() {
-    const [state, formAction, isPending] = useActionState<RegisterState, FormData>(registerAction, initialState);
+  const [state, formAction, isPending] = useActionState<
+    RegisterState,
+    FormData
+  >(registerAction, initialState);
 
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [googleLoading, setGoogleLoading] = useState(false);
-    const [atLeast8Chars, setAtLeast8Chars] = useState(false);
-    const [hasNumberOrSymbol, setHasNumberOrSymbol] = useState(false);
-    const [passwordsMatch, setPasswordsMatch] = useState(false);
+  const [formEntries, setFormEntries] = useState<RegisterFormEntries>({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
 
-    
+  const [passwordConditions, setPasswordConditions] =
+    useState<passwordConditions>({
+      atLeast8Chars: false,
+      hasNumberOrSymbol: false,
+      passwordsMatch: false,
+    });
 
-    const dadosPreenchidos =
-        email.trim().length > 0 &&
-        atLeast8Chars &&
-        hasNumberOrSymbol &&
-        passwordsMatch &&
-        username.trim().length > 0;
-        
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
-    useEffect(() => {
-        setAtLeast8Chars(password.length >= 8);
-        setHasNumberOrSymbol(/[\d\W]/.test(password));
-        setPasswordsMatch(password.length !== 0 && password === confirmPassword);
-        
-    }, [password, confirmPassword]);
+  //const [googleLoading, setGoogleLoading] = useState<boolean>(false);
 
-    useEffect(() => {
-        if (state.success) {
-            setUsername('');
-            setEmail('');
-            setPassword('');
-            setConfirmPassword('');
-        }else if (state.success === false) {
-            setPassword('');
-            setConfirmPassword('');
-        }
+  const dadosPreenchidos: boolean =
+    formEntries.email.trim().length > 0 &&
+    passwordConditions.atLeast8Chars &&
+    passwordConditions.hasNumberOrSymbol &&
+    passwordConditions.passwordsMatch &&
+    formEntries.username.trim().length > 0;
 
-    }, [state]);
+  useEffect(() => {
+    setPasswordConditions((prev) => ({
+      ...prev,
+      atLeast8Chars: formEntries.password.length >= 8,
+    }));
+    setPasswordConditions((prev) => ({
+      ...prev,
+      hasNumberOrSymbol: /[\d\W]/.test(formEntries.password),
+    }));
+    setPasswordConditions((prev) => ({
+      ...prev,
+      passwordsMatch:
+        formEntries.password.length !== 0 &&
+        formEntries.password === formEntries.confirmPassword,
+    }));
+  }, [formEntries.password, formEntries.confirmPassword]);
 
-    function handleGoogleSignIn() {
-        if (googleLoading) return;
-        setGoogleLoading(true);
-
-        // ...existing code...
-        console.log('Login com Google');
-        // ...existing code...
-
-        setGoogleLoading(false);
-    }
-
-
+  useEffect(() => {
     if (state.success) {
-        return (
-            <Card sx={{ width: 'fit-content', height: 'fit-content', mx: 'auto', paddingBlock: 4, paddingInline: { xs: "1rem", md: "2rem" }, mt: 2 }}>
-                <Typography component="h2" mb={0.75} sx={{whiteSpace: 'pre-line', textAlign: 'center', fontWeight: 500, fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
-                    {state.message}
-                </Typography>
-                {state.secondaryMessage && (
-                    <Typography component="p" mb={0.25} sx={{whiteSpace: 'pre-line', textAlign: 'center', fontSize: { xs: '0.8rem', sm: '1rem' }, color: 'text.secondary' }}>
-                        {state.secondaryMessage}
-                    </Typography>
-                )}
-                <div style={{width: "100%", display: "flex", justifyContent: "center", paddingBlock: "2rem"}}>
-                    <DoneIcon color="success" sx={{fontSize: 150}}></DoneIcon>
-                </div>
-                
-                <Box display="flex" justifyContent="center">
-                    <Link href="/login" passHref>
-                        <Button variant="contained">
-                            Fazer login
-                        </Button>
-                    </Link>
-                </Box>
-            </Card>
-        );
+      setFormEntries({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
+    } else if (state.success === false) {
+      setFormEntries({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
     }
+  }, [state]);
 
+  /*function handleGoogleSignIn() {
+    if (googleLoading) return;
+    setGoogleLoading(true);
+
+    // ...existing code...
+    console.log('Login com Google');
+    // ...existing code...
+
+    setGoogleLoading(false);
+  }*/
+
+  if (state.success) {
     return (
-        <Card sx={{width: { xs: "90vw", sm: "30vw" }, height: "fit-content", mx: 'auto', p: 3, mt: 2,  }}>
-                <Typography variant="h4" component="h1" mb={2} sx={{ textAlign: "center", fontWeight: 500 }}>
-                    Crie sua conta
-                </Typography>
+      <Card
+        sx={{
+          width: 'fit-content',
+          height: 'fit-content',
+          mx: 'auto',
+          paddingBlock: 4,
+          paddingInline: { xs: '1rem', md: '2rem' },
+          mt: 2,
+        }}
+      >
+        <Typography
+          component="h2"
+          mb={0.75}
+          sx={{
+            whiteSpace: 'pre-line',
+            textAlign: 'center',
+            fontWeight: 500,
+            fontSize: { xs: '1.3rem', sm: '1.5rem' },
+          }}
+        >
+          {state.message}
+        </Typography>
+        {state.secondaryMessage && (
+          <Typography
+            component="p"
+            mb={0.25}
+            sx={{
+              whiteSpace: 'pre-line',
+              textAlign: 'center',
+              fontSize: { xs: '0.8rem', sm: '1rem' },
+              color: 'text.secondary',
+            }}
+          >
+            {state.secondaryMessage}
+          </Typography>
+        )}
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            paddingBlock: '2rem',
+          }}
+        >
+          <DoneIcon color="success" sx={{ fontSize: 150 }}></DoneIcon>
+        </div>
 
-                {state.success === false && (
-                    <Alert severity="error" sx={{ mb: 2, marginInline: { xs: "1rem", md: "2rem" } }}>
-                        {state.message}
-                    </Alert>
-                )}
-            <Box sx={{paddingInline: { xs: "2rem", md: "4rem" }}}>
-                <Form action={formAction} style={{ display: 'block', flexDirection: 'column' }}>
-                    <Stack spacing={1}>
-                        <TextField
-                            fullWidth
-                            name="username"
-                            label="Nome de usuário"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                        />
+        <Box display="flex" justifyContent="center">
+          <Link href="/login" passHref>
+            <Button variant="contained">Fazer login</Button>
+          </Link>
+        </Box>
+      </Card>
+    );
+  }
 
-                        <TextField
-                            fullWidth
-                            name="email"
-                            type="email"
-                            label="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
+  return (
+    <Card
+      sx={{
+        width: { xs: '90vw', sm: '30vw' },
+        height: 'fit-content',
+        mx: 'auto',
+        p: 3,
+        mt: 2,
+      }}
+    >
+      <Typography
+        variant="h4"
+        component="h1"
+        mb={2}
+        sx={{ textAlign: 'center', fontWeight: 500 }}
+      >
+        Crie sua conta
+      </Typography>
 
-                        <TextField
-                            fullWidth
-                            name="password"
-                            type={showPassword ? 'text' : 'password'}
-                            label="Senha"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            slotProps={{
-                                input: {
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton tabIndex={-1} onClick={() => setShowPassword((prev) => !prev)} edge="end" aria-label="Mostrar/Ocultar senha" size="small">
-                                                {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }
-                            }}
-                        />
+      {state.success === false && (
+        <Alert
+          severity="error"
+          sx={{ mb: 2, marginInline: { xs: '1rem', md: '2rem' } }}
+        >
+          {state.message}
+        </Alert>
+      )}
+      <Box sx={{ paddingInline: { xs: '2rem', md: '4rem' } }}>
+        <Form
+          action={formAction}
+          style={{ display: 'block', flexDirection: 'column' }}
+        >
+          <Stack spacing={1}>
+            <TextField
+              fullWidth
+              name="username"
+              label="Nome de usuário"
+              value={formEntries.username}
+              onChange={(e) =>
+                setFormEntries({
+                  ...formEntries,
+                  username: e.target.value.toLowerCase(),
+                })
+              }
+            />
 
-                        <TextField
-                            fullWidth
-                            name="confirmPassword"
-                            type={showPassword ? 'text' : 'password'}
-                            label="Confirmar senha"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                    </Stack>
+            <TextField
+              fullWidth
+              name="email"
+              type="email"
+              label="Email"
+              value={formEntries.email}
+              onChange={(e) =>
+                setFormEntries({ ...formEntries, email: e.target.value })
+              }
+            />
 
-                    <Stack spacing={1} sx={{mt: 2}} >
-                        <Condition ok={atLeast8Chars} text="Ao menos 8 caracteres" />
-                        <Condition ok={hasNumberOrSymbol} text="Deve conter um número ou símbolo" />
-                        <Condition ok={passwordsMatch} text="As senhas devem coincidir" />
-                    </Stack>
+            <TextField
+              fullWidth
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              label="Senha"
+              value={formEntries.password}
+              onChange={(e) =>
+                setFormEntries({ ...formEntries, password: e.target.value })
+              }
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        tabIndex={-1}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                        aria-label="Mostrar/Ocultar senha"
+                        size="small"
+                      >
+                        {showPassword ? (
+                          <VisibilityIcon />
+                        ) : (
+                          <VisibilityOffIcon />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
 
-                        {/*
+            <TextField
+              fullWidth
+              name="confirmPassword"
+              type={showPassword ? 'text' : 'password'}
+              label="Confirmar senha"
+              value={formEntries.confirmPassword}
+              onChange={(e) =>
+                setFormEntries({
+                  ...formEntries,
+                  confirmPassword: e.target.value,
+                })
+              }
+            />
+          </Stack>
+
+          <Stack spacing={1} sx={{ mt: 2 }}>
+            <Condition
+              ok={passwordConditions.atLeast8Chars}
+              text="Ao menos 8 caracteres"
+            />
+            <Condition
+              ok={passwordConditions.hasNumberOrSymbol}
+              text="Deve conter um número ou símbolo"
+            />
+            <Condition
+              ok={passwordConditions.passwordsMatch}
+              text="As senhas devem coincidir"
+            />
+          </Stack>
+
+          {/*
                     <Stack spacing={1} alignItems="center" pt={1}>
                         <Typography variant="body2">Ou crie uma conta com</Typography>
                         <Button
@@ -204,29 +315,23 @@ export default function RegisterForm() {
                         </Button>
                     </Stack>
                     */}
-                    
 
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={isPending || !dadosPreenchidos}
-                        endIcon={<ArrowForwardIcon />}
-                        sx={{ mt: 1 }}
-                        fullWidth
-                    >
-                        {isPending ? 'Enviando...' : 'Cadastrar'}
-                    </Button>
-                    
-                </Form>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={isPending || !dadosPreenchidos}
+            endIcon={<ArrowForwardIcon />}
+            sx={{ mt: 1 }}
+            fullWidth
+          >
+            {isPending ? 'Enviando...' : 'Cadastrar'}
+          </Button>
+        </Form>
 
-                <Box mt={1} textAlign="center">
-                    <Link href="/login">Já possuo uma conta</Link>
-                </Box>
-            </Box>
-
-            
-
-        </Card>
-
-    );
+        <Box mt={1} textAlign="center">
+          <Link href="/login">Já possuo uma conta</Link>
+        </Box>
+      </Box>
+    </Card>
+  );
 }

@@ -1,147 +1,152 @@
-"use client";
+'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Box, Fade } from '@mui/material';
 
 const colors = {
-    accent: '#11B5E4',
-    accentHover: '#0b80a0',
-    bg: '#080d2e',
+  accent: '#11B5E4',
+  accentHover: '#0b80a0',
+  bg: '#080d2e',
 };
 
-export default function RouteProgressBar({ isScrolled }: { isScrolled: boolean }) {
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const [isLoading, setIsLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [showSplash, setShowSplash] = useState(false);
-    const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+export default function RouteProgressBar({
+  isScrolled,
+}: {
+  isScrolled: boolean;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [showSplash, setShowSplash] = useState(false);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const startLoading = useCallback(() => {
-        if (hideTimeoutRef.current) {
-            clearTimeout(hideTimeoutRef.current);
-            hideTimeoutRef.current = null;
-        }
+  const startLoading = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
 
-        setIsLoading(true);
-        setShowSplash(true);
-        setProgress((prev) => (prev > 10 ? prev : 10));
-    }, []);
+    setIsLoading(true);
+    setShowSplash(true);
+    setProgress((prev) => (prev > 10 ? prev : 10));
+  }, []);
 
-    const finishLoading = useCallback(() => {
-        if (!isLoading) return;
+  const finishLoading = useCallback(() => {
+    if (!isLoading) return;
 
-        setProgress(100);
-        hideTimeoutRef.current = setTimeout(() => {
-            setIsLoading(false);
-            setShowSplash(false);
-            setProgress(0);
-            hideTimeoutRef.current = null;
-        }, 250);
-    }, [isLoading]);
+    setProgress(100);
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsLoading(false);
+      setShowSplash(false);
+      setProgress(0);
+      hideTimeoutRef.current = null;
+    }, 250);
+  }, [isLoading]);
 
-    useEffect(() => {
-        const handleDocumentClick = (event: MouseEvent) => {
-            if (event.defaultPrevented) return;
-            if (event.button !== 0) return;
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+      if (event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
 
-            const target = event.target as HTMLElement | null;
-            const link = target?.closest('a[href]') as HTMLAnchorElement | null;
-            if (!link) return;
+      const target = event.target as HTMLElement | null;
+      const link = target?.closest('a[href]') as HTMLAnchorElement | null;
+      if (!link) return;
 
-            if (link.target && link.target !== '_self') return;
-            if (link.hasAttribute('download')) return;
+      if (link.target && link.target !== '_self') return;
+      if (link.hasAttribute('download')) return;
 
-            const url = new URL(link.href, window.location.href);
-            const isExternal = url.origin !== window.location.origin;
-            const isSameRoute =
-                url.pathname === window.location.pathname &&
-                url.search === window.location.search &&
-                url.hash === window.location.hash;
+      const url = new URL(link.href, window.location.href);
+      const isExternal = url.origin !== window.location.origin;
+      const isSameRoute =
+        url.pathname === window.location.pathname &&
+        url.search === window.location.search &&
+        url.hash === window.location.hash;
 
-            if (isExternal || isSameRoute) return;
+      if (isExternal || isSameRoute) return;
 
-            startLoading();
-        };
+      startLoading();
+    };
 
-        const handlePopState = () => {
-            startLoading();
-        };
+    const handlePopState = () => {
+      startLoading();
+    };
 
-        document.addEventListener('click', handleDocumentClick, true);
-        window.addEventListener('popstate', handlePopState);
+    document.addEventListener('click', handleDocumentClick, true);
+    window.addEventListener('popstate', handlePopState);
 
-        return () => {
-            document.removeEventListener('click', handleDocumentClick, true);
-            window.removeEventListener('popstate', handlePopState);
-        };
-    }, [startLoading]);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [startLoading]);
 
-    useEffect(() => {
-        if (!isLoading) return;
+  useEffect(() => {
+    if (!isLoading) return;
 
-        const interval = setInterval(() => {
-            setProgress((prev) => {
-                if (prev >= 90) return prev;
-                return Math.min(90, prev + Math.random() * 12);
-            });
-        }, 160);
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) return prev;
+        return Math.min(90, prev + Math.random() * 12);
+      });
+    }, 160);
 
-        return () => clearInterval(interval);
-    }, [isLoading]);
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
-    useEffect(() => {
-        finishLoading();
-    }, [pathname, searchParams, finishLoading]);
+  useEffect(() => {
+    finishLoading();
+  }, [pathname, searchParams, finishLoading]);
 
-    useEffect(() => {
-        return () => {
-            if (hideTimeoutRef.current) {
-                clearTimeout(hideTimeoutRef.current);
-            }
-        };
-    }, []);
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
 
-    useEffect(() => {
-        if (!isLoading) return;
+  useEffect(() => {
+    if (!isLoading) return;
 
-        const failSafeTimeout = setTimeout(() => {
-            finishLoading();
-        }, 5000);
+    const failSafeTimeout = setTimeout(() => {
+      finishLoading();
+    }, 5000);
 
-        return () => {
-            clearTimeout(failSafeTimeout);
-        };
-    }, [isLoading, finishLoading]);
+    return () => {
+      clearTimeout(failSafeTimeout);
+    };
+  }, [isLoading, finishLoading]);
 
-    return (
-        <>
-            <Box
-                sx={{
-                    position: 'relative',
-                    left: 0,
-                    width: isScrolled ? '100%' : '0%',
-                    height: isScrolled ? '2px' : '0%',
-                    background: '#F0E',
-                    overflow: 'hidden',
-                }}
-            >
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        height: '100%',
-                        background: colors.accent,
-                        width: `${progress}%`,
-                        transition: 'width 0.2s ease-out',
-                        boxShadow: isLoading ? `0 0 10px ${colors.accent}` : 'none',
-                    }}
-                />
-            </Box>
+  return (
+    <>
+      <Box
+        sx={{
+          position: 'relative',
+          left: 0,
+          width: isScrolled ? '100%' : '0%',
+          height: isScrolled ? '2px' : '0%',
+          background: '#F0E',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            background: colors.accent,
+            width: `${progress}%`,
+            transition: 'width 0.2s ease-out',
+            boxShadow: isLoading ? `0 0 10px ${colors.accent}` : 'none',
+          }}
+        />
+      </Box>
 
-            {/*}
+      {/*}
             <Fade in={showSplash} timeout={400}>
                 <Box
                     sx={{
@@ -177,6 +182,6 @@ export default function RouteProgressBar({ isScrolled }: { isScrolled: boolean }
                     `}</style>
                 </Box>
             </Fade>*/}
-        </>
-    );
+    </>
+  );
 }

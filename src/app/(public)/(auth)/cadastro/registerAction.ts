@@ -1,15 +1,7 @@
 'use server';
 
-import { z } from 'zod';
-import { registerSchema } from "@/schemas/users";
-
-
-export type RegisterState = {
-  success: boolean | null;
-  message: string;
-  secondaryMessage?: string;
-};
-
+import { registerSchema } from '@/schemas/users';
+import { RegisterState } from '@/types/auth/authTypes';
 
 type RegisterPayload = {
   username: string;
@@ -38,7 +30,8 @@ export default async function registerAction(
   };
 
   try {
-    const response = await fetch(`${process.env.API_URL}/auth/register`, { //URL da API de cadastro, posteriomente colocar isso em uma variável de ambiente
+    const response = await fetch(`${process.env.API_URL}/auth/register`, {
+      //URL da API de cadastro, posteriomente colocar isso em uma variável de ambiente
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,7 +39,6 @@ export default async function registerAction(
       body: JSON.stringify(payload),
       cache: 'no-store',
     });
-    console.log('Resposta da API de cadastro:', response);
 
     if (!response.ok) {
       const errorBody = await response.json();
@@ -61,7 +53,7 @@ export default async function registerAction(
     return {
       success: true,
       message: 'Usuário cadastrado com sucesso!',
-      secondaryMessage: 'Verifique seu email para ativar a conta.'
+      secondaryMessage: 'Verifique seu email para ativar a conta.',
     };
   } catch (error) {
     return {

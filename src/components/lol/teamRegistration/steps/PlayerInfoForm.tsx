@@ -5,7 +5,7 @@
  * Usado dentro de PlayersStep para cada jogador
  */
 
-import React from 'react';
+import { useLayoutEffect, useRef, type ChangeEvent } from 'react';
 import {
   Box,
   TextField,
@@ -17,46 +17,54 @@ import {
 } from '@mui/material';
 import { Player } from '@/types/teamRegistration';
 import { PositionSelector } from '../shared/PositionSelector';
-import { THEME_COLORS, PLAYER_LABELS } from '@/hooks/lol/teamRegistration/constants';
+import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 
 interface PlayerInfoFormProps {
   data: Player;
   playerIndex: number;
   onChange: (updates: Partial<Player>) => void;
+  onPositionKeyboardConfirm?: () => void;
   error?: string | null;
   disabled?: boolean;
 }
 
-export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
+export function PlayerInfoForm({
   data,
   playerIndex,
   onChange,
+  onPositionKeyboardConfirm,
   error = null,
   disabled = false,
-}) => {
+}: PlayerInfoFormProps) {
   const isReserva = playerIndex === 5;
   const isFormDisabled = disabled || (isReserva && data.disabledPlayer);
+  const playerNameInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleChange = (field: keyof Player) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    if(field === 'matricula') {
-      // Permitir apenas números na matrícula
-      //se o valor não for um número, não atualizar
-      if (isNaN(Number(value))) {
-        return;
+  useLayoutEffect(() => {
+    if (isFormDisabled) return;
+
+    playerNameInputRef.current?.focus();
+  }, [isFormDisabled, playerIndex]);
+
+  const handleChange =
+    (field: keyof Player) => (e: ChangeEvent<HTMLInputElement>) => {
+      const value =
+        e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      if (field === 'schoolId') {
+        // Permitir apenas números na matrícula
+        //se o valor não for um número, não atualizar
+        if (isNaN(Number(value))) {
+          return;
+        }
       }
-    }
 
+      onChange({ [field]: value } as Partial<Player>);
+    };
 
-    onChange({ [field]: value } as Partial<Player>);
-  };
-
-  const handleExternalToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExternalToggle = (e: ChangeEvent<HTMLInputElement>) => {
     onChange({
       isExternalPlayer: e.target.checked,
-      matricula: '', // Limpar matrícula ao marcar como externo
+      schoolId: '', // Limpar matrícula ao marcar como externo
     });
   };
 
@@ -70,23 +78,6 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
       }}
     >
       <Stack spacing={2}>
-        {/* Header com badge */}
-        {/*<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: THEME_COLORS.text,
-              fontWeight: 600,
-            }}
-          >
-            {PLAYER_LABELS[playerIndex]}
-          </Typography>
-          
-        </Box>
-        
-        <Divider sx={{ borderColor: THEME_COLORS.border, my: 0 }} />
-        */}
-
         {/* Nome do Jogador */}
         <TextField
           fullWidth
@@ -95,8 +86,9 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
           value={data.playerName}
           onChange={handleChange('playerName')}
           disabled={isFormDisabled}
+          inputRef={playerNameInputRef}
           slotProps={{
-            htmlInput:{maxLength: 50}
+            htmlInput: { maxLength: 50 },
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
@@ -120,7 +112,7 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
           onChange={handleChange('nickname')}
           disabled={isFormDisabled}
           slotProps={{
-            htmlInput:{maxLength: 30}
+            htmlInput: { maxLength: 30 },
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
@@ -145,10 +137,9 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
           disabled={isFormDisabled}
           slotProps={{
             htmlInput: {
-                maxLength: 50,
-            }
+              maxLength: 50,
+            },
           }}
-          
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: THEME_COLORS.surfaceHigh,
@@ -161,10 +152,6 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
             '& .MuiInputLabel-root': { color: THEME_COLORS.textMuted },
           }}
         />
-
-
-
-        
 
         {/* Matrícula + Checkbox "não possui" */}
         <Box
@@ -181,8 +168,8 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
               fullWidth
               label="Matrícula"
               placeholder="Números apenas (6-11 dígitos)"
-              value={data.matricula}
-              onChange={handleChange('matricula')}
+              value={data.schoolId}
+              onChange={handleChange('schoolId')}
               disabled={isFormDisabled || data.isExternalPlayer}
               slotProps={{
                 htmlInput: {
@@ -200,7 +187,9 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
                   color: THEME_COLORS.text,
                   '& fieldset': { borderColor: THEME_COLORS.border },
                   '&:hover fieldset': { borderColor: THEME_COLORS.accent },
-                  '&.Mui-focused fieldset': { borderColor: THEME_COLORS.accent },
+                  '&.Mui-focused fieldset': {
+                    borderColor: THEME_COLORS.accent,
+                  },
                 },
                 '& .MuiInputLabel-root': { color: THEME_COLORS.textMuted },
               }}
@@ -232,7 +221,15 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
                 />
               }
               label={
-                <Typography sx={{ color: playerIndex === 0 || isFormDisabled ? THEME_COLORS.textMuted : THEME_COLORS.text, fontSize: '0.85rem' }}>
+                <Typography
+                  sx={{
+                    color:
+                      playerIndex === 0 || isFormDisabled
+                        ? THEME_COLORS.textMuted
+                        : THEME_COLORS.text,
+                    fontSize: '0.85rem',
+                  }}
+                >
                   Não possui matrícula
                 </Typography>
               }
@@ -242,10 +239,11 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
         </Box>
 
         {/* Posição */}
-        <Box sx={{width: "100%", display:"flex", justifyContent:"center"}}>
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
           <PositionSelector
             value={data.role}
             onChange={(position) => onChange({ role: position })}
+            onKeyboardConfirm={onPositionKeyboardConfirm}
             disabled={isFormDisabled}
           />
         </Box>
@@ -259,4 +257,4 @@ export const PlayerInfoForm: React.FC<PlayerInfoFormProps> = ({
       </Stack>
     </Box>
   );
-};
+}

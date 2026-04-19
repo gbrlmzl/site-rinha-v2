@@ -5,50 +5,35 @@
  * Componente reutilizável para seleção de posição de jogador
  */
 
-import React, { useEffect, useState } from 'react';
-import {
-  IconButton,
-  Menu,
-  MenuItem,
-  Box,
-  Tooltip,
-  Stack,
-} from '@mui/material';
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { IconButton, Menu, MenuItem, Box, Tooltip, Stack } from '@mui/material';
 import Image from 'next/image';
 import { PlayerPosition } from '@/types/teamRegistration';
-import { PLAYER_POSITIONS, DEFAULT_POSITION_ICON, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import {
+  PLAYER_POSITIONS,
+  DEFAULT_POSITION_ICON,
+  THEME_COLORS,
+} from '@/hooks/lol/teamRegistration/constants';
 
 interface PositionSelectorProps {
   value: PlayerPosition;
   onChange: (position: PlayerPosition) => void;
+  onKeyboardConfirm?: () => void;
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
 }
 
-export const PositionSelector: React.FC<PositionSelectorProps> = ({
+export function PositionSelector({
   value,
   onChange,
+  onKeyboardConfirm,
   disabled = false,
   size = 'medium',
-}) => {
+}: PositionSelectorProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const positionItemRefs = useRef<(HTMLLIElement | null)[]>([]);
 
-  useEffect(() => {
-    if (!anchorEl) return;
-
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousHtmlOverflow;
-    };
-  }, [anchorEl]);
-
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -59,6 +44,62 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
   const handleSelectPosition = (position: PlayerPosition) => {
     onChange(position);
     handleCloseMenu();
+  };
+
+  const focusPositionAtIndex = (index: number) => {
+    positionItemRefs.current[index]?.focus();
+  };
+
+  useEffect(() => {
+    if (!anchorEl) return;
+
+    const selectedIndex = Math.max(
+      0,
+      PLAYER_POSITIONS.findIndex((position) => position.key === value),
+    );
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      focusPositionAtIndex(selectedIndex);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [anchorEl, value]);
+
+  const handlePositionKeyDown = (
+    event: KeyboardEvent<HTMLLIElement>,
+    index: number,
+  ) => {
+    const totalPositions = PLAYER_POSITIONS.length;
+    let nextIndex = index;
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = (index + 1) % totalPositions;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = (index - 1 + totalPositions) % totalPositions;
+        break;
+      case 'Enter':
+      case ' ': {
+        event.preventDefault();
+        event.stopPropagation();
+        handleSelectPosition(PLAYER_POSITIONS[index].key);
+        if (event.key === 'Enter') {
+          onKeyboardConfirm?.();
+        }
+        return;
+      }
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    focusPositionAtIndex(nextIndex);
   };
 
   // Obter ícone da posição selecionada
@@ -124,15 +165,16 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
           },
         }}
       >
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{ p: 1 }}
-        >
-          {PLAYER_POSITIONS.map((position) => (
+        <Stack direction="row" spacing={1} sx={{ p: 1 }}>
+          {PLAYER_POSITIONS.map((position, index) => (
             <MenuItem
               key={position.key}
+              ref={(element) => {
+                positionItemRefs.current[index] = element;
+              }}
+              tabIndex={value === position.key ? 0 : -1}
               onClick={() => handleSelectPosition(position.key)}
+              onKeyDown={(event) => handlePositionKeyDown(event, index)}
               selected={value === position.key}
               sx={{
                 display: 'flex',
@@ -142,10 +184,15 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
                 height: 60,
                 padding: '8px !important',
                 borderRadius: 2,
-                backgroundColor: value === position.key ? THEME_COLORS.accent : 'transparent',
+                backgroundColor:
+                  value === position.key ? THEME_COLORS.accent : 'transparent',
                 border: `2px solid ${value === position.key ? THEME_COLORS.accent : THEME_COLORS.border}`,
                 cursor: 'pointer',
                 transition: 'all 0.2s',
+                '&.Mui-focusVisible': {
+                  outline: `2px solid ${THEME_COLORS.text}`,
+                  outlineOffset: 2,
+                },
                 '&:hover': {
                   backgroundColor: THEME_COLORS.accent,
                   borderColor: THEME_COLORS.accent,
@@ -173,4 +220,4 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
       </Menu>
     </>
   );
-};
+}

@@ -55,8 +55,10 @@ async function tryRefresh(): Promise<boolean> {
   return refreshPromise;
 }
 
-export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-
+export async function apiFetch(
+  input: RequestInfo,
+  init?: RequestInit
+): Promise<Response> {
   // Monta os headers corretamente
   const headers = new Headers(init?.headers);
 
@@ -80,7 +82,10 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<
       return response;
     }
 
-    const body = await response.clone().json().catch(() => ({}));
+    const body = await response
+      .clone()
+      .json()
+      .catch(() => ({}));
 
     // Só tenta refresh se o erro for token expirado ou genérico
     // token_invalid não adianta tentar refresh

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Form from 'next/form';
 import { useEffect, useState } from 'react';
 import { redirect } from 'next/navigation';
-import loginAction from '@/hooks/authentication/useLogin'
+import loginAction from '@/hooks/authentication/useLogin';
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -27,11 +27,16 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useAuth } from '@/hooks/authentication/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 type LoginState = {
   success: boolean | null;
   message: string;
+};
+
+type LoginFormEntries = {
+  username: string;
+  password: string;
 };
 
 const initialState: LoginState = {
@@ -40,15 +45,19 @@ const initialState: LoginState = {
 };
 
 export default function LoginForm() {
-  const [state, formAction, isPending] = useActionState<LoginState, FormData>(loginAction, initialState);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
-  
-  
+  const [state, formAction, isPending] = useActionState<LoginState, FormData>(
+    loginAction,
+    initialState
+  );
+  const [formEntries, setFormEntries] = useState<LoginFormEntries>({
+    username: '',
+    password: '',
+  });
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState<boolean>(false);
 
-  const { isLoading, refreshUser } = useAuth();
+  const { isLoading, refreshUser } = useAuthContext();
+
   const router = useRouter();
 
   useEffect(() => {
@@ -61,15 +70,31 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (state?.success === false) {
-      setPassword('');
+      console.log('Falha no login:', state.message);
+      setFormEntries((prev) => ({ ...prev, password: '' }));
     }
-  }, [state?.success]);
+  }, [state]);
 
-  const dadosPreenchidos = username.trim().length > 0 && password.trim().length > 0;
+  const dadosPreenchidos: boolean =
+    formEntries.username.trim().length > 0 &&
+    formEntries.password.trim().length > 0;
 
   return (
-    <Card sx={{ maxWidth: 500, mx: 'auto', p: 3, mt: 2, paddingInline: { xs: '2rem', md: '8rem' } }}>
-      <Typography variant="h4" component="h1" mb={2} sx={{ textAlign: 'center', fontWeight: 500 }}>
+    <Card
+      sx={{
+        maxWidth: 500,
+        mx: 'auto',
+        p: 3,
+        mt: 2,
+        paddingInline: { xs: '2rem', md: '8rem' },
+      }}
+    >
+      <Typography
+        variant="h4"
+        component="h1"
+        mb={2}
+        sx={{ textAlign: 'center', fontWeight: 500 }}
+      >
         Fazer login
       </Typography>
 
@@ -83,11 +108,16 @@ export default function LoginForm() {
         <Stack spacing={1}>
           <TextField
             fullWidth
-            name='username'
+            name="username"
             type="text"
             label="Usuário"
-            value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            value={formEntries.username}
+            onChange={(e) =>
+              setFormEntries((prev) => ({
+                ...prev,
+                username: e.target.value.toLowerCase(),
+              }))
+            }
             disabled={isPending}
           />
 
@@ -95,9 +125,11 @@ export default function LoginForm() {
             fullWidth
             type={showPassword ? 'text' : 'password'}
             label="Senha"
-            name='password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formEntries.password}
+            onChange={(e) =>
+              setFormEntries((prev) => ({ ...prev, password: e.target.value }))
+            }
             disabled={isPending}
             slotProps={{
               input: {
@@ -110,7 +142,11 @@ export default function LoginForm() {
                       tabIndex={-1}
                       disabled={isPending}
                     >
-                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      {showPassword ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -122,7 +158,7 @@ export default function LoginForm() {
         <Box sx={{ width: '100%', paddingBlock: 0.5, paddingInline: 1 }}>
           <FormControlLabel
             control={<Checkbox />}
-            name='keepLoggedIn'
+            name="keepLoggedIn"
             checked={keepLoggedIn}
             onChange={() => setKeepLoggedIn(!keepLoggedIn)}
             label="Manter login"
@@ -145,7 +181,13 @@ export default function LoginForm() {
               type="submit"
               variant="contained"
               disabled={isPending || !dadosPreenchidos}
-              endIcon={isPending ? <CircularProgress color="inherit" size={16} /> : <ArrowForwardIcon />}
+              endIcon={
+                isPending ? (
+                  <CircularProgress color="inherit" size={16} />
+                ) : (
+                  <ArrowForwardIcon />
+                )
+              }
             >
               {isPending ? 'Entrando...' : 'Entrar'}
             </Button>
@@ -154,8 +196,15 @@ export default function LoginForm() {
       </Form>
 
       {!isLoading && (
-        <Box mt={2} textAlign="center" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5,  }}>
-          <Link href="/recuperar-senha" style={{ textDecoration: 'none', fontSize: '0.875rem' }}>
+        <Box
+          mt={2}
+          textAlign="center"
+          sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}
+        >
+          <Link
+            href="/recuperar-senha"
+            style={{ textDecoration: 'none', fontSize: '0.875rem' }}
+          >
             Esqueceu a senha?
           </Link>
           <Link href="/cadastro" style={{ textDecoration: 'none' }}>

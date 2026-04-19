@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAuth } from '@/hooks/authentication/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { RefreshOutlined } from '@mui/icons-material';
 import { apiFetch } from '@/services/interceptor';
 import { set } from 'zod';
-
-
 
 // ─── Tipos exportados para uso nos componentes ─────────────────────────────
 
@@ -28,28 +26,25 @@ export interface PasswordRequirements {
   passwordsMatch: boolean;
 }
 
-
-
-
-
 // ───────────────────────────────────────────────────────────────────────────
 
 export function useProfile() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser } = useAuthContext();
 
   // ── Dados derivados do usuário ──────────────────────────────────────────
-  const nickname = user?.nickname ?? 'Usuário';
-  const email = user?.email ?? '';
-  const username = user?.username ?? '';
+  const nickname: string = user?.nickname ?? 'Usuário';
+  const email: string = user?.email ?? '';
+  const username: string = user?.username ?? '';
 
-  
-  const [isEditingNickname, setIsEditingNickname] = useState(false);
-  const [nicknameInput, setNicknameInput] = useState('');
-  const [nicknamePreview, setNicknamePreview] = useState(nickname);
+  const [isEditingNickname, setIsEditingNickname] = useState<boolean>(false);
+  const [nicknameInput, setNicknameInput] = useState<string>('');
+  const [nicknamePreview, setNicknamePreview] = useState<string>(nickname);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{open : boolean,  message: string; severity: 'success' | 'error' | 'info' } | null>(null);
-  
-  
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error' | 'info';
+  } | null>(null);
 
   useEffect(() => {
     if (!isEditingNickname) {
@@ -64,7 +59,11 @@ export function useProfile() {
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ open: false, message: snackbar?.message || '', severity: snackbar?.severity || 'info' });
+    setSnackbar({
+      open: false,
+      message: snackbar?.message || '',
+      severity: snackbar?.severity || 'info',
+    });
   };
 
   const cancelNicknameEdit = () => {
@@ -73,7 +72,9 @@ export function useProfile() {
     setNicknameError(null);
   };
 
-  const handleNicknameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNicknameInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setNicknameInput(e.target.value);
   };
 
@@ -87,33 +88,45 @@ export function useProfile() {
 
     // TODO: Persistir nickname na API (ex.: PATCH /users/me/nickname)
     try {
-      const response = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nickname: nextNickname }),
-        credentials: 'include',
-      });
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nickname: nextNickname }),
+          credentials: 'include',
+        }
+      );
 
       if (!response.ok) {
         const errorBody = await response.json();
         //setNicknameError(errorBody.error || 'Erro ao atualizar nickname.');
-        setSnackbar({ open: true, message: errorBody.error || 'Erro ao atualizar nickname.', severity: 'error' });
+        setSnackbar({
+          open: true,
+          message: errorBody.error || 'Erro ao atualizar nickname.',
+          severity: 'error',
+        });
         return;
       }
 
       if (response.status === 200) {
         //chamar um refresh para atualizar o usuário com o novo nickname
-        setSnackbar({ open: true, message: 'Nickname atualizado com sucesso!', severity: 'success' });
+        setSnackbar({
+          open: true,
+          message: 'Nickname atualizado com sucesso!',
+          severity: 'success',
+        });
         await refreshUser();
       }
-
     } catch (error) {
-      setSnackbar({ open: true, message: 'Erro interno no servidor.', severity: 'error' });
-
+      setSnackbar({
+        open: true,
+        message: 'Erro interno no servidor.',
+        severity: 'error',
+      });
     }
-
 
     setNicknamePreview(nextNickname);
     setIsEditingNickname(false);
@@ -131,7 +144,7 @@ export function useProfile() {
 
   // ── Foto de perfil ──────────────────────────────────────────────────────
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const IMGUR_ALLOWED_FORMATS = ["image/jpeg", "image/png"];
+  const IMGUR_ALLOWED_FORMATS = ['image/jpeg', 'image/png'];
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (limite do Imgur)
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -155,9 +168,7 @@ export function useProfile() {
     }
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-
   };
-
 
   /*const handleConfirmChangePicture = async (username: string, email: string) => {
     if (loadingChangeProfilePicture) return; // Impede execução se já estiver carregando
@@ -189,10 +200,15 @@ export function useProfile() {
     confirmPassword: '',
   });
 
-  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({ atLeast8Chars: false, hasNumberOrSymbol: false, passwordsMatch: false });
+  const [passwordRequirements, setPasswordRequirements] =
+    useState<PasswordRequirements>({
+      atLeast8Chars: false,
+      hasNumberOrSymbol: false,
+      passwordsMatch: false,
+    });
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
-  const passwordFieldsValidated = 
+  const passwordFieldsValidated =
     passwordRequirements.atLeast8Chars &&
     passwordRequirements.hasNumberOrSymbol &&
     passwordRequirements.passwordsMatch &&
@@ -202,7 +218,9 @@ export function useProfile() {
     setPasswordRequirements({
       atLeast8Chars: passwordForm.newPassword.length >= 8,
       hasNumberOrSymbol: /[\d\W]/.test(passwordForm.newPassword),
-      passwordsMatch: passwordForm.newPassword === passwordForm.confirmPassword && passwordForm.newPassword.length > 0,
+      passwordsMatch:
+        passwordForm.newPassword === passwordForm.confirmPassword &&
+        passwordForm.newPassword.length > 0,
     });
   }, [passwordForm]);
 
@@ -212,17 +230,16 @@ export function useProfile() {
     showConfirm: false,
   });
 
-  const updatePasswordField = (field: keyof PasswordFormState) =>
+  const updatePasswordField =
+    (field: keyof PasswordFormState) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
-      setPasswordForm(prev => ({ ...prev, [field]: e.target.value }));
+      setPasswordForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const toggleVisibility = (field: keyof PasswordVisibility) => () =>
-    setVisibility(prev => ({ ...prev, [field]: !prev[field] }));
-
-
+    setVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
 
   // ── Validação ───────────────────────────────────────────────────────────
- /* const validatePasswordForm = (): boolean => {
+  /* const validatePasswordForm = (): boolean => {
     const errors: PasswordErrors = {};
 
     if (!passwordForm.currentPassword)
@@ -238,53 +255,86 @@ export function useProfile() {
     return Object.keys(errors).length === 0;
   };*/
 
-
-
   // ── Submit ──────────────────────────────────────────────────────────────
   const handlePasswordSubmit = async () => {
     if (!passwordFieldsValidated) return;
 
     // TODO: chamar API de alteração de senha
-    await changePassword({ newPassword: passwordForm.newPassword, currentPassword: passwordForm.currentPassword });
-
-
+    await changePassword({
+      newPassword: passwordForm.newPassword,
+      currentPassword: passwordForm.currentPassword,
+    });
   };
 
-  const changePassword = async (data: { newPassword: string; currentPassword: string }) => {
+  const changePassword = async (data: {
+    newPassword: string;
+    currentPassword: string;
+  }) => {
     try {
-      const response = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      });
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+          credentials: 'include',
+        }
+      );
 
       if (!response.ok) {
         const errorBody = await response.json();
 
         setPasswordSuccess(false);
-        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        setSnackbar({ open: true, message: errorBody.error || 'Erro ao alterar senha.', severity: 'error' });
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+        setSnackbar({
+          open: true,
+          message: errorBody.error || 'Erro ao alterar senha.',
+          severity: 'error',
+        });
         return;
       }
 
       if (response.status === 200) {
-        setSnackbar({ open: true, message: 'Senha alterada com sucesso!', severity: 'success' });
+        setSnackbar({
+          open: true,
+          message: 'Senha alterada com sucesso!',
+          severity: 'success',
+        });
         setPasswordSuccess(true);
         setTimeout(() => {
           //setPasswordSuccess(false);
-          setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-          setPasswordRequirements({ atLeast8Chars: false, hasNumberOrSymbol: false, passwordsMatch: false });
+          setPasswordForm({
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          });
+          setPasswordRequirements({
+            atLeast8Chars: false,
+            hasNumberOrSymbol: false,
+            passwordsMatch: false,
+          });
           goToProfile();
         }, 1800);
         await refreshUser();
       }
     } catch (error) {
-      setSnackbar({ open: true, message: 'Erro ao conectar à API.', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: 'Erro ao conectar à API.',
+        severity: 'error',
+      });
       setPasswordSuccess(false);
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
     }
   };
 
@@ -332,6 +382,6 @@ export function useProfile() {
 
     //snackbar
     snackbar,
-    handleCloseSnackbar
+    handleCloseSnackbar,
   };
 }

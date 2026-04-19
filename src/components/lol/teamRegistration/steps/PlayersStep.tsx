@@ -1,30 +1,18 @@
 'use client';
 
-/**
- * Passo 2: Informações dos Jogadores
- * Orquestra 6 sub-passos individuais de jogadores
- */
-
-import React from 'react';
 import {
   Box,
   Stack,
   Typography,
-  Button,
   Checkbox,
   FormControlLabel,
-  Stepper,
-  Step,
-  StepLabel,
-  MobileStepper,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Player } from '@/types/teamRegistration';
 import { PlayerInfoForm } from './PlayerInfoForm';
-import { PLAYER_LABELS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import {
+  PLAYER_LABELS,
+  THEME_COLORS,
+} from '@/hooks/lol/teamRegistration/constants';
 
 interface PlayersStepProps {
   data: Player[];
@@ -33,18 +21,18 @@ interface PlayersStepProps {
   disabled?: boolean;
   currentPlayerIndex: number;
   onCurrentPlayerIndexChange: (index: number) => void;
+  onPositionKeyboardConfirm?: () => void;
 }
 
-export const PlayersStep: React.FC<PlayersStepProps> = ({
+export function PlayersStep({
   data,
   onPlayerChange,
   error = {},
   disabled = false,
   currentPlayerIndex,
   onCurrentPlayerIndexChange,
-}) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  onPositionKeyboardConfirm,
+}: PlayersStepProps) {
   const isReservaStep = currentPlayerIndex === 5;
 
   const handleReserveToggle = (checked: boolean) => {
@@ -54,7 +42,7 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
       onPlayerChange(5, {
         disabledPlayer: true,
         playerName: '',
-        matricula: '',
+        schoolId: '',
         nickname: '',
         discordUser: '',
         role: 'FILL',
@@ -68,7 +56,8 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
     });
   };
 
-  const handleNextPlayer = () => {
+  {
+    /* const handleNextPlayer = () => {
     if (currentPlayerIndex < 5) {
       onCurrentPlayerIndexChange(currentPlayerIndex + 1);
     }
@@ -83,6 +72,8 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
   const handlePlayerClick = (index: number) => {
     onCurrentPlayerIndexChange(index);
   };
+  */
+  }
 
   return (
     <Box
@@ -118,7 +109,6 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
               fontWeight: 700,
               textAlign: 'center',
               fontSize: '1.4rem',
-              
             }}
           >
             {PLAYER_LABELS[currentPlayerIndex]}
@@ -140,7 +130,9 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
                 />
               }
               label={
-                <Typography sx={{ color: THEME_COLORS.text, fontSize: '0.9rem' }}>
+                <Typography
+                  sx={{ color: THEME_COLORS.text, fontSize: '0.9rem' }}
+                >
                   Sem jogador reserva
                 </Typography>
               }
@@ -159,17 +151,16 @@ export const PlayersStep: React.FC<PlayersStepProps> = ({
           5 titulares + 1 reserva (opcional)
         </Typography>
 
-
         {/* Current Player Form */}
         <PlayerInfoForm
           data={data[currentPlayerIndex]}
           playerIndex={currentPlayerIndex}
           onChange={(updates) => onPlayerChange(currentPlayerIndex, updates)}
+          onPositionKeyboardConfirm={onPositionKeyboardConfirm}
           error={error[currentPlayerIndex] || null}
           disabled={disabled}
         />
-
       </Stack>
     </Box>
   );
-};
+}

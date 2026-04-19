@@ -5,7 +5,7 @@
  * Inclui preview, upload e feedback visual
  */
 
-import React, { useRef, useState } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import {
   Box,
   Button,
@@ -30,24 +30,26 @@ interface ShieldUploaderProps {
   success?: boolean;
 }
 
-export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
+export function ShieldUploader({
   preview,
   onFileSelected,
   loading = false,
   error = null,
   success = false,
-}) => {
+}: ShieldUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [shieldFileError, setShieldFileError] = useState<string | null>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
       if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
         //alert('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
-        //Snackbar de erro 
-        setShieldFileError('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
+        //Snackbar de erro
+        setShieldFileError(
+          'Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)'
+        );
         return;
       }
 
@@ -58,7 +60,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       }
       // Se passou nas validações, limpar erros anteriores
       setShieldFileError(null);
-      
+
       onFileSelected(file);
     }
   };
@@ -124,10 +126,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
                 mb: 1,
               }}
             />
-            <Typography
-              variant="body2"
-              sx={{ color: THEME_COLORS.textMuted }}
-            >
+            <Typography variant="body2" sx={{ color: THEME_COLORS.textMuted }}>
               PNG, JPG ou JPEG
             </Typography>
             <Typography
@@ -150,9 +149,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       />
 
       {/* Upload Button & Actions */}
-      <Box>
-        
-      </Box>
+      <Box></Box>
       <Box
         sx={{
           display: 'grid',
@@ -164,7 +161,9 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
       >
         <Button
           variant="contained"
-          endIcon={loading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
+          endIcon={
+            loading ? <CircularProgress size={20} /> : <CloudUploadIcon />
+          }
           onClick={handleClick}
           disabled={loading}
           sx={{
@@ -198,7 +197,7 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
         >
           {loading ? 'Carregando...' : preview ? 'Mudar Escudo' : 'Escudo'}
         </Button>
- 
+
         {preview && (
           <IconButton
             onClick={handleRemoveFile}
@@ -228,7 +227,6 @@ export const ShieldUploader: React.FC<ShieldUploaderProps> = ({
           {shieldFileError}
         </Alert>
       ) : null}
-
     </Stack>
   );
-};
+}

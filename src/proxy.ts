@@ -1,32 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const authRoutes = [
-  '/login',
-  '/cadastro',
-  '/recuperar-senha',
-  
-];
+const authRoutes = ['/login', '/cadastro', '/recuperar-senha'];
 
-const protectedRoutePrefixes = [
-  '/perfil',
-  '/lol/inscricoes',
-  '/configuracoes',
-];
+const protectedRoutePrefixes = ['/perfil', '/lol/inscricoes', '/configuracoes'];
 
-export function proxy(request: NextRequest) {
+async function tryRefreshJwt(
+  request: NextRequest
+): Promise<NextResponse | null> {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiBaseUrl) {
+    return null;
+  }
+
+  try {
+    const refreshResponse = await fetch(`${apiBaseUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        cookie: request.headers.get('cookie') ?? '',
+      },
+      cache: 'no-store',
+    });
+
+    if (!refreshResponse.ok) {
+      return null;
+    }
+
+    const response = NextResponse.next();
+    const setCookieHeader = refreshResponse.headers.get('set-cookie');
+
+    if (setCookieHeader) {
+      response.headers.set('set-cookie', setCookieHeader);
+    }
+
+    return response;
+  } catch {
+    return null;
+  }
+}
+
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const hasJwt = request.cookies.has('JWT');
   const hasRefresh = request.cookies.has('REFRESH');
 
-  const isAuthRoute = authRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
-  
+  const isAuthRoute = authRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+
   const isProtectedRoute = protectedRoutePrefixes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
   // Para páginas de auth, só bloqueia se já houver JWT ativo.
   // Ter apenas REFRESH (possivelmente expirado) não deve impedir acesso ao login.
+
   if (hasJwt) {
     if (isAuthRoute) {
       const homeUrl = new URL('/', request.url);
@@ -34,12 +63,25 @@ export function proxy(request: NextRequest) {
     }
 
     return NextResponse.next();
+  } else if (!hasJwt && hasRefresh) {
+    const refreshedResponse = await tryRefreshJwt(request);
+    if (refreshedResponse) {
+      //chama refresh
+      return refreshedResponse;
+    }
+
+    return NextResponse.next();
+  } else if (!hasRefresh) {
+    // Se não tem JWT nem REFRESH, bloqueia acesso às rotas protegidas e redireciona para login
   }
 
   if (isProtectedRoute) {
     if (hasRefresh) {
-      // Permite entrar e deixar o silent refresh tentar renovar o JWT.
-      return NextResponse.next();
+      const refreshedResponse = await tryRefreshJwt(request);
+
+      if (refreshedResponse) {
+        return refreshedResponse;
+      }
     }
 
     const loginUrl = new URL('/login', request.url);
@@ -53,6 +95,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/admin/:subpath*',
     '/login',
     '/cadastro',
     '/recuperar-senha',

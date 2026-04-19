@@ -1,9 +1,5 @@
 //src/app/(autenticado)/perfil/page.tsx
-import Profile from "@/components/Profile";
+import Profile from '@/components/Profile';
 export default function PaginaMinhaConta() {
-
-
-  return (
-    <Profile />
-)
+  return <Profile />;
 }

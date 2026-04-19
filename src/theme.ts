@@ -1,8 +1,8 @@
-import { createTheme, darkScrollbar } from "@mui/material";
+import { createTheme, darkScrollbar } from '@mui/material';
 
 const theme = createTheme({
   typography: {
-    fontFamily: "var(--font-roboto)",
+    fontFamily: 'var(--font-roboto)',
   },
   components: {
     MuiCssBaseline: {

@@ -5,7 +5,6 @@
  * Revisa todas as informações antes do pagamento
  */
 
-import React from 'react';
 import {
   Box,
   Stack,
@@ -25,7 +24,11 @@ import MilitaryTechOutlinedIcon from '@mui/icons-material/MilitaryTechOutlined';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import Image from 'next/image';
 import { Team, Player } from '@/types/teamRegistration';
-import { PLAYER_POSITIONS, THEME_COLORS, getPositionIcon } from '@/hooks/lol/teamRegistration/constants';
+import {
+  PLAYER_POSITIONS,
+  THEME_COLORS,
+  getPositionIcon,
+} from '@/hooks/lol/teamRegistration/constants';
 
 interface ConfirmationStepProps {
   team: Team;
@@ -36,16 +39,16 @@ interface ConfirmationStepProps {
   error?: string | null;
 }
 
-export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
+export function ConfirmationStep({
   team,
   players,
   shieldPreview,
   termsAccepted,
   onTermsChange,
   error = null,
-}) => {
+}: ConfirmationStepProps) {
   const activePlayers = players.filter((p) => !p.disabledPlayer);
-  const shieldSrc = shieldPreview
+  const shieldSrc = shieldPreview;
 
   return (
     <Box
@@ -106,25 +109,24 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                 <Image
                   src={shieldSrc}
                   alt="Escudo da equipe"
-                  width={120}
-                  height={120}
+                  width={150}
+                  height={150}
                   style={{ objectFit: 'contain' }}
                 />
-                
               </Box>
             )}
 
             <Divider sx={{ borderColor: THEME_COLORS.border }} />
-               <Typography
-                  variant="h6"
-                  sx={{
-                    color: THEME_COLORS.text,
-                    fontWeight: 700,
-                    textAlign: 'center',
-                  }}
-                >
-                  {team.teamName}
-              </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                color: THEME_COLORS.text,
+                fontWeight: 700,
+                textAlign: 'center',
+              }}
+            >
+              {team.teamName}
+            </Typography>
           </Stack>
         </Card>
 
@@ -157,7 +159,9 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                 }}
               >
                 <AccordionSummary
-                  expandIcon={<ExpandMoreIcon sx={{ color: THEME_COLORS.accent }} />}
+                  expandIcon={
+                    <ExpandMoreIcon sx={{ color: THEME_COLORS.accent }} />
+                  }
                 >
                   <Stack
                     direction="row"
@@ -167,14 +171,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                       alignItems: 'center',
                     }}
                   >
-                    {idx === 0 && (
-                      <MilitaryTechOutlinedIcon
-                        sx={{
-                          color: '#FFD700',
-                          fontSize: 24,
-                        }}
-                      />
-                    )}
+                    
                     <Typography
                       sx={{
                         color: THEME_COLORS.text,
@@ -184,9 +181,21 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                     >
                       {player.nickname}
                     </Typography>
+                    {idx === 0 && (
+                      <MilitaryTechOutlinedIcon
+                        sx={{
+                          color: '#FFD700',
+                          fontSize: 24,
+                        }}
+                      />
+                    )}
 
                     <Box
-                      title={PLAYER_POSITIONS.find((position) => position.key === player.role)?.label || player.role}
+                      title={
+                        PLAYER_POSITIONS.find(
+                          (position) => position.key === player.role
+                        )?.label || player.role
+                      }
                       sx={{
                         //backgroundColor: THEME_COLORS.surfaceHigh,
                         width: 30,
@@ -199,6 +208,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                         border: `1px solid ${THEME_COLORS.border}`,
                       }}
                     >
+                      
                       <Box
                         sx={{
                           width: 22,
@@ -261,7 +271,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                           variant="body2"
                           sx={{ color: THEME_COLORS.text }}
                         >
-                          {player.matricula || 'N/A'}
+                          {player.schoolId || 'N/A'}
                         </Typography>
                       </Box>
                     )}
@@ -306,8 +316,8 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                 checked={termsAccepted}
                 onChange={(e) => onTermsChange(e.target.checked)}
                 sx={{
-                  color: "cyan",
-                  opacity: "75%"
+                  color: 'cyan',
+                  opacity: '75%',
                 }}
               />
             }
@@ -342,9 +352,10 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
 
         {/* Final Note */}
         <Alert severity="info" sx={{ borderRadius: 2 }}>
-          Revise todos os dados acima. Uma vez confirmado, você será redirecionado para o pagamento.
+          Revise todos os dados acima. Uma vez confirmado, você será
+          redirecionado para o pagamento.
         </Alert>
       </Stack>
     </Box>
   );
-};
+}

@@ -1,11 +1,18 @@
 export default function RegisterLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <div style={{ display: 'flex', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#18027c' }}>
-            {children}
-        </div>
-    );
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#18027c',
+      }}
+    >
+      {children}
+    </div>
+  );
 }

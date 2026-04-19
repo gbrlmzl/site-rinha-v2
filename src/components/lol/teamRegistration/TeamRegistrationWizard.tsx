@@ -6,7 +6,13 @@
  * Integra todas os passos, validações e lógica de negócio
  */
 
-import React, { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from 'react';
 import {
   Box,
   Button,
@@ -19,51 +25,67 @@ import {
   Paper,
 } from '@mui/material';
 import { useTeamRegistration } from '@/hooks/lol/teamRegistration/useTeamRegistration';
-import { validatePlayer, validateAllPLayers, validatePaymentForm, validateTeam } from '@/hooks/lol/teamRegistration/validationSchemas';
+import {
+  validatePlayer,
+  validateAllPLayers,
+  validatePaymentForm,
+  validateTeam,
+} from '@/schemas/validationSchemas';
 import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
-import { setupPaymentWebSocketListener } from '@/services/teamRegistrationService';
 
 // Componentes de Passos
 import { StepIndicator } from './shared/StepIndicator';
 import { TeamInfoStep } from './steps/TeamInfoStep';
+import { TeamInfoStepSkeleton } from './steps/TeamInfoStepSkeleton';
 import { PlayersStep } from './steps/PlayersStep';
 import { ConfirmationStep } from './steps/ConfirmationStep';
 import { PaymentStep } from './steps/PaymentStep';
+import ExpiredPayment from './ExpiredPayment';
 
 // ─────────────────────────────────────────────────────────────────────────
 
-export const TeamRegistrationWizard: React.FC = () => {
+export function TeamRegistrationWizard() {
   const {
     state,
     loading,
+    checkingRegisteredTeam,
     error,
-    qrCodeData,
+    paymentData,
     paymentApproved,
+    paymentExpired,
     updateTeam,
     handleShieldFileSelected,
     updatePlayer,
     updatePaymentForm,
     getPaymentValue,
     submitRegistration,
-    handlePaymentApproved,
     nextStep,
     prevStep,
     resetForm,
     checkTeamNameAvailability,
+    checkRegisteredTeam,
+    handleCancelPayment,
+    handleRetryPayment,
   } = useTeamRegistration();
 
   const [validationErrors, setValidationErrors] = useState<{
     [key: number]: string;
   }>({});
-  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
   const [wsError, setWsError] = useState<string | null>(null);
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [isCheckingTeamName, setIsCheckingTeamName] = useState(false);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
+  const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
+  const wizardCardRef = useRef<HTMLDivElement | null>(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const stepIndex = STEPS.findIndex((s) => s.key === state.currentStep);
+  const stepIndex: number = STEPS.findIndex((s) => s.key === state.currentStep);
 
+  useEffect(() => {
+    // Verificar se o usuário já tem uma inscrição ativa
+    checkRegisteredTeam();
+  }, []);
   // ─── Step Handlers ────────────────────────────────────────────────────
 
   const handleNextStep = async () => {
@@ -87,7 +109,9 @@ export const TeamRegistrationWizard: React.FC = () => {
         //Verificar se já existe uma equipe com o mesmo nome
         setIsCheckingTeamName(true);
         try {
-          const nameCheckResult = await checkTeamNameAvailability(state.team.teamName);
+          const nameCheckResult = await checkTeamNameAvailability(
+            state.team.teamName
+          );
           if (!nameCheckResult) {
             setValidationErrors({
               0: 'Já existe uma equipe com esse nome. Por favor, escolha outro.',
@@ -127,7 +151,7 @@ export const TeamRegistrationWizard: React.FC = () => {
           setCurrentPlayerIndex((prev) => prev + 1);
           return;
         }
-        
+
         // isLastPlayer === true, validar o conjunto completo antes de avançar
         // No último jogador, valida o conjunto completo antes de avançar
         const validation = validateAllPLayers(state.players);
@@ -138,7 +162,8 @@ export const TeamRegistrationWizard: React.FC = () => {
               ? validation.errors[0]
               : null;
             setValidationErrors({
-              [validation.playerIndex]: firstIssue?.message || 'Dados inválidos',
+              [validation.playerIndex]:
+                firstIssue?.message || 'Dados inválidos',
             });
           } else {
             setValidationErrors({
@@ -205,23 +230,6 @@ export const TeamRegistrationWizard: React.FC = () => {
     prevStep();
   };
 
-  // ─── WebSocket: Escutar Pagamento ─────────────────────────────────────
-
-  useEffect(() => {
-    if (!qrCodeData?.uuid) return;
-
-    const unsubscribe = setupPaymentWebSocketListener(qrCodeData.uuid, {
-      onPaymentApproved: handlePaymentApproved,
-      onError: (error) => {
-        setWsError(error.message);
-      },
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [qrCodeData?.uuid]);
-
   // ─── Renderização Condicional ─────────────────────────────────────────
 
   const renderStepContent = () => {
@@ -244,6 +252,9 @@ export const TeamRegistrationWizard: React.FC = () => {
           disabled={loading}
           currentPlayerIndex={currentPlayerIndex}
           onCurrentPlayerIndexChange={setCurrentPlayerIndex}
+          onPositionKeyboardConfirm={() => {
+            wizardCardRef.current?.focus();
+          }}
         />
       ),
       confirmation: (
@@ -261,7 +272,7 @@ export const TeamRegistrationWizard: React.FC = () => {
           data={state.paymentForm}
           onDataChange={updatePaymentForm}
           paymentValue={getPaymentValue()}
-          qrCodeData={qrCodeData}
+          paymentData={paymentData}
           paymentApproved={paymentApproved}
           loading={loading}
           error={validationErrors[0] || wsError || null}
@@ -273,26 +284,38 @@ export const TeamRegistrationWizard: React.FC = () => {
   };
 
   const isLastStep = stepIndex === STEPS.length - 1;
-  const isPaymentScreen = qrCodeData !== null;
+  const isPaymentScreen = paymentData !== null;
   const isPaymentStep = state.currentStep === 'payment';
-  const isConfirmationBlocked = state.currentStep === 'confirmation' && !termsAccepted;
-  
-  const handleWizardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const isConfirmationBlocked =
+    state.currentStep === 'confirmation' && !termsAccepted;
+
+  const handleWizardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter') return;
-    if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
+    if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
+      return;
 
     const target = event.target as HTMLElement;
     if (target.tagName === 'TEXTAREA' || target.isContentEditable) return;
     if (target.closest('button, [role="button"], a[href]')) return;
-    if (loading || isCheckingTeamName || isConfirmationBlocked || paymentApproved) return;
+    if (
+      loading ||
+      isCheckingTeamName ||
+      isConfirmationBlocked ||
+      paymentApproved
+    )
+      return;
 
     event.preventDefault();
     void handleNextStep();
   };
 
-  const handleWizardCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleWizardCardClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
-    if (target.closest('input, textarea, button, [role="button"], a[href], [contenteditable="true"]')) {
+    if (
+      target.closest(
+        'input, textarea, button, [role="button"], a[href], [contenteditable="true"]'
+      )
+    ) {
       return;
     }
 
@@ -300,11 +323,71 @@ export const TeamRegistrationWizard: React.FC = () => {
   };
 
   const nextButtonLabel =
-    state.currentStep === 'playersInfo' && currentPlayerIndex < state.players.length - 1
+    state.currentStep === 'playersInfo' &&
+    currentPlayerIndex < state.players.length - 1
       ? 'Próximo'
       : isLastStep && !isPaymentScreen
         ? 'Gerar QR code PIX'
         : 'Próximo';
+
+
+  if (checkingRegisteredTeam) {
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          minHeight: '100vh',
+          backgroundColor: THEME_COLORS.bg,
+          py: { xs: 3, md: 4 },
+        }}
+      >
+        <Container maxWidth="md">
+          <Paper
+            elevation={0}
+            sx={{
+              backgroundColor: THEME_COLORS.surface,
+              borderRadius: 3,
+              border: `1px solid ${THEME_COLORS.border}`,
+              p: { xs: 0, md: 1 },
+              overflow: 'hidden',
+            }}
+          >
+            <Box sx={{ p: { xs: 2, md: 4 } }}>
+              {/*<StepIndicator steps={STEPS} activeStep={0} />*/}
+              <Box sx={{ mb: 4, minHeight: 400 }}>
+                <TeamInfoStepSkeleton />
+              </Box>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
+
+
+  if (paymentExpired) {
+    return (
+      <Box
+        sx={{
+          width: '100vw',
+          minHeight: '100vh',
+          backgroundColor: THEME_COLORS.bg,
+          py: { xs: 3, md: 4 },
+          //mt: { xs: 2, md: '10vh' },
+          pt: { xs: '0vh', md: '13vh' },
+          alignItems:{xs: 'center', md: 'flex-start'},
+          px: 2,
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <ExpiredPayment
+          onCancel={handleCancelPayment}
+          onRetryPayment={handleRetryPayment}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -320,6 +403,7 @@ export const TeamRegistrationWizard: React.FC = () => {
         <Paper
           elevation={0}
           tabIndex={0}
+          ref={wizardCardRef}
           onClick={handleWizardCardClick}
           sx={{
             backgroundColor: THEME_COLORS.surface,
@@ -334,10 +418,7 @@ export const TeamRegistrationWizard: React.FC = () => {
         >
           <Box sx={{ p: { xs: 2, md: 4 } }}>
             {/* Step Indicator */}
-            <StepIndicator
-              steps={STEPS}
-              activeStep={stepIndex}
-            />
+            <StepIndicator steps={STEPS} activeStep={stepIndex} />
 
             {/* Global Error Alert */}
             {error && (
@@ -358,6 +439,7 @@ export const TeamRegistrationWizard: React.FC = () => {
                   }}
                 >
                   <CircularProgress />
+                  {/*Criar skeleton para o formulario de inscricao */}
                 </Box>
               ) : (
                 renderStepContent()
@@ -367,7 +449,7 @@ export const TeamRegistrationWizard: React.FC = () => {
             {/* Navigation Buttons */}
             {!paymentApproved && !isPaymentScreen && (
               <Stack
-                direction={"row"}
+                direction={'row'}
                 spacing={2}
                 sx={{
                   justifyContent: isPaymentStep ? 'center' : 'space-between',
@@ -378,7 +460,12 @@ export const TeamRegistrationWizard: React.FC = () => {
                   <Button
                     variant="contained"
                     onClick={handlePrevStep}
-                    disabled={stepIndex === 0 || loading || isCheckingTeamName || isPaymentScreen}
+                    disabled={
+                      stepIndex === 0 ||
+                      loading ||
+                      isCheckingTeamName ||
+                      isPaymentScreen
+                    }
                     sx={{
                       backgroundColor: THEME_COLORS.accent,
                       color: THEME_COLORS.text,
@@ -392,32 +479,32 @@ export const TeamRegistrationWizard: React.FC = () => {
                       },
                     }}
                   >
-                  Voltar
+                    Voltar
                   </Button>
                 )}
-
-                {/*<Box
-                  sx={{
-                    display: 'flex',
-                    gap: 1,
-                    alignItems: 'center',
-                    color: THEME_COLORS.textMuted,
-                    fontSize: '0.9rem',
-                  }}
-                >
-                  Passo {stepIndex + 1} de {STEPS.length}
-                </Box>*/}
 
                 <Button
                   variant="contained"
                   onClick={handleNextStep}
-                  disabled={loading || isCheckingTeamName || isConfirmationBlocked}
+                  disabled={
+                    loading || isCheckingTeamName || isConfirmationBlocked
+                  }
                   sx={{
-                    backgroundColor: isPaymentStep ? '#16a34a' : THEME_COLORS.accent,
+                    backgroundColor: isPaymentStep
+                      ? '#16a34a'
+                      : THEME_COLORS.accent,
                     color: '#ffffff',
-                    width: isPaymentStep ? (isMobile ? '75%' : '33%') : (isMobile ? '33%' : '25%'),
+                    width: isPaymentStep
+                      ? isMobile
+                        ? '75%'
+                        : '33%'
+                      : isMobile
+                        ? '33%'
+                        : '25%',
                     '&:hover': {
-                      backgroundColor: isPaymentStep ? '#15803d' : THEME_COLORS.accentHover,
+                      backgroundColor: isPaymentStep
+                        ? '#15803d'
+                        : THEME_COLORS.accentHover,
                     },
                     '&:disabled': {
                       opacity: 0.5,
@@ -465,4 +552,4 @@ export const TeamRegistrationWizard: React.FC = () => {
       </Container>
     </Box>
   );
-};
+}
