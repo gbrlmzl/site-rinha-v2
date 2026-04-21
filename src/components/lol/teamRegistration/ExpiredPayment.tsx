@@ -10,11 +10,12 @@ import Box from '@mui/material/Box';
 import BlitzcrankImage from '@/assets/imgs/lol/BlitzcrankExpiredPayment.jpg';
 
 type ExpiredPaymentProps = {
+  loading: boolean;
   onCancel: () => void;
   onRetryPayment: () => void;
 };
 
-export default function ExpiredPayment({ onCancel, onRetryPayment }: ExpiredPaymentProps) {
+export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: ExpiredPaymentProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
@@ -68,6 +69,7 @@ export default function ExpiredPayment({ onCancel, onRetryPayment }: ExpiredPaym
           variant="contained"
           onClick={onCancel}
           sx={{ justifySelf: 'start' }}
+          disabled={loading}
         >
           Cancelar
         </Button>

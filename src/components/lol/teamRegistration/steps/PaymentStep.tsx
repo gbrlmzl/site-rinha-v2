@@ -21,7 +21,7 @@ import {
 import Image from 'next/image';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { PaymentForm } from '@/types/teamRegistration';
+import { GeneratedPaymentData, PaymentForm } from '@/types/teamRegistration';
 import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 import {
   formatTimeRemaining,
@@ -33,13 +33,7 @@ interface PaymentStepProps {
   data: PaymentForm;
   onDataChange: (updates: Partial<PaymentForm>) => void;
   paymentValue: number;
-  paymentData?: {
-    uuid: string;
-    qrCode: string;
-    qrCodeBase64: string;
-    value: number;
-    expiresAt: string;
-  } | null;
+  paymentData?: GeneratedPaymentData | null;
   paymentApproved?: boolean;
   loading?: boolean;
   error?: string | null;
@@ -56,7 +50,7 @@ export function PaymentStep({
 }: PaymentStepProps) {
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [copied, setCopied] = useState<boolean>(false);
-  //console.log(paymentData?.expiresAt);
+  
 
   // Timer para QR Code
   useEffect(() => {

@@ -3,7 +3,7 @@
 import { Box, Skeleton, Stack } from '@mui/material';
 import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 
-export function TeamInfoStepSkeleton() {
+export default function TeamInfoStepSkeleton() {
   return (
     <Box
       sx={{
