@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { RefreshOutlined } from '@mui/icons-material';
 import { apiFetch } from '@/services/interceptor';
-import { set } from 'zod';
-
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
+import { ChangeEvent } from 'react';
 // ─── Tipos exportados para uso nos componentes ─────────────────────────────
 
 export type ProfileView = 'profile' | 'password';
@@ -21,7 +20,7 @@ export interface PasswordVisibility {
 }
 
 export interface PasswordRequirements {
-  atLeast8Chars: boolean;
+  atLeast8Characters: boolean;
   hasNumberOrSymbol: boolean;
   passwordsMatch: boolean;
 }
@@ -30,120 +29,165 @@ export interface PasswordRequirements {
 
 export function useProfile() {
   const { user, refreshUser } = useAuthContext();
+  const [loading, setLoading] = useState(false);
 
   // ── Dados derivados do usuário ──────────────────────────────────────────
   const nickname: string = user?.nickname ?? 'Usuário';
   const email: string = user?.email ?? '';
   const username: string = user?.username ?? '';
 
-  const [isEditingNickname, setIsEditingNickname] = useState<boolean>(false);
-  const [nicknameInput, setNicknameInput] = useState<string>('');
-  const [nicknamePreview, setNicknamePreview] = useState<string>(nickname);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+  const [nicknameInput, setNicknameInput] = useState<string>(nickname);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info';
-  } | null>(null);
 
-  useEffect(() => {
-    if (!isEditingNickname) {
-      setNicknamePreview(nickname);
-    }
-  }, [nickname, isEditingNickname]);
+  const [visibility, setVisibility] = useState<PasswordVisibility>({
+    showCurrent: false,
+    showNew: false,
+    showConfirm: false,
+  });
+  const [view, setView] = useState<ProfileView>('profile');
 
-  const startNicknameEdit = () => {
-    setNicknameInput(nicknamePreview);
-    setNicknameError(null);
-    setIsEditingNickname(true);
-  };
+  // ── Formulário de senha ─────────────────────────────────────────────────
+  const [passwordForm, setPasswordForm] = useState<PasswordFormState>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [passwordRequirements, setPasswordRequirements] =
+    useState<PasswordRequirements>({
+      atLeast8Characters: false,
+      hasNumberOrSymbol: false,
+      passwordsMatch: false,
+    });
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  const { showSnackbar, closeSnackbar } = useSnackbarContext();
+
+  function isNewNickNameValid(): boolean {
+    const trimmed = nicknameInput.trim();
+    return trimmed.length >= 3 && trimmed !== nickname;
+  }
+
+  const canSendChangeRequest = isNewNickNameValid() || profilePicFile !== null;
 
   const handleCloseSnackbar = () => {
-    setSnackbar({
-      open: false,
-      message: snackbar?.message || '',
-      severity: snackbar?.severity || 'info',
-    });
+    closeSnackbar();
   };
 
-  const cancelNicknameEdit = () => {
-    setIsEditingNickname(false);
-    setNicknameInput('');
-    setNicknameError(null);
+  const resetProfilePictureSelection = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setPreviewUrl(null);
+    setProfilePicFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleNicknameInputChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setNicknameInput(e.target.value);
+    if (nicknameError) {
+      setNicknameError(null);
+    }
   };
 
-  const confirmNicknameEdit = async () => {
-    const nextNickname = nicknameInput.trim();
+  
 
-    if (nextNickname.length < 3) {
+  const confirmChanges = async () => {
+    const nextNickname = nicknameInput.trim();
+    const hasNicknameChange = nextNickname !== nickname;
+    const hasProfilePicChange = profilePicFile !== null;
+
+    if (hasNicknameChange && nextNickname.length < 3) {
       setNicknameError('O nickname deve ter pelo menos 3 caracteres.');
       return;
     }
 
-    // TODO: Persistir nickname na API (ex.: PATCH /users/me/nickname)
+    if (!hasNicknameChange && !hasProfilePicChange) {
+      return;
+    }
+
     try {
+      setLoading(true);
+
+      const formData = new FormData();
+
+      const data = {
+        nickname: hasNicknameChange ? nextNickname : null,
+        // outros campos de perfil que possam ser editados no futuro
+      };
+      formData.append(
+        'data',
+        new Blob([JSON.stringify(data)], { type: 'application/json' })
+      );
+
+      if (profilePicFile) {
+        formData.append('profilePic', profilePicFile);
+      }
+
+     
       const response = await apiFetch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nickname: nextNickname }),
+          body: formData,
           credentials: 'include',
         }
       );
 
       if (!response.ok) {
-        const errorBody = await response.json();
-        //setNicknameError(errorBody.error || 'Erro ao atualizar nickname.');
-        setSnackbar({
-          open: true,
-          message: errorBody.error || 'Erro ao atualizar nickname.',
+        let errorMessage = 'Erro ao atualizar perfil.';
+        try {
+          const errorBody = await response.json();
+          errorMessage = errorBody.error || errorMessage;
+        } catch {
+          // se a resposta não for JSON, mantém a mensagem genérica
+        }
+        showSnackbar({
+          message: errorMessage,
           severity: 'error',
         });
         return;
       }
 
-      if (response.status === 200) {
-        //chamar um refresh para atualizar o usuário com o novo nickname
-        setSnackbar({
-          open: true,
-          message: 'Nickname atualizado com sucesso!',
-          severity: 'success',
-        });
-        await refreshUser();
+      showSnackbar({
+        message: 'Perfil atualizado com sucesso!',
+        severity: 'success',
+      });
+
+      if (hasNicknameChange) {
+        setNicknameInput(nextNickname);
       }
+
+      await refreshUser();
+      resetProfilePictureSelection();
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Erro interno no servidor.',
+      showSnackbar({
+        message: 'Erro ao conectar à API.',
         severity: 'error',
       });
+    } finally {
+      setLoading(false);
     }
-
-    setNicknamePreview(nextNickname);
-    setIsEditingNickname(false);
-    setNicknameInput('');
-    setNicknameError(null);
   };
 
-  const displayNickname = nicknamePreview;
-  const avatarLetter = displayNickname.charAt(0).toUpperCase();
+  
+  const avatarLetter = nickname.charAt(0).toUpperCase();
 
   // ── Navegação entre telas ───────────────────────────────────────────────
-  const [view, setView] = useState<ProfileView>('profile');
+
   const goToPassword = () => setView('password');
   const goToProfile = () => setView('profile');
 
   // ── Foto de perfil ──────────────────────────────────────────────────────
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const IMGUR_ALLOWED_FORMATS = ['image/jpeg', 'image/png'];
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (limite do Imgur)
 
@@ -159,64 +203,40 @@ export function useProfile() {
 
     //validar tipo de arquivo
     if (!IMGUR_ALLOWED_FORMATS.includes(file.type)) {
+      showSnackbar({
+        message: 'Formato inválido. Use JPG ou PNG.',
+        severity: 'error',
+      });
       return;
     }
     //validar tamanho do arquivo
     if (file.size > MAX_FILE_SIZE) {
-      //retornar False e mensagem de erro
+      showSnackbar({
+        message: 'Arquivo muito grande. Máximo de 10MB.',
+        severity: 'error',
+      });
       return;
     }
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
+    setProfilePicFile(file);
   };
 
-  /*const handleConfirmChangePicture = async (username: string, email: string) => {
-    if (loadingChangeProfilePicture) return; // Impede execução se já estiver carregando
-
-    setLoadingChangeProfilePicture(true);
-
-    const formData = new FormData();
-    formData.append('profilePictureFile', profilePictureFile as Blob);
-    formData.append('username', username);
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile-picture`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-
-    } catch (error) {
-      console.error('Erro ao alterar foto de perfil:', error);
-    } finally {
-      setLoadingChangeProfilePicture(false);
-    }
-  }*/
-
-  // ── Formulário de senha ─────────────────────────────────────────────────
-  const [passwordForm, setPasswordForm] = useState<PasswordFormState>({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-
-  const [passwordRequirements, setPasswordRequirements] =
-    useState<PasswordRequirements>({
-      atLeast8Chars: false,
-      hasNumberOrSymbol: false,
-      passwordsMatch: false,
-    });
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const passwordFieldsValidated =
-    passwordRequirements.atLeast8Chars &&
+    passwordRequirements.atLeast8Characters &&
     passwordRequirements.hasNumberOrSymbol &&
     passwordRequirements.passwordsMatch &&
     passwordForm.currentPassword.length > 0;
 
   useEffect(() => {
     setPasswordRequirements({
-      atLeast8Chars: passwordForm.newPassword.length >= 8,
+      atLeast8Characters: passwordForm.newPassword.length >= 8,
       hasNumberOrSymbol: /[\d\W]/.test(passwordForm.newPassword),
       passwordsMatch:
         passwordForm.newPassword === passwordForm.confirmPassword &&
@@ -224,36 +244,12 @@ export function useProfile() {
     });
   }, [passwordForm]);
 
-  const [visibility, setVisibility] = useState<PasswordVisibility>({
-    showCurrent: false,
-    showNew: false,
-    showConfirm: false,
-  });
-
   const updatePasswordField =
     (field: keyof PasswordFormState) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: ChangeEvent<HTMLInputElement>) =>
       setPasswordForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const toggleVisibility = (field: keyof PasswordVisibility) => () =>
-    setVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
-
-  // ── Validação ───────────────────────────────────────────────────────────
-  /* const validatePasswordForm = (): boolean => {
-    const errors: PasswordErrors = {};
-
-    if (!passwordForm.currentPassword)
-      errors.current = 'Informe a senha atual';
-
-    if (passwordForm.newPassword.length < 8)
-      errors.new = 'Mínimo de 8 caracteres';
-
-    if (passwordForm.newPassword !== passwordForm.confirmPassword)
-      errors.confirm = 'As senhas não coincidem';
-
-    setPasswordErrors(errors);
-    return Object.keys(errors).length === 0;
-  };*/
+  const toggleVisibility = (field: keyof PasswordVisibility) => () => setVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
 
   // ── Submit ──────────────────────────────────────────────────────────────
   const handlePasswordSubmit = async () => {
@@ -271,14 +267,18 @@ export function useProfile() {
     currentPassword: string;
   }) => {
     try {
+      const formData = new FormData();
+      formData.append(
+        'data',
+        new Blob([JSON.stringify(data)], { type: 'application/json' })
+      );
+
+
       const response = await apiFetch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
+          body: formData,
           credentials: 'include',
         }
       );
@@ -292,8 +292,7 @@ export function useProfile() {
           newPassword: '',
           confirmPassword: '',
         });
-        setSnackbar({
-          open: true,
+        showSnackbar({
           message: errorBody.error || 'Erro ao alterar senha.',
           severity: 'error',
         });
@@ -301,11 +300,11 @@ export function useProfile() {
       }
 
       if (response.status === 200) {
-        setSnackbar({
-          open: true,
+        showSnackbar({
           message: 'Senha alterada com sucesso!',
           severity: 'success',
         });
+
         setPasswordSuccess(true);
         setTimeout(() => {
           //setPasswordSuccess(false);
@@ -315,7 +314,7 @@ export function useProfile() {
             confirmPassword: '',
           });
           setPasswordRequirements({
-            atLeast8Chars: false,
+            atLeast8Characters: false,
             hasNumberOrSymbol: false,
             passwordsMatch: false,
           });
@@ -324,8 +323,7 @@ export function useProfile() {
         await refreshUser();
       }
     } catch (error) {
-      setSnackbar({
-        open: true,
+      showSnackbar({
         message: 'Erro ao conectar à API.',
         severity: 'error',
       });
@@ -341,20 +339,19 @@ export function useProfile() {
   // ── Retorno público do hook ─────────────────────────────────────────────
   return {
     // dados do usuário
-    nickname: displayNickname,
+    nickname,
     email,
     username,
     avatarLetter,
     profilePic,
 
     // edição de nickname
-    isEditingNickname,
     nicknameInput,
-    nicknameError,
-    startNicknameEdit,
-    cancelNicknameEdit,
     handleNicknameInputChange,
-    confirmNicknameEdit,
+    nicknameError,
+    canSendChangeRequest,
+    confirmChanges,
+    loading,
 
     // navegação
     view,
@@ -381,7 +378,6 @@ export function useProfile() {
     handlePasswordSubmit,
 
     //snackbar
-    snackbar,
     handleCloseSnackbar,
   };
 }

@@ -6,15 +6,23 @@ type ConditionProps = {
   ok: boolean;
   text: string;
   textColor?: string;
+  checkedColor?: string;
+  uncheckedColor?: string;
 };
 
-const Condition = ({ ok, text, textColor }: ConditionProps) => {
+const Condition = ({ ok, text, textColor, checkedColor, uncheckedColor }: ConditionProps) => {
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       {ok ? (
-        <CheckCircleIcon color="success" fontSize="small" />
+        <CheckCircleIcon
+          fontSize="small"
+          sx={{ color: checkedColor ?? 'success.main' }}
+        />
       ) : (
-        <RadioButtonUncheckedIcon color="disabled" fontSize="small" />
+        <RadioButtonUncheckedIcon
+          fontSize="small"
+          sx={{ color: uncheckedColor ?? 'text.disabled' }}
+        />
       )}
       <Typography variant="body2" sx={{ color: textColor ?? 'text.primary' }}>
         {text}

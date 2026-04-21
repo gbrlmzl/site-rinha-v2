@@ -44,7 +44,6 @@ import ExpiredPayment from './ExpiredPayment';
 import TeamRegistrationLoadingScreen from './TeamRegistrationLoadingScreen';
 import InfoScreen from '@/components/lol/teamRegistration/UI/InfoScreen';
 
-
 // ─────────────────────────────────────────────────────────────────────────
 
 export function TeamRegistrationWizard() {
@@ -73,7 +72,6 @@ export function TeamRegistrationWizard() {
     handleRetryPayment,
   } = useTeamRegistration();
 
-  
   const [validationErrors, setValidationErrors] = useState<{
     [key: number]: string;
   }>({});
@@ -94,7 +92,7 @@ export function TeamRegistrationWizard() {
     checkRegisteredTeam();
   }, []);
   // ─── Step Handlers ────────────────────────────────────────────────────
-  
+
   const handleNextStep = async () => {
     if (loading || isCheckingTeamName) return;
 
@@ -337,78 +335,57 @@ export function TeamRegistrationWizard() {
         ? 'Gerar QR code PIX'
         : 'Próximo';
 
-
-
-
-
-
- //======================================================================
+  //======================================================================
 
   if (checkingRegisteredTeam) {
-    return (
-      <TeamRegistrationLoadingScreen/>
-    );
+    return <TeamRegistrationLoadingScreen />;
   }
 
   if (uiState.status === 'tournament_closed') {
-  return (
-    <InfoScreen
-      event={'tournament_closed'}
-      title="Inscrições encerradas"
-      message={uiState.message || 'As inscrições para este torneio foram encerradas.'}
-      action={{ label: 'Voltar', onClick: () => router.back() }}
-    />
-  );
-}
+    return (
+      <InfoScreen
+        event={'tournament_closed'}
+        title="Inscrições encerradas"
+        message={
+          uiState.message || 'As inscrições para este torneio foram encerradas.'
+        }
+        action={{ label: 'Voltar', onClick: () => router.back() }}
+      />
+    );
+  }
 
-if (uiState.status === 'tournament_full') {
-  return (
-    <InfoScreen
-      event={'tournament_full'}
-      title="Vagas esgotadas"
-      message={uiState.message || "Todas as vagas deste torneio já foram preenchidas."}
-      action={{ label: 'Voltar', onClick: () => router.back() }}
-    />
-  );
-}
+  if (uiState.status === 'tournament_full') {
+    return (
+      <InfoScreen
+        event={'tournament_full'}
+        title="Vagas esgotadas"
+        message={
+          uiState.message ||
+          'Todas as vagas deste torneio já foram preenchidas.'
+        }
+        action={{ label: 'Voltar', onClick: () => router.back() }}
+      />
+    );
+  }
 
-if (uiState.status === 'error') {
-  return (
-    <InfoScreen
-      event={'error'}
-      title="Algo deu errado"
-      message={uiState.message || 'Tente novamente mais tarde.'}
-      action={{ label: 'Início', onClick: () => router.push('/lol') }}
-    />
-  );
-}
-
-
-
+  if (uiState.status === 'error') {
+    return (
+      <InfoScreen
+        event={'error'}
+        title="Algo deu errado"
+        message={uiState.message || 'Tente novamente mais tarde.'}
+        action={{ label: 'Início', onClick: () => router.push('/lol') }}
+      />
+    );
+  }
 
   if (paymentExpired) {
     return (
-      <Box
-        sx={{
-          width: '100vw',
-          minHeight: '100vh',
-          backgroundColor: THEME_COLORS.bg,
-          py: { xs: 3, md: 4 },
-          //mt: { xs: 2, md: '10vh' },
-          pt: { xs: '0vh', md: '13vh' },
-          alignItems:{xs: 'center', md: 'flex-start'},
-          px: 2,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <ExpiredPayment
-          loading={cancelingRegistration}
-          onCancel={handleCancelPayment}
-          onRetryPayment={handleRetryPayment}
-          
-        />
-      </Box>
+      <ExpiredPayment
+        loading={cancelingRegistration}
+        onCancel={handleCancelPayment}
+        onRetryPayment={handleRetryPayment}
+      />
     );
   }
 

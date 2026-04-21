@@ -308,9 +308,9 @@ export const useTeamRegistration = () => {
 
     const { registrationData, paymentData } = registrationStatus;
 
-    // ── Torneio lotado (sem inscrição prévia) ──────────────────────────────
-    if (!registrationData.registered && registrationData.maxTeamsReached) {
-      setUiState({status: 'tournament_full', message: "O torneio está lotado."});
+    // ── Torneio lotado (sem inscrição prévia) ────────────────────────────── 
+    if (!registrationData.registered && (registrationData.maxTeamsReached || registrationData.tournamentStatus === 'FULL')) {
+      setUiState({status: 'tournament_full', message: "Não há mais vagas disponíveis para este torneio."});
       return;
     }
 

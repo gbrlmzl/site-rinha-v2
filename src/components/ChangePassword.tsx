@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  colors,
   Divider,
   IconButton,
   InputAdornment,
@@ -15,13 +14,37 @@ import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import Condition from '@/components/shared/Condition';
+import { THEME_COLORS, inputSx } from '@/constants/styles/theme';
+import { PasswordVisibility } from '@/hooks/useProfile';
+
+type ChangePasswordProps = {
+  goToProfile: () => void;
+  passwordForm: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  };
+  updatePasswordField: (
+    field: keyof ChangePasswordProps['passwordForm']
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  visibility: {
+    showCurrent: boolean;
+    showNew: boolean;
+    showConfirm: boolean;
+  };
+  toggleVisibility: (field: keyof PasswordVisibility) => () => void;
+  passwordRequirements: {
+    atLeast8Characters: boolean;
+    hasNumberOrSymbol: boolean;
+    passwordsMatch: boolean;
+  };
+  passwordFieldsValidated: boolean;
+  handlePasswordSubmit: () => void;
+  passwordSuccess: boolean;
+};
 
 export default function ChangePassword({
-  C,
-  inputSx,
   goToProfile,
-  nickname,
-  email,
   passwordForm,
   updatePasswordField,
   visibility,
@@ -30,7 +53,7 @@ export default function ChangePassword({
   passwordFieldsValidated,
   handlePasswordSubmit,
   passwordSuccess,
-}: any) {
+}: ChangePasswordProps) {
   return (
     <Box>
       {/* Header */}
@@ -38,8 +61,11 @@ export default function ChangePassword({
         <IconButton
           onClick={goToProfile}
           sx={{
-            color: C.textMuted,
-            '&:hover': { color: C.text, bgcolor: C.surfaceHigh },
+            color: THEME_COLORS.textMuted,
+            '&:hover': {
+              color: THEME_COLORS.text,
+              bgcolor: THEME_COLORS.surfaceHigh,
+            },
           }}
         >
           <ArrowBackRoundedIcon />
@@ -48,7 +74,7 @@ export default function ChangePassword({
           <Typography
             sx={{
               fontSize: '0.75rem',
-              color: C.textMuted,
+              color: THEME_COLORS.textMuted,
               letterSpacing: 2,
               textTransform: 'uppercase',
             }}
@@ -56,52 +82,18 @@ export default function ChangePassword({
             Segurança
           </Typography>
           <Typography
-            sx={{ fontWeight: 700, fontSize: '1.4rem', color: C.text }}
+            sx={{
+              fontWeight: 700,
+              fontSize: '1.4rem',
+              color: THEME_COLORS.text,
+            }}
           >
             Alterar senha
           </Typography>
         </Box>
       </Box>
 
-      {/* Info do usuário (somente leitura) */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-        <Box
-          sx={{
-            flex: 1,
-            bgcolor: C.surfaceHigh,
-            borderRadius: 2,
-            px: 2,
-            py: 1.5,
-            border: `1px solid ${C.border}`,
-          }}
-        >
-          <Typography sx={{ fontSize: '0.7rem', color: C.textMuted, mb: 0.3 }}>
-            Nickname
-          </Typography>
-          <Typography sx={{ color: C.text, fontWeight: 600 }}>
-            {nickname}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            flex: 2,
-            bgcolor: C.surfaceHigh,
-            borderRadius: 2,
-            px: 2,
-            py: 1.5,
-            border: `1px solid ${C.border}`,
-          }}
-        >
-          <Typography sx={{ fontSize: '0.7rem', color: C.textMuted, mb: 0.3 }}>
-            Email
-          </Typography>
-          <Typography sx={{ color: C.text, fontWeight: 600 }}>
-            {email}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Divider sx={{ borderColor: C.border, mb: 3 }} />
+      <Divider sx={{ borderColor: THEME_COLORS.border, mb: 3 }} />
 
       {/* Campos de senha */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -120,7 +112,7 @@ export default function ChangePassword({
                   <IconButton
                     tabIndex={-1}
                     onClick={toggleVisibility('showCurrent')}
-                    sx={{ color: C.textMuted }}
+                    sx={{ color: THEME_COLORS.textMuted }}
                   >
                     {visibility.showCurrent ? (
                       <VisibilityOffRoundedIcon fontSize="small" />
@@ -150,7 +142,7 @@ export default function ChangePassword({
                     <IconButton
                       tabIndex={-1}
                       onClick={toggleVisibility('showNew')}
-                      sx={{ color: C.textMuted }}
+                      sx={{ color: THEME_COLORS.textMuted }}
                     >
                       {visibility.showNew ? (
                         <VisibilityOffRoundedIcon fontSize="small" />
@@ -168,19 +160,22 @@ export default function ChangePassword({
             <Box>
               <Stack spacing={1} sx={{ mt: 1 }}>
                 <Condition
-                  ok={passwordRequirements.atLeast8Chars}
+                  ok={passwordRequirements.atLeast8Characters}
                   text="Ao menos 8 caracteres"
                   textColor="white"
+                  uncheckedColor="white"
                 />
                 <Condition
                   ok={passwordRequirements.hasNumberOrSymbol}
                   text="Deve conter um número ou símbolo"
                   textColor="white"
+                  uncheckedColor="white"
                 />
                 <Condition
                   ok={passwordRequirements.passwordsMatch}
                   text="As senhas devem coincidir"
                   textColor="white"
+                  uncheckedColor="white"
                 />
               </Stack>
             </Box>
@@ -202,7 +197,7 @@ export default function ChangePassword({
                   <IconButton
                     tabIndex={-1}
                     onClick={toggleVisibility('showConfirm')}
-                    sx={{ color: C.textMuted }}
+                    sx={{ color: THEME_COLORS.textMuted }}
                   >
                     {visibility.showConfirm ? (
                       <VisibilityOffRoundedIcon fontSize="small" />
@@ -230,9 +225,13 @@ export default function ChangePassword({
           fontWeight: 700,
           fontSize: '0.95rem',
           letterSpacing: 1,
-          backgroundColor: passwordSuccess ? '#4caf50' : C.accent,
+          backgroundColor: passwordSuccess
+            ? '#4caf50'
+            : THEME_COLORS.accent,
           '&:hover': {
-            backgroundColor: passwordSuccess ? '#4caf50' : C.accentHover,
+            backgroundColor: passwordSuccess
+              ? '#4caf50'
+              : THEME_COLORS.accentHover,
           },
           '&.Mui-disabled': {
             backgroundColor: 'rgba(9, 65, 80, 0.35)',
