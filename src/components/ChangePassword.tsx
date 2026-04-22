@@ -68,7 +68,7 @@ export default function ChangePassword({
             },
           }}
         >
-          <ArrowBackRoundedIcon />
+          <ArrowBackRoundedIcon onClick={goToProfile} />
         </IconButton>
         <Box>
           <Typography

@@ -1,6 +1,7 @@
-// src/app/(autenticado)/layout.tsx
+import { AUTH_SX } from '@/theme';
+
 export default async function AuthenticationGuardedLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <>{children}</>;
+  return <div style={AUTH_SX.pageContainerWithTopSpacing}>{children}</div>;
 }

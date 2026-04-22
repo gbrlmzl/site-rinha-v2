@@ -8,16 +8,12 @@ export default async function passwordRecoveryAction(
   const data = Object.fromEntries(formData.entries());
 
   const payload = {
-    username: String(data.username ?? ''),
+    username: String(data.username),
   };
 
   try {
-    console.log(
-      'Enviando solicitação de recuperação de senha para:',
-      payload.username
-    );
     // não precisa de await
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/password-reset/request`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/password-reset`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

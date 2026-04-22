@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import Form from 'next/form';
 import { useEffect, useState } from 'react';
-import { redirect } from 'next/navigation';
 import loginAction from '@/hooks/authentication/useLogin';
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AUTH_BUTTON_CLASSES, AUTH_SX } from '@/theme';
 
 import {
   Alert,
@@ -25,8 +25,6 @@ import {
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import GoogleIcon from '@mui/icons-material/Google';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useAuthContext } from '@/contexts/AuthContext';
 
 type LoginState = {
@@ -82,18 +80,14 @@ export default function LoginForm() {
   return (
     <Card
       sx={{
-        maxWidth: 500,
-        mx: 'auto',
-        p: 3,
-        mt: 2,
-        paddingInline: { xs: '2rem', md: '8rem' },
+        ...AUTH_SX.card,
       }}
     >
       <Typography
         variant="h4"
         component="h1"
         mb={2}
-        sx={{ textAlign: 'center', fontWeight: 500 }}
+        sx={AUTH_SX.title}
       >
         Fazer login
       </Typography>
@@ -180,16 +174,10 @@ export default function LoginForm() {
             <Button
               type="submit"
               variant="contained"
+              className={AUTH_BUTTON_CLASSES.primary}
               disabled={isPending || !dadosPreenchidos}
-              endIcon={
-                isPending ? (
-                  <CircularProgress color="inherit" size={16} />
-                ) : (
-                  <ArrowForwardIcon />
-                )
-              }
             >
-              {isPending ? 'Entrando...' : 'Entrar'}
+              {isPending ? <CircularProgress color="inherit" size={16} /> : 'Entrar'}
             </Button>
           )}
         </Stack>
@@ -197,9 +185,7 @@ export default function LoginForm() {
 
       {!isLoading && (
         <Box
-          mt={2}
-          textAlign="center"
-          sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}
+          sx={AUTH_SX.centeredLinks}
         >
           <Link
             href="/recuperar-senha"

@@ -6,9 +6,6 @@ export default function RegisterLayout({
   return (
     <div
       style={{
-        display: 'flex',
-        justifyContent: 'center',
-        minHeight: '100vh',
         backgroundColor: '#18027c',
       }}
     >

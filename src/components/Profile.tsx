@@ -89,7 +89,8 @@ export default function ProfilePage() {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        pt: { xs: 2, md: 4 },
+        pt: view === 'password' ? { xs: '13vh', md: 8 } : { xs: 4, md: 6 },
+
         px: 2,
       }}
     >
@@ -118,17 +119,18 @@ export default function ProfilePage() {
         {view === 'password' ? (
           // ── Tela: alterar senha ──────────────────────────────────────────
           <Fade in timeout={300}>
-            <ChangePassword
-              goToProfile={goToProfile}
-              passwordForm={passwordForm}
-              updatePasswordField={updatePasswordField}
-              visibility={visibility}
-              toggleVisibility={toggleVisibility}
-              passwordRequirements={passwordRequirements}
-              passwordFieldsValidated={passwordFieldsValidated}
-              handlePasswordSubmit={handlePasswordSubmit}
-              passwordSuccess={passwordSuccess}
-            />
+                <ChangePassword
+                goToProfile={goToProfile}
+                passwordForm={passwordForm}
+                updatePasswordField={updatePasswordField}
+                visibility={visibility}
+                toggleVisibility={toggleVisibility}
+                passwordRequirements={passwordRequirements}
+                passwordFieldsValidated={passwordFieldsValidated}
+                handlePasswordSubmit={handlePasswordSubmit}
+                passwordSuccess={passwordSuccess}
+                />
+
           </Fade>
         ) : (
           // ── Tela: perfil ─────────────────────────────────────────────────
@@ -249,9 +251,6 @@ export default function ProfilePage() {
                     },
                   }}
                 >
-                  <PersonRoundedIcon
-                    sx={{ color: THEME_COLORS.textMuted, fontSize: 20 }}
-                  />
                   <Box sx={{ flex: 1, cursor: 'text' }}>
                     <Typography
                       sx={{
@@ -303,7 +302,8 @@ export default function ProfilePage() {
                 <Box
                   sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'flex-start', sm: 'center' },
                     gap: 1.5,
                     bgcolor: THEME_COLORS.surfaceHigh,
                     borderRadius: 2,
@@ -312,9 +312,10 @@ export default function ProfilePage() {
                     border: `1px solid ${THEME_COLORS.border}`,
                   }}
                 >
-                  <EmailRoundedIcon sx={{ color: THEME_COLORS.textMuted, fontSize: 20 }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
+
+                  <Box sx={{ flex: 1, width: '100%', minWidth: 0 }}>
+                    <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
+                      <Typography
                       sx={{
                         fontSize: '0.68rem',
                         color: THEME_COLORS.textMuted,
@@ -324,14 +325,11 @@ export default function ProfilePage() {
                     >
                       EMAIL
                     </Typography>
-                    <Typography sx={{ color: THEME_COLORS.text, fontWeight: 600 }}>
-                      {email}
-                    </Typography>
-                  </Box>
-                  <Chip
+                      <Chip
                     label="Privado"
                     size="small"
                     sx={{
+                      alignSelf: { xs: 'flex-start', sm: 'center' },
                       bgcolor: 'rgba(255,255,255,0.05)',
                       color: THEME_COLORS.textMuted,
                       fontSize: '0.65rem',
@@ -339,6 +337,19 @@ export default function ProfilePage() {
                       border: `1px solid ${THEME_COLORS.border}`,
                     }}
                   />
+                    </Stack>
+                    
+                    <Typography
+                      sx={{
+                        color: THEME_COLORS.text,
+                        fontWeight: 600,
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {email}
+                    </Typography>
+                  </Box>
+                  
                 </Box>
               </Box>
 

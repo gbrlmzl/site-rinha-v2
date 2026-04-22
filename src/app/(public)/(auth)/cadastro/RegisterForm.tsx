@@ -6,7 +6,6 @@ import Form from 'next/form';
 import Link from 'next/link';
 
 import {
-  Alert,
   Box,
   Button,
   IconButton,
@@ -24,10 +23,9 @@ import Condition from '@/components/shared/Condition';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import DoneIcon from '@mui/icons-material/Done';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import GoogleIcon from '@mui/icons-material/Google';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
+import { AUTH_BUTTON_CLASSES, AUTH_SX } from '@/theme';
 
 type RegisterFormEntries = {
   username: string;
@@ -48,6 +46,8 @@ const initialState: RegisterState = {
 };
 
 export default function RegisterForm() {
+  const { showSnackbar } = useSnackbarContext();
+
   const [state, formAction, isPending] = useActionState<
     RegisterState,
     FormData
@@ -103,7 +103,15 @@ export default function RegisterForm() {
         password: '',
         confirmPassword: '',
       });
-    } else if (state.success === false) {
+      return;
+    }
+
+    if (state.success === false) {
+      showSnackbar({
+        message: state.message || 'Não foi possível criar sua conta.',
+        severity: 'error',
+      });
+
       setFormEntries({
         username: '',
         email: '',
@@ -111,7 +119,7 @@ export default function RegisterForm() {
         confirmPassword: '',
       });
     }
-  }, [state]);
+  }, [state, showSnackbar]);
 
   /*function handleGoogleSignIn() {
     if (googleLoading) return;
@@ -128,12 +136,7 @@ export default function RegisterForm() {
     return (
       <Card
         sx={{
-          width: 'fit-content',
-          height: 'fit-content',
-          mx: 'auto',
-          paddingBlock: 4,
-          paddingInline: { xs: '1rem', md: '2rem' },
-          mt: 2,
+          ...AUTH_SX.card,
         }}
       >
         <Typography
@@ -175,7 +178,12 @@ export default function RegisterForm() {
 
         <Box display="flex" justifyContent="center">
           <Link href="/login" passHref>
-            <Button variant="contained">Fazer login</Button>
+            <Button
+              variant="contained"
+              className={AUTH_BUTTON_CLASSES.primary}
+            >
+              Fazer login
+            </Button>
           </Link>
         </Box>
       </Card>
@@ -185,31 +193,19 @@ export default function RegisterForm() {
   return (
     <Card
       sx={{
-        width: { xs: '90vw', sm: '30vw' },
-        height: 'fit-content',
-        mx: 'auto',
-        p: 3,
-        mt: 2,
+        ...AUTH_SX.card,
       }}
     >
       <Typography
         variant="h4"
         component="h1"
         mb={2}
-        sx={{ textAlign: 'center', fontWeight: 500 }}
+        sx={AUTH_SX.title}
       >
         Crie sua conta
       </Typography>
 
-      {state.success === false && (
-        <Alert
-          severity="error"
-          sx={{ mb: 2, marginInline: { xs: '1rem', md: '2rem' } }}
-        >
-          {state.message}
-        </Alert>
-      )}
-      <Box sx={{ paddingInline: { xs: '2rem', md: '4rem' } }}>
+      
         <Form
           action={formAction}
           style={{ display: 'block', flexDirection: 'column' }}
@@ -319,19 +315,19 @@ export default function RegisterForm() {
           <Button
             type="submit"
             variant="contained"
+            className={AUTH_BUTTON_CLASSES.primary}
             disabled={isPending || !dadosPreenchidos}
-            endIcon={<ArrowForwardIcon />}
-            sx={{ mt: 1 }}
             fullWidth
+            sx={{mt:2}}
           >
-            {isPending ? 'Enviando...' : 'Cadastrar'}
+            {isPending ? <CircularProgress color="inherit" size={16} />  : 'Cadastrar'}
           </Button>
         </Form>
 
-        <Box mt={1} textAlign="center">
+        <Box sx={AUTH_SX.centeredLinks}>
           <Link href="/login">Já possuo uma conta</Link>
         </Box>
-      </Box>
+
     </Card>
   );
 }
