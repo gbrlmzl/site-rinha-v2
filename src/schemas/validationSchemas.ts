@@ -52,16 +52,47 @@ export const TitularPlayerSchema = BasePlayerSchema.extend({
 
   // Matrícula só é obrigatória se não for jogador externo
   if (!data.isExternalPlayer) {
-    if (!data.schoolId || data.schoolId.trim() === '') {
+    const normalizedSchoolId = data.schoolId?.trim() ?? '';
+
+    if (!/^\d{6,11}$/.test(normalizedSchoolId)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Matrícula deve ter de 6 a 11 dígitos',
+        path: ['schoolId'], // ← aponta o erro para o campo correto
+      });
+    }
+  }
+});
+
+// ─── Capitão (mensagem personalizada para matrícula em branco) ───────────
+
+export const CaptainPlayerSchema = BasePlayerSchema.extend({
+  schoolId: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.disabledPlayer) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Jogadores titulares não podem ser desabilitados',
+      path: ['disabledPlayer'],
+    });
+  }
+
+  if (!data.isExternalPlayer) {
+    const normalizedSchoolId = data.schoolId?.trim() ?? '';
+
+    if (!normalizedSchoolId) {
       ctx.addIssue({
         code: 'custom',
         message: 'O capitão deve possuir matrícula na UFPB',
-        path: ['schoolId'], // ← aponta o erro para o campo correto
+        path: ['schoolId'],
       });
-    } else if (!/^\d{6,11}$/.test(data.schoolId)) {
+      return;
+    }
+
+    if (!/^\d{6,11}$/.test(normalizedSchoolId)) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Matrícula deve ter entre 6 e 11 dígitos',
+        message: 'Matrícula deve ter de 6 a 11 dígitos',
         path: ['schoolId'],
       });
     }
@@ -73,19 +104,22 @@ export const TitularPlayerSchema = BasePlayerSchema.extend({
 export const ReservaPlayerSchema = BasePlayerSchema.extend({
   schoolId: z
     .string()
-    .regex(/^\d{6,11}$/, 'Matrícula deve ter 6 a 11 dígitos')
     .optional()
-    .transform((val) => val || ''),
-}).refine(
-  (data) => {
-    // Se NÃO é jogador externo e NÃO está desabilitado, precisa de matrícula
-    if (!data.isExternalPlayer && !data.disabledPlayer && !data.schoolId) {
-      return false;
+    .transform((val) => val?.trim() || ''),
+}).superRefine((data, ctx) => {
+  // Só valida matrícula quando não for jogador externo e estiver ativo
+  if (!data.isExternalPlayer && !data.disabledPlayer) {
+    const normalizedSchoolId = data.schoolId?.trim() ?? '';
+
+    if (!/^\d{6,11}$/.test(normalizedSchoolId)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Matrícula deve ter de 6 a 11 dígitos',
+        path: ['schoolId'],
+      });
     }
-    return true;
-  },
-  { message: 'Matrícula obrigatória se jogador não for externo' }
-);
+  }
+});
 
 // ─── Jogador Desabilitado (reserva) ───────────────────────────────────────
 
@@ -164,7 +198,10 @@ export const PaymentFormSchema = z.object({
 export function validatePlayer(player: any, playerIndex: number) {
   let schema;
 
-  if (playerIndex < 5) {
+  if (playerIndex === 0) {
+    // 1º jogador é o capitão
+    schema = CaptainPlayerSchema;
+  } else if (playerIndex < 5) {
     // Primeiros 5 são titulares
     schema = TitularPlayerSchema;
   } else {
@@ -224,7 +261,7 @@ export function validateAllPLayers(players: any[]) {
 
   // Verificar matrículas únicas entre titulares
   const schoolIds = players
-    .slice(0, 5) // Apenas titulares
+    //.slice(0, 6) // Apenas titulares
     .filter((p) => !p.disabledPlayer)
     .map((p) => p.schoolId)
     .filter((m) => m !== '');
@@ -234,7 +271,7 @@ export function validateAllPLayers(players: any[]) {
     return {
       success: false,
       step: 'players',
-      message: 'Matrículas dos jogadores titulares devem ser únicas',
+      message: 'Matrículas dos jogadores devem ser únicas',
     };
   }
 

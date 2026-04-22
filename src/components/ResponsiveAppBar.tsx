@@ -16,7 +16,7 @@ import Link from 'next/link';
 import MenuIcon from '@mui/icons-material/Menu';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SettingsIcon from '@mui/icons-material/Settings';
+import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Button, ListItemIcon } from '@mui/material';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -365,13 +365,13 @@ function ResponsiveAppBar() {
                 <MenuItem
                   onClick={() => {
                     handleCloseNavOptions();
-                    router.push('/configuracoes');
+                    router.push('/torneios/me');
                   }}
                 >
                   <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-                    <SettingsIcon sx={{ fontSize: '1.2rem' }} />
+                    <EmojiEventsRoundedIcon sx={{ fontSize: '1.2rem' }} />
                   </ListItemIcon>
-                  Configurações
+                  Meus torneios
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
                   <ListItemIcon sx={{ color: '#ff6b6b', minWidth: 40 }}>
@@ -633,13 +633,13 @@ function ResponsiveAppBar() {
             <MenuItem
               onClick={() => {
                 handleCloseUserMenu();
-                router.push('/configuracoes');
+                router.push('/torneios/me');
               }}
             >
               <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-                <SettingsIcon sx={{ fontSize: '1.2rem' }} />
+                <EmojiEventsRoundedIcon sx={{ fontSize: '1.2rem' }} />
               </ListItemIcon>
-              Configurações
+              Meus torneios
             </MenuItem>
 
             <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Paper,
+  Card,
   Typography,
   TextField,
   Button,
@@ -22,8 +22,7 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
 import Link from 'next/link';
 import useNewPassword from '../../../../hooks/authentication/useNewPassword';
-
-type PageState = 'validating' | 'invalid' | 'form' | 'success';
+import { AUTH_BUTTON_CLASSES, AUTH_SX } from '@/theme';
 
 type NewPasswordFormEntries = {
   newPassword: string;
@@ -50,23 +49,6 @@ export default function NewPasswordPage() {
     passwordsMatch: false,
   });
 
-  const {
-    C,
-    inputSx,
-    token,
-    loading,
-    pageState,
-    errors,
-    submitNewPassword,
-    checkToken,
-  } = useNewPassword();
-
-  // Valida o token ao montar a página
-  useEffect(() => {
-    checkToken();
-  }, [token]);
-
-  // Valida os critérios de senha sempre que o usuário digitar
   useEffect(() => {
     setPasswordCriteria((prev) => ({
       ...prev,
@@ -78,6 +60,26 @@ export default function NewPasswordPage() {
     }));
   }, [formEntries.newPassword, formEntries.confirmPass]);
 
+  
+
+  const {
+    token,
+    loading,
+    pageState,
+    submitNewPassword,
+    checkToken,
+  } = useNewPassword();
+
+  // Valida o token ao montar a página
+  useEffect(() => {
+    checkToken();
+  }, [token]);
+
+  // Valida os critérios de senha sempre que o usuário digitar
+  
+
+
+  const validPassword = Object.values(passwordCriteria).every((criterion) => criterion);
   /*const validate = (): boolean => {
         const e: Record<string, string> = {};
         if (formEntries.newPassword.length < 8) e.new = 'Mínimo de 8 caracteres';
@@ -85,49 +87,23 @@ export default function NewPasswordPage() {
         setErrors(e);
         return Object.keys(e).length === 0;
     };*/
+  
 
   const handleSubmit = async () => {
     submitNewPassword(formEntries.newPassword);
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: C.bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
-      }}
-    >
-      <Paper
-        elevation={0}
+      <Card
         sx={{
-          width: '100%',
-          maxWidth: 440,
-          backgroundColor: C.surface,
-          borderRadius: 4,
-          border: `1px solid ${C.border}`,
-          p: { xs: 3, md: 4 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3,
-            background: `linear-gradient(90deg, transparent, ${C.accent}, transparent)`,
-          },
+          ...AUTH_SX.card,
         }}
       >
         {/* Validando token */}
         {pageState === 'validating' && (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <CircularProgress sx={{ color: C.accent }} />
-            <Typography sx={{ color: C.textMuted, mt: 2 }}>
+            <CircularProgress />
+            <Typography sx={{ color: 'text.secondary', mt: 2 }}>
               Validando link...
             </Typography>
           </Box>
@@ -137,19 +113,19 @@ export default function NewPasswordPage() {
         {pageState === 'invalid' && (
           <Fade in timeout={300}>
             <Box sx={{ textAlign: 'center', py: 2 }}>
-              <ErrorRoundedIcon sx={{ fontSize: 64, color: C.danger, mb: 2 }} />
+              <ErrorRoundedIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
               <Typography
                 sx={{
                   fontWeight: 700,
                   fontSize: '1.4rem',
-                  color: C.text,
+                  color: 'text.primary',
                   mb: 1,
                 }}
               >
                 Link inválido
               </Typography>
               <Typography
-                sx={{ color: C.textMuted, fontSize: '0.9rem', mb: 3 }}
+                sx={{ color: 'text.secondary', fontSize: '0.9rem', mb: 3 }}
               >
                 Este link é inválido ou já expirou. Solicite um novo link de
                 recuperação.
@@ -157,13 +133,42 @@ export default function NewPasswordPage() {
               <Link href="/recuperar-senha" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  sx={{
-                    backgroundColor: C.accent,
-                    borderRadius: 3,
-                    '&:hover': { backgroundColor: C.accentHover },
-                  }}
+                  className={AUTH_BUTTON_CLASSES.primary}
                 >
                   Solicitar novo link
+                </Button>
+              </Link>
+            </Box>
+          </Fade>
+        )}
+
+        {/*Erro na resposta da APi */}
+        {pageState === 'error' && (
+          <Fade in timeout={300}>
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              <ErrorRoundedIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '1.4rem',
+                  color: 'text.primary',
+                  mb: 1,
+                }}
+              >
+                Ocorreu um erro
+              </Typography>
+              <Typography
+                sx={{ color: 'text.secondary', fontSize: '0.9rem', mb: 3 }}
+              >
+                Ocorreu um erro ao processar sua solicitação. Tente novamente
+                mais tarde.
+              </Typography>
+              <Link href="/recuperar-senha" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="contained"
+                  className={AUTH_BUTTON_CLASSES.primary}
+                >
+                  Tentar novamente
                 </Button>
               </Link>
             </Box>
@@ -176,29 +181,14 @@ export default function NewPasswordPage() {
             <Box>
               <Box sx={{ mb: 4 }}>
                 <Typography
+
                   sx={{
-                    fontWeight: 700,
-                    fontSize: '1.5rem',
-                    color: C.text,
-                    textAlign: 'center',
+                    ...AUTH_SX.title,
                   }}
                 >
                   Nova senha
                 </Typography>
               </Box>
-
-              {errors.submit && (
-                <Alert
-                  severity="error"
-                  sx={{
-                    mb: 2,
-                    bgcolor: 'rgba(255,107,107,0.1)',
-                    color: C.danger,
-                  }}
-                >
-                  {errors.submit}
-                </Alert>
-              )}
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
@@ -213,9 +203,6 @@ export default function NewPasswordPage() {
                         newPassword: e.target.value,
                       }))
                     }
-                    error={!!errors.new}
-                    helperText={errors.new}
-                    sx={inputSx}
                     slotProps={{
                       input: {
                         endAdornment: (
@@ -223,7 +210,6 @@ export default function NewPasswordPage() {
                             <IconButton
                               tabIndex={-1}
                               onClick={() => setShowPassword((p) => !p)}
-                              sx={{ color: C.textMuted }}
                             >
                               {showPassword ? (
                                 <VisibilityOffRoundedIcon fontSize="small" />
@@ -249,9 +235,6 @@ export default function NewPasswordPage() {
                       confirmPass: e.target.value,
                     }))
                   }
-                  error={!!errors.confirm}
-                  helperText={errors.confirm}
-                  sx={inputSx}
                   slotProps={{
                     input: {
                       endAdornment: (
@@ -259,7 +242,6 @@ export default function NewPasswordPage() {
                           <IconButton
                             tabIndex={-1}
                             onClick={() => setShowPassword((p) => !p)}
-                            sx={{ color: C.textMuted }}
                           >
                             {showPassword ? (
                               <VisibilityOffRoundedIcon fontSize="small" />
@@ -277,39 +259,30 @@ export default function NewPasswordPage() {
                 spacing={1}
                 sx={{
                   mt: 2,
-                  '& .MuiSvgIcon-colorDisabled': { color: C.textMuted },
                 }}
               >
                 <Condition
                   ok={passwordCriteria.atLeast8Chars}
                   text="Ao menos 8 caracteres"
-                  textColor="white"
                 />
                 <Condition
                   ok={passwordCriteria.hasNumberOrSymbol}
                   text="Deve conter um número ou símbolo"
-                  textColor="white"
                 />
                 <Condition
                   ok={passwordCriteria.passwordsMatch}
                   text="As senhas devem coincidir"
-                  textColor="white"
                 />
               </Stack>
 
               <Button
                 fullWidth
                 variant="contained"
+                className={AUTH_BUTTON_CLASSES.primary}
                 onClick={handleSubmit}
-                disabled={loading}
-                startIcon={loading ? undefined : <LockRoundedIcon />}
+                disabled={!validPassword || loading}
                 sx={{
                   mt: 3,
-                  py: 1.5,
-                  borderRadius: 3,
-                  backgroundColor: C.accent,
-                  '&:hover': { backgroundColor: C.accentHover },
-                  fontWeight: 700,
                 }}
               >
                 {loading ? (
@@ -327,20 +300,20 @@ export default function NewPasswordPage() {
           <Fade in timeout={400}>
             <Box sx={{ textAlign: 'center', py: 2 }}>
               <CheckCircleRoundedIcon
-                sx={{ fontSize: 64, color: '#4caf50', mb: 2 }}
+                sx={{ fontSize: 64, color: 'success.main', mb: 2 }}
               />
               <Typography
                 sx={{
                   fontWeight: 700,
                   fontSize: '1.4rem',
-                  color: C.text,
+                  color: 'text.primary',
                   mb: 1,
                 }}
               >
                 Senha redefinida!
               </Typography>
               <Typography
-                sx={{ color: C.textMuted, fontSize: '0.9rem', mb: 3 }}
+                sx={{ color: 'text.secondary', fontSize: '0.9rem', mb: 3 }}
               >
                 Sua senha foi atualizada com sucesso. Faça login com sua nova
                 senha.
@@ -348,11 +321,7 @@ export default function NewPasswordPage() {
               <Link href="/login" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  sx={{
-                    backgroundColor: C.accent,
-                    borderRadius: 3,
-                    '&:hover': { backgroundColor: C.accentHover },
-                  }}
+                  className={AUTH_BUTTON_CLASSES.primary}
                 >
                   Ir para o login
                 </Button>
@@ -360,7 +329,6 @@ export default function NewPasswordPage() {
             </Box>
           </Fade>
         )}
-      </Paper>
-    </Box>
+      </Card>
   );
 }

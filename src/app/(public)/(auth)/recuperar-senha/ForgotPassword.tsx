@@ -3,47 +3,22 @@ import React, { useActionState, useState } from 'react';
 import Form from 'next/form';
 import {
   Box,
-  Paper,
+  Card,
   Typography,
   TextField,
   Button,
   InputAdornment,
   Fade,
   CircularProgress,
-  Alert,
 } from '@mui/material';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import MarkEmailReadRoundedIcon from '@mui/icons-material/MarkEmailReadRounded';
 import Link from 'next/link';
+import { AUTH_BUTTON_CLASSES, AUTH_SX } from '@/theme';
 
 import passwordRecoveryAction from './forgotPasswordAction';
 import { PasswordRecoveryState } from '@/types/auth/authTypes';
-
-const C = {
-  bg: '#080d2e',
-  surface: '#0E1241',
-  surfaceHigh: '#151a54',
-  border: 'rgba(255,255,255,0.08)',
-  accent: '#11B5E4',
-  accentHover: '#0b80a0',
-  danger: '#ff6b6b',
-  text: '#ffffff',
-  textMuted: 'rgba(255,255,255,0.45)',
-};
-
-const inputSx = {
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: C.surfaceHigh,
-    borderRadius: 2,
-    color: C.text,
-    '& fieldset': { borderColor: C.border },
-    '&:hover fieldset': { borderColor: C.accent },
-    '&.Mui-focused fieldset': { borderColor: C.accent },
-  },
-  '& .MuiInputLabel-root': { color: C.textMuted },
-  '& .MuiInputLabel-root.Mui-focused': { color: C.accent },
-};
 
 const initialState: PasswordRecoveryState = {
   submitted: false,
@@ -59,37 +34,9 @@ export default function ForgotPassword() {
   >(passwordRecoveryAction, initialState);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: C.bg,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        px: 2,
-        py: 6,
-      }}
-    >
-      <Paper
-        elevation={0}
+      <Card
         sx={{
-          width: '100%',
-          maxWidth: 440,
-          backgroundColor: C.surface,
-          borderRadius: 4,
-          border: `1px solid ${C.border}`,
-          p: { xs: 3, md: 4 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3,
-            background: `linear-gradient(90deg, transparent, ${C.accent}, transparent)`,
-          },
+          ...AUTH_SX.card,
         }}
       >
         {!state.submitted ? (
@@ -98,12 +45,13 @@ export default function ForgotPassword() {
               {/* Header */}
               <Box sx={{ mb: 4 }}>
                 <Typography
-                  sx={{ fontWeight: 700, fontSize: '1.5rem', color: C.text }}
+                  variant='h4'
+                  sx={{ ...AUTH_SX.title }}
                 >
                   Recuperar senha
                 </Typography>
                 <Typography
-                  sx={{ fontSize: '0.85rem', color: C.textMuted, mt: 1 }}
+                  sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 1 }}
                 >
                   Informe seu nome de usuário e enviaremos um link para
                   redefinir sua senha.
@@ -117,38 +65,25 @@ export default function ForgotPassword() {
                   label="Usuário"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  sx={{ ...inputSx, mb: 3 }}
-                  slotProps={{
+                  sx={{ mb: 3 }}
+                  /*slotProps={{
                     input: {
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PersonRoundedIcon
-                            sx={{ color: C.textMuted, fontSize: 20 }}
-                          />
+                          <PersonRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                         </InputAdornment>
                       ),
                     },
-                  }}
+                  }}*/
                 />
 
                 <Button
                   fullWidth
                   variant="contained"
+                  className={AUTH_BUTTON_CLASSES.primary}
                   type="submit"
                   disabled={isPending || username.trim().length === 0}
                   sx={{
-                    py: 1.5,
-                    borderRadius: 3,
-                    backgroundColor: C.accent,
-                    '&:hover': { backgroundColor: C.accentHover },
-                    '&.Mui-disabled': {
-                      backgroundColor: '#0E1241',
-                      color: 'rgba(255,255,255,0.72)',
-                      border: `1px solid ${C.accent}80`,
-                      boxShadow: 'none',
-                    },
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
                     mb: 2,
                   }}
                 >
@@ -163,8 +98,8 @@ export default function ForgotPassword() {
               <Box sx={{ textAlign: 'center' }}>
                 <Link href="/login" style={{ textDecoration: 'none' }}>
                   <Button
-                    startIcon={<ArrowBackRoundedIcon />}
-                    sx={{ color: C.textMuted, '&:hover': { color: C.text } }}
+                    variant="outlined"
+                    className={AUTH_BUTTON_CLASSES.secondary}
                   >
                     Voltar para o login
                   </Button>
@@ -177,13 +112,13 @@ export default function ForgotPassword() {
           <Fade in timeout={400}>
             <Box sx={{ textAlign: 'center', py: 2 }}>
               <MarkEmailReadRoundedIcon
-                sx={{ fontSize: 64, color: C.accent, mb: 2 }}
+                sx={{ fontSize: 64, color: 'primary.main', mb: 2 }}
               />
               <Typography
                 sx={{
                   fontWeight: 700,
                   fontSize: '1.4rem',
-                  color: C.text,
+                  color: 'text.primary',
                   mb: 1,
                 }}
               >
@@ -191,33 +126,27 @@ export default function ForgotPassword() {
               </Typography>
               <Typography
                 sx={{
-                  color: C.textMuted,
+                  color: 'text.secondary',
                   fontSize: '0.9rem',
                   mb: 3,
                   lineHeight: 1.6,
                 }}
               >
                 Se o username{' '}
-                <strong style={{ color: C.text }}>{username}</strong> existir,
+                <strong style={{ color: 'inherit' }}>{username}</strong> existir,
                 você receberá um email com o link para redefinir sua senha. O
                 link expira em{' '}
-                <strong style={{ color: C.accent }}>10 minutos</strong>.
+                <strong style={{ color: 'inherit' }}>10 minutos</strong>.
               </Typography>
               <Typography
-                sx={{ color: C.textMuted, fontSize: '0.8rem', mb: 3 }}
+                sx={{ color: 'text.secondary', fontSize: '0.8rem', mb: 3 }}
               >
                 Não recebeu? Verifique a pasta de spam.
               </Typography>
               <Link href="/login" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="outlined"
-                  startIcon={<ArrowBackRoundedIcon />}
-                  sx={{
-                    borderColor: C.border,
-                    color: C.text,
-                    '&:hover': { borderColor: C.accent, color: C.accent },
-                    borderRadius: 3,
-                  }}
+                  className={AUTH_BUTTON_CLASSES.secondary}
                 >
                   Voltar para o login
                 </Button>
@@ -225,7 +154,6 @@ export default function ForgotPassword() {
             </Box>
           </Fade>
         )}
-      </Paper>
-    </Box>
+      </Card>
   );
 }

@@ -13,6 +13,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Button,
@@ -36,11 +37,12 @@ import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 // Componentes de Passos
 import { StepIndicator } from './shared/StepIndicator';
 import { TeamInfoStep } from './steps/TeamInfoStep';
-import { TeamInfoStepSkeleton } from './steps/TeamInfoStepSkeleton';
 import { PlayersStep } from './steps/PlayersStep';
 import { ConfirmationStep } from './steps/ConfirmationStep';
 import { PaymentStep } from './steps/PaymentStep';
 import ExpiredPayment from './ExpiredPayment';
+import TeamRegistrationLoadingScreen from './TeamRegistrationLoadingScreen';
+import InfoScreen from '@/components/lol/teamRegistration/UI/InfoScreen';
 
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -48,11 +50,13 @@ export function TeamRegistrationWizard() {
   const {
     state,
     loading,
+    uiState,
     checkingRegisteredTeam,
     error,
     paymentData,
     paymentApproved,
     paymentExpired,
+    cancelingRegistration,
     updateTeam,
     handleShieldFileSelected,
     updatePlayer,
@@ -79,6 +83,7 @@ export function TeamRegistrationWizard() {
   const wizardCardRef = useRef<HTMLDivElement | null>(null);
 
   const theme = useTheme();
+  const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const stepIndex: number = STEPS.findIndex((s) => s.key === state.currentStep);
 
@@ -330,62 +335,57 @@ export function TeamRegistrationWizard() {
         ? 'Gerar QR code PIX'
         : 'Próximo';
 
+  //======================================================================
 
   if (checkingRegisteredTeam) {
+    return <TeamRegistrationLoadingScreen />;
+  }
+
+  if (uiState.status === 'tournament_closed') {
     return (
-      <Box
-        sx={{
-          width: '100%',
-          minHeight: '100vh',
-          backgroundColor: THEME_COLORS.bg,
-          py: { xs: 3, md: 4 },
-        }}
-      >
-        <Container maxWidth="md">
-          <Paper
-            elevation={0}
-            sx={{
-              backgroundColor: THEME_COLORS.surface,
-              borderRadius: 3,
-              border: `1px solid ${THEME_COLORS.border}`,
-              p: { xs: 0, md: 1 },
-              overflow: 'hidden',
-            }}
-          >
-            <Box sx={{ p: { xs: 2, md: 4 } }}>
-              {/*<StepIndicator steps={STEPS} activeStep={0} />*/}
-              <Box sx={{ mb: 4, minHeight: 400 }}>
-                <TeamInfoStepSkeleton />
-              </Box>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
+      <InfoScreen
+        event={'tournament_closed'}
+        title="Inscrições encerradas"
+        message={
+          uiState.message || 'As inscrições para este torneio foram encerradas.'
+        }
+        action={{ label: 'Voltar', onClick: () => router.back() }}
+      />
     );
   }
 
+  if (uiState.status === 'tournament_full') {
+    return (
+      <InfoScreen
+        event={'tournament_full'}
+        title="Vagas esgotadas"
+        message={
+          uiState.message ||
+          'Todas as vagas deste torneio já foram preenchidas.'
+        }
+        action={{ label: 'Voltar', onClick: () => router.back() }}
+      />
+    );
+  }
+
+  if (uiState.status === 'error') {
+    return (
+      <InfoScreen
+        event={'error'}
+        title="Algo deu errado"
+        message={uiState.message || 'Tente novamente mais tarde.'}
+        action={{ label: 'Início', onClick: () => router.push('/lol') }}
+      />
+    );
+  }
 
   if (paymentExpired) {
     return (
-      <Box
-        sx={{
-          width: '100vw',
-          minHeight: '100vh',
-          backgroundColor: THEME_COLORS.bg,
-          py: { xs: 3, md: 4 },
-          //mt: { xs: 2, md: '10vh' },
-          pt: { xs: '0vh', md: '13vh' },
-          alignItems:{xs: 'center', md: 'flex-start'},
-          px: 2,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <ExpiredPayment
-          onCancel={handleCancelPayment}
-          onRetryPayment={handleRetryPayment}
-        />
-      </Box>
+      <ExpiredPayment
+        loading={cancelingRegistration}
+        onCancel={handleCancelPayment}
+        onRetryPayment={handleRetryPayment}
+      />
     );
   }
 

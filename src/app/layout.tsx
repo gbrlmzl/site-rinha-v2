@@ -5,6 +5,7 @@ import Navbar from '../components/ResponsiveAppBar';
 import AppThemeProvider from './theme-provider';
 
 import { AuthContextProvider } from '@/contexts/AuthContext';
+import { SnackbarProvider } from '@/contexts/SnackbarContext';
 import { isAuthenticated } from '@/utils/auth';
 
 //const hasToken = await isAuthenticated();
@@ -39,16 +40,12 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <AppThemeProvider>
             <AuthContextProvider>
-              <Navbar></Navbar>
-              <main
-                style={
-                  {
-                    /*paddingTop: "64px"*/
-                  }
-                }
-              >
-                {children}
-              </main>
+              <SnackbarProvider>
+                <Navbar></Navbar>
+                <main>
+                  {children}
+                </main>
+              </SnackbarProvider>
             </AuthContextProvider>
           </AppThemeProvider>
         </AppRouterCacheProvider>

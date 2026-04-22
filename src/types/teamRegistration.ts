@@ -3,6 +3,8 @@
  * Centraliza as interfaces e tipos de dados
  */
 
+import { register } from "module";
+
 // ─── Player ───────────────────────────────────────────────────────────────
 
 export type PlayerPosition =
@@ -30,6 +32,20 @@ export interface Team {
   teamShield: File | null; //File
 }
 
+export interface CanceledTeamData {
+  teamId: number;
+  captainId: number;
+  captainUser: string;
+  name: string;
+  status: string;
+}
+
+export interface CancelTournamentRegistrationResponse {
+  success: boolean;
+  message: string;
+  data?: CanceledTeamData;
+}
+
 // ─── Payment ──────────────────────────────────────────────────────────────
 
 export interface PaymentForm {
@@ -37,6 +53,14 @@ export interface PaymentForm {
   sobrenome: string;
   email: string;
   cpf: string;
+}
+
+export interface GeneratedPaymentData {
+  uuid: string;
+  qrCode: string;
+  qrCodeBase64: string;
+  value: number;
+  expiresAt: string;
 }
 
 // ─── Registration State ────────────────────────────────────────────────────
@@ -61,45 +85,55 @@ export interface TeamRegistrationPayload {
   dadosPagamento: PaymentForm;
 }
 
-export interface PaymentResponse {
-  uuid: string;
-  qrCode: string;
-  qrCodeBase64: string;
-  valor: number;
+export interface ExceptionResponse {
+  error : string;
 }
 
-export interface PaymentStatusMessage {
-  status: 'PAGAMENTO REALIZADO' | 'PAGAMENTO PENDENTE' | string;
-  uuid: string;
-  timestamp?: string;
-}
 
-type PaymentStatus =
-  | 'APPROVED'
-  | 'PENDING'
+type TeamStatus =
+  | 'PENDING_PAYMENT'
+  | 'EXPIRED_PAYMENT'
+  | 'EXPIRED_PAYMENT_PROBLEM'
+  | 'READY'
+  | 'FINISHED'
   | 'CANCELED'
-  | 'EXPIRED';
+  | 'BANNED';
 
-export type RegisterStatus =
-  | { registered: false;
-      /*
-      paymentStatus: null;
-      uuid: null;
-      value: null;
-      qrCode: null;
-      qrCodeBase64: null;
-      expiresAt: null;
-      */
-   }
-  | {
-      registered: true;
-      paymentStatus: PaymentStatus;
-      uuid: string;
-      value: number;
-      qrCode: string;
-      qrCodeBase64: string;
-      expiresAt: string;
+
+type TournamentStatus =
+ | 'OPEN'
+ | 'FULL'
+ | 'ONGOING'
+ | 'CANCELED'
+ | 'FINISHED';
+
+
+type RegistrationData = {
+  registered: boolean;
+  teamStatus?: TeamStatus;
+  tournamentStatus?: TournamentStatus;
+  maxTeamsReached?: boolean;
+}
+export type RegisterStatusResponse = {
+      registrationData: RegistrationData;
+      paymentData?: GeneratedPaymentData;
     };
+
+// types/registration.ts — adicione os estados de UI
+export type RegistrationUIState ={
+  status: 
+    | 'loading' 
+    | 'can_register'
+    | 'tournament_closed'
+    | 'tournament_full'
+    | 'pending_payment'
+    | 'payment_approved'
+    | 'payment_expired' 
+    | 'canceled' 
+    | 'error';
+  message?: string; // Mensagem opcional para fornecer detalhes adicionais
+}
+
 
 // ─── UI/UX Types ──────────────────────────────────────────────────────────
 
