@@ -24,6 +24,7 @@ import {
   Container,
   Paper,
 } from '@mui/material';
+
 import { useTeamRegistration } from '@/hooks/lol/teamRegistration/useTeamRegistration';
 import {
   validatePlayer,
@@ -31,6 +32,7 @@ import {
   validatePaymentForm,
   validateTeam,
 } from '@/schemas/validationSchemas';
+
 import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 
 // Componentes de Passos
@@ -48,14 +50,14 @@ import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
 export function TeamRegistrationWizard() {
   const {
-    state,
+    registrationData,
+    step,
     loading,
     uiState,
     checkingRegisteredTeam,
     error,
     paymentData,
     paymentApproved,
-    paymentExpired,
     cancelingRegistration,
     updateTeam,
     handleShieldFileSelected,
@@ -84,7 +86,7 @@ export function TeamRegistrationWizard() {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const stepIndex: number = STEPS.findIndex((s) => s.key === state.currentStep);
+  const stepIndex: number = STEPS.findIndex((s) => s.key === step);
 
   useEffect(() => {
     // Verificar se o usuário já tem uma inscrição ativa
@@ -95,10 +97,10 @@ export function TeamRegistrationWizard() {
   const handleNextStep = async () => {
     if (loading || isCheckingTeamName) return;
 
-    switch (state.currentStep) {
+    switch (step) {
       case 'teamInfo': {
         // Validar equipe
-        const validation = validateTeam(state.team);
+        const validation = validateTeam(registrationData.team);
         if (!validation.success) {
           const firstIssue = Array.isArray(validation.errors)
             ? validation.errors[0]
@@ -114,7 +116,7 @@ export function TeamRegistrationWizard() {
         setIsCheckingTeamName(true);
         try {
           const nameCheckResult = await checkTeamNameAvailability(
-            state.team.teamName
+            registrationData.team.teamName
           );
           if (!nameCheckResult) {
             /*setValidationErrors({
@@ -138,12 +140,12 @@ export function TeamRegistrationWizard() {
 
       case 'playersInfo': {
         setValidationErrors({});
-        const isLastPlayer = currentPlayerIndex === state.players.length - 1;
-        const lastPlayerIndex = state.players.length - 1;
+        const isLastPlayer = currentPlayerIndex === registrationData.players.length - 1;
+        const lastPlayerIndex = registrationData.players.length - 1;
 
         if (!isLastPlayer) {
           const currentValidation = validatePlayer(
-            state.players[currentPlayerIndex],
+            registrationData.players[currentPlayerIndex],
             currentPlayerIndex
           );
 
@@ -164,7 +166,7 @@ export function TeamRegistrationWizard() {
 
         // isLastPlayer === true, validar o conjunto completo antes de avançar
         // No último jogador, valida o conjunto completo antes de avançar
-        const validation = validateAllPLayers(state.players);
+        const validation = validateAllPLayers(registrationData.players);
         if (!validation.success) {
           console.log('Erro de validação dos jogadores:', validation.message);
           if (validation.playerIndex !== undefined) {
@@ -206,7 +208,7 @@ export function TeamRegistrationWizard() {
       case 'payment': {
         setValidationErrors({});
         // Validar pagamento
-        const validation = validatePaymentForm(state.paymentForm);
+        const validation = validatePaymentForm(registrationData.paymentForm);
         if (!validation.success) {
           const firstIssue = Array.isArray(validation.errors)
             ? validation.errors[0]
@@ -235,7 +237,7 @@ export function TeamRegistrationWizard() {
   const handlePrevStep = () => {
     setValidationErrors({});
 
-    if (state.currentStep === 'playersInfo' && currentPlayerIndex > 0) {
+    if (step === 'playersInfo' && currentPlayerIndex > 0) {
       setCurrentPlayerIndex((prev) => prev - 1);
       return;
     }
@@ -249,8 +251,8 @@ export function TeamRegistrationWizard() {
     const stepContentMap = {
       teamInfo: (
         <TeamInfoStep
-          data={state.team}
-          shieldPreview={state.shieldPreview}
+          data={registrationData.team}
+          shieldPreview={registrationData.shieldPreview}
           onTeamChange={updateTeam}
           onShieldFileSelected={handleShieldFileSelected}
           loading={loading}
@@ -259,7 +261,7 @@ export function TeamRegistrationWizard() {
       ),
       playersInfo: (
         <PlayersStep
-          data={state.players}
+          data={registrationData.players}
           onPlayerChange={updatePlayer}
           error={validationErrors}
           disabled={loading}
@@ -272,9 +274,9 @@ export function TeamRegistrationWizard() {
       ),
       confirmation: (
         <ConfirmationStep
-          team={state.team}
-          players={state.players}
-          shieldPreview={state.shieldPreview}
+          team={registrationData.team}
+          players={registrationData.players}
+          shieldPreview={registrationData.shieldPreview}
           termsAccepted={termsAccepted}
           onTermsChange={setTermsAccepted}
           error={validationErrors[0] || null}
@@ -282,7 +284,7 @@ export function TeamRegistrationWizard() {
       ),
       payment: (
         <PaymentStep
-          data={state.paymentForm}
+          data={registrationData.paymentForm}
           onDataChange={updatePaymentForm}
           paymentValue={getPaymentValue()}
           paymentData={paymentData}
@@ -293,14 +295,14 @@ export function TeamRegistrationWizard() {
       ),
     } as const;
 
-    return stepContentMap[state.currentStep] ?? null;
+    return stepContentMap[step] ?? null;
   };
 
   const isLastStep = stepIndex === STEPS.length - 1;
   const isPaymentScreen = paymentData !== null;
-  const isPaymentStep = state.currentStep === 'payment';
+  const isPaymentStep = step === 'payment';
   const isConfirmationBlocked =
-    state.currentStep === 'confirmation' && !termsAccepted;
+    step === 'confirmation' && !termsAccepted;
 
   const handleWizardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter') return;
@@ -336,8 +338,8 @@ export function TeamRegistrationWizard() {
   };
 
   const nextButtonLabel =
-    state.currentStep === 'playersInfo' &&
-    currentPlayerIndex < state.players.length - 1
+    step === 'playersInfo' &&
+    currentPlayerIndex < registrationData.players.length - 1
       ? 'Próximo'
       : isLastStep && !isPaymentScreen
         ? 'Gerar QR code PIX'

@@ -71,10 +71,8 @@ export interface TeamRegistrationState {
   team: Team;
   players: Player[];
   paymentForm: PaymentForm;
-  currentStep: StepType;
   //shieldFile: File | null; // Arquivo em memória antes do upload
   shieldPreview: string | null; // Data URL para preview
-  teamPlayersAmount: number;
 }
 
 // ─── Submission & API ──────────────────────────────────────────────────────
@@ -109,7 +107,7 @@ type TournamentStatus =
  | 'FINISHED';
 
 
-type RegistrationData = {
+export type RegistrationData = {
   registered: boolean;
   teamStatus?: TeamStatus;
   teamPlayersAmount?: number;

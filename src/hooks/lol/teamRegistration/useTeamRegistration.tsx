@@ -19,9 +19,12 @@ import {
   CanceledTeamData,
   CancelTournamentRegistrationResponse,
   ExceptionResponse,
-  RegistrationUIState
+  RegistrationUIState,
+  RegistrationData
 } from '@/types/teamRegistration';
-import {ApiResponseSuccess, ApiResponseError} from '@/types/api';
+
+import { ApiResponseSuccess, ApiResponseError } from '@/types/api';
+
 import {
   subscribeToPayment,
   disconnectWebSocket,
@@ -37,42 +40,52 @@ import {
 } from './constants';
 import { useRouter } from 'next/navigation';
 import { useSnackbarContext } from '@/contexts/SnackbarContext';
-import { set } from 'zod';
 
 // ────────────────────────────────────────────────────────────────────────
 
 export const useTeamRegistration = () => {
-  // ─── State ───────────────────────────────────────────────────────────────
+  // ─── States ───────────────────────────────────────────────────────────────
 
-  const [state, setState] = useState<TeamRegistrationState>({
-    team: INITIAL_TEAM,
-    players: INITIAL_PLAYERS,
-    paymentForm: INITIAL_PAYMENT_FORM,
-    currentStep: 'teamInfo',
-    shieldPreview: null,
-    teamPlayersAmount: 0,
+  const [registrationData, setRegistrationData] =
+    useState<TeamRegistrationState>({
+      team: INITIAL_TEAM,
+      players: INITIAL_PLAYERS,
+      paymentForm: INITIAL_PAYMENT_FORM,
+      shieldPreview: null,
+    });
+  const [uiState, setUiState] = useState<RegistrationUIState>({
+    status: 'loading',
   });
 
-  const { showSnackbar } = useSnackbarContext();
-  const router = useRouter();
+  const [step, setStep] = useState<StepType>('teamInfo');
   const [loading, setLoading] = useState(false);
   const [checkingRegisteredTeam, setCheckingRegisteredTeam] = useState(true);
   const [cancelingRegistration, setCancelingRegistration] = useState(false);
-  const [uiState, setUiState] = useState<RegistrationUIState>({ status: 'loading' });
   const [error, setError] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<GeneratedPaymentData | null>(null);
   const [paymentApproved, setPaymentApproved] = useState(false);
-  const [paymentExpired, setPaymentExpired] = useState(false);
-  const [isRetryRegister, setIsRetryRegister] = useState(false); // Estado para controlar se é uma tentativa de re-registrar após falha ou expiração do pagamento
-
-
+  const [retryRegisterData, setRetryRegisterData] = useState<RegistrationData | null>(null); // Estado para armazenar os dados da inscrição existente ao tentar re-registrar após expiração ou falha de pagamento
+  
   const paymentSubscriptionRef = useRef<(() => void) | null>(null); // Ref para guardar função de cleanup do WebSocket
   const teamNameAvailabilityCacheRef = useRef<Record<string, boolean>>({});
+
+  const { showSnackbar } = useSnackbarContext();
+  const router = useRouter();
+
+
+  useEffect(() => {
+    return () => {
+      unsubscribePayment();
+      disconnectWebSocket();
+    };
+  }, []);
+
+
 
   // ─── Handlers: Team ────────────────────────────────────────────────────
 
   const updateTeam = useCallback((updates: Partial<Team>) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       team: { ...prev.team, ...updates },
     }));
@@ -80,7 +93,7 @@ export const useTeamRegistration = () => {
   }, []);
 
   const setTeamShield = useCallback((file: File | null) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       team: { ...prev.team, teamShield: file },
     }));
@@ -89,7 +102,7 @@ export const useTeamRegistration = () => {
   // ─── Handlers: Shield File ─────────────────────────────────────────────
 
   const handleShieldFileSelected = useCallback((file: File | null) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       team: { ...prev.team, teamShield: file },
     }));
@@ -97,14 +110,14 @@ export const useTeamRegistration = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setState((prev) => ({
+        setRegistrationData((prev) => ({
           ...prev,
           shieldPreview: e.target?.result as string,
         }));
       };
       reader.readAsDataURL(file);
     } else {
-      setState((prev) => ({
+      setRegistrationData((prev) => ({
         ...prev,
         shieldPreview: null,
       }));
@@ -116,7 +129,7 @@ export const useTeamRegistration = () => {
 
   const updatePlayer = useCallback(
     (playerIndex: number, updates: Partial<Player>) => {
-      setState((prev) => {
+      setRegistrationData((prev) => {
         const newPlayers = [...prev.players];
         newPlayers[playerIndex] = { ...newPlayers[playerIndex], ...updates };
         return {
@@ -130,7 +143,7 @@ export const useTeamRegistration = () => {
   );
 
   const updateAllPlayers = useCallback((players: Player[]) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       players,
     }));
@@ -139,43 +152,30 @@ export const useTeamRegistration = () => {
   // ─── Handlers: Payment Form ────────────────────────────────────────────
 
   const updatePaymentForm = useCallback((updates: Partial<PaymentForm>) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       paymentForm: { ...prev.paymentForm, ...updates },
     }));
     setError(null);
   }, []);
 
-  
-
   const handleRetryPayment = () => {
-    setPaymentExpired(false);
-    setIsRetryRegister(true);
-    setUiState({status: 'can_register'});
-    setState((prev) => ({
-      ...prev,
-      currentStep: 'payment',
-    }));
+    setUiState({ status: 'can_register' });
+    setStep('payment');
   };
 
   // ─── Handlers: Step Navigation ──────────────────────────────────────────
 
   const goToStep = useCallback((step: StepType) => {
-    setState((prev) => ({
-      ...prev,
-      currentStep: step,
-    }));
+    setStep(step);
     setError(null);
   }, []);
 
   const nextStep = useCallback(() => {
-    setState((prev) => {
-      const currentIdx = STEP_LIST.indexOf(prev.currentStep);
+    setStep((prev) => {
+      const currentIdx = STEP_LIST.indexOf(prev);
       if (currentIdx < STEP_LIST.length - 1) {
-        return {
-          ...prev,
-          currentStep: STEP_LIST[currentIdx + 1],
-        };
+        return STEP_LIST[currentIdx + 1];
       }
       return prev;
     });
@@ -183,13 +183,10 @@ export const useTeamRegistration = () => {
   }, []);
 
   const prevStep = useCallback(() => {
-    setState((prev) => {
-      const currentIdx = STEP_LIST.indexOf(prev.currentStep);
+    setStep((prev) => {
+      const currentIdx = STEP_LIST.indexOf(prev);
       if (currentIdx > 0) {
-        return {
-          ...prev,
-          currentStep: STEP_LIST[currentIdx - 1],
-        };
+        return STEP_LIST[currentIdx - 1];
       }
       return prev;
     });
@@ -213,7 +210,6 @@ export const useTeamRegistration = () => {
 
   const handlePaymentApproved = useCallback(() => {
     setPaymentApproved(true);
-    console.log('Pagamento aprovado! Atualizando status...');
     unsubscribePayment(); // cancela a inscrição — não precisa mais ouvir
   }, []);
 
@@ -226,12 +222,7 @@ export const useTeamRegistration = () => {
   }, []);
 
   // ─── Cleanup — cancela WebSocket ao desmontar o componente ────────────────
-  useEffect(() => {
-    return () => {
-      unsubscribePayment();
-      disconnectWebSocket();
-    };
-  }, []);
+  
 
   const checkTeamNameAvailability = useCallback(
     async (name: string): Promise<boolean> => {
@@ -258,8 +249,7 @@ export const useTeamRegistration = () => {
 
       return isAvailable;
     },
-    []
-  );
+    []);
 
   const checkRegisterStatus = async (tournamentId: number) => {
     const response = await apiFetch(
@@ -267,167 +257,185 @@ export const useTeamRegistration = () => {
       { method: 'GET' }
     );
     if (!response.ok) {
-      const data : ExceptionResponse = await response.json();
+      const data: ExceptionResponse = await response.json();
       throw new Error(data.error || 'Erro ao verificar status de inscrição');
     }
     const data: RegisterStatusResponse = await response.json();
     return data;
   };
 
-
   const checkRegisteredTeam = async () => {
-  try {
-    setCheckingRegisteredTeam(true);
-    const tournamentId = 1; // TODO: pegar do path
-
-    let registrationStatus: RegisterStatusResponse;
-
     try {
-      registrationStatus = await checkRegisterStatus(tournamentId);
-    } catch (err : any) {
-      // Trata exceções HTTP separadamente das lógicas de negócio
-      if (err) {
-        if (err.status === 404) {
-          setUiState({status: 'error', message: "Torneio não encontrado"});      
-          return;
+      setCheckingRegisteredTeam(true);
+      const tournamentId = 1; // TODO: pegar do path
+
+      let registrationStatus: RegisterStatusResponse;
+
+      try {
+        registrationStatus = await checkRegisterStatus(tournamentId);
+      } catch (err : any) {
+        // Trata exceções HTTP separadamente das lógicas de negócio
+        if (err) {
+          if (err.status === 404) {
+            setUiState({ status: 'error', message: 'Torneio não encontrado' });
+            return;
+          }
+          if (err.status === 409) {
+            // TournamentFullException — torneio encerrado ou não aberto
+            setUiState({
+              status: 'tournament_closed',
+              message: 'As inscrições para este torneio estão encerradas.',
+            });
+
+            return;
+          }
+          if (err.status === 401) {
+            showSnackbar({
+              message: 'Faça login para continuar com a inscrição.',
+              severity: 'info',
+            });
+            router.push('/login');
+            return;
+          }
         }
-        if (err.status === 409) {
-          // TournamentFullException — torneio encerrado ou não aberto
-          setUiState({status: 'tournament_closed', message: "As inscrições para este torneio estão encerradas."});
-          
-          return;
-        }
-        if (err.status === 401) {
-          showSnackbar({
-            message: 'Faça login para continuar com a inscrição.',
-            severity: 'info',
-          });
-          router.push('/login');
-          return;
-        }
-      }
-      setUiState({status: 'error', message: "Erro ao verificar status da inscrição. Tente novamente."});
-      return;
-    }
-
-    const { registrationData, paymentData } = registrationStatus;
-
-    // ── Torneio lotado (sem inscrição prévia) ────────────────────────────── 
-    if (!registrationData.registered && (registrationData.maxTeamsReached || registrationData.tournamentStatus === 'FULL')) {
-      setUiState({status: 'tournament_full', message: "Não há mais vagas disponíveis para este torneio."});
-      return;
-    }
-
-    // ── Sem inscrição — pode registrar ─────────────────────────────────────
-    if (!registrationData.registered) {
-      setUiState({status: 'can_register'});
-      return;
-    }
-
-    // ── Tem inscrição — analisa o status ───────────────────────────────────
-    switch (registrationData.teamStatus) {
-
-      case 'PENDING_PAYMENT':
-        if (paymentData) {
-          setPaymentData(paymentData);
-          console.log('Inscrição pendente de pagamento. Dados de pagamento recebidos:', paymentData);
-          setUiState({status: 'pending_payment'});
-          goToStep('payment');
-          await handlePaymentWebSocketSubscribe(paymentData.uuid);
-          return;
-        } else {
-          // Inconsistência: PENDING sem paymentData → trata como erro
-          setUiState({status: 'error', message: "Houve um erro ao processar a sua inscrição, tente novamente mais tarde."});
-          console.error('Inscrição pendente de pagamento sem dados de pagamento disponíveis.');
-        }
-        break;
-
-      case 'READY':
-        setUiState({status: 'payment_approved'});
-        //setPaymentApproved(true);
-        //goToStep('payment');
-        break;
-
-      case 'EXPIRED_PAYMENT':
-        //setPaymentExpired(true);
-        setUiState({status: 'payment_expired'});
-        setState((prev) => ({
-          ...prev,
-          teamPlayersAmount: registrationData.teamPlayersAmount || 0,
-        }));
-        break;
-      case 'EXPIRED_PAYMENT_PROBLEM':
-        if (registrationData.maxTeamsReached) {
-          // Expirou mas torneio lotou → não pode fazer retry
-          setUiState({status: 'tournament_full'});
-        } else {
-          setUiState({status: 'payment_expired'});
-          goToStep('payment'); // volta para a etapa de pagamento com opção de retry
-        }
-        break;
-
-      case 'CANCELED':
-        // Cancelou antes → pode inscrever de novo
-        setUiState({status: 'can_register'});
-        break;
-
-      default:
-        setUiState({status: 'error', message: "Status de inscrição inválido."});
-        showSnackbar({
-          message: 'Status de inscrição inválido.',
-          severity: 'error',
+        setUiState({
+          status: 'error',
+          message: 'Erro ao verificar status da inscrição. Tente novamente.',
         });
-    }
+        return;
+      }
 
-  } catch {
-    setUiState({status: 'error', message: "Erro inesperado ao verificar inscrição."});
-  } finally {
-    setCheckingRegisteredTeam(false);
-  }
-};
+      const { registrationData, paymentData } = registrationStatus;
+
+      // ── Torneio lotado (sem inscrição prévia) ──────────────────────────────
+      if (
+        !registrationData.registered &&
+        (registrationData.maxTeamsReached ||
+          registrationData.tournamentStatus === 'FULL')
+      ) {
+        setUiState({
+          status: 'tournament_full',
+          message: 'Não há mais vagas disponíveis para este torneio.',
+        });
+        return;
+      }
+
+      // ── Sem inscrição — pode registrar ─────────────────────────────────────
+      if (!registrationData.registered) {
+        setUiState({ status: 'can_register' });
+        return;
+      }
+
+      // ── Tem inscrição — analisa o status ───────────────────────────────────
+      switch (registrationData.teamStatus) {
+        case 'PENDING_PAYMENT':
+          if (paymentData) {
+            setPaymentData(paymentData);
+            console.log(
+              'Inscrição pendente de pagamento. Dados de pagamento recebidos:',
+              paymentData
+            );
+            setUiState({ status: 'pending_payment' });
+            goToStep('payment');
+            await handlePaymentWebSocketSubscribe(paymentData.uuid);
+            return;
+          } else {
+            // Inconsistência: PENDING sem paymentData → trata como erro
+            setUiState({
+              status: 'error',
+              message:
+                'Houve um erro ao processar a sua inscrição, tente novamente mais tarde.',
+            });
+            console.error(
+              'Inscrição pendente de pagamento sem dados de pagamento disponíveis.'
+            );
+          }
+          break;
+
+        case 'READY':
+          setUiState({ status: 'payment_approved' });
+          //setPaymentApproved(true);
+          //goToStep('payment');
+          break;
+
+        case 'EXPIRED_PAYMENT':
+          setUiState({ status: 'payment_expired' });
+          setRetryRegisterData(registrationData); // Guarda os dados da inscrição existente para usar no retry
+          break;
+        case 'EXPIRED_PAYMENT_PROBLEM':
+          if (registrationData.maxTeamsReached) {
+            // Expirou mas torneio lotou → não pode fazer retry
+            setUiState({ status: 'tournament_full' });
+          } else {
+            setUiState({ status: 'payment_expired' });
+            goToStep('payment'); // volta para a etapa de pagamento com opção de retry
+          }
+          break;
+
+        case 'CANCELED':
+          // Cancelou antes → pode inscrever de novo
+          setUiState({ status: 'can_register' });
+          break;
+
+        default:
+          setUiState({
+            status: 'error',
+            message: 'Status de inscrição inválido.',
+          });
+          showSnackbar({
+            message: 'Status de inscrição inválido.',
+            severity: 'error',
+          });
+      }
+    } catch {
+      setUiState({
+        status: 'error',
+        message: 'Erro inesperado ao verificar inscrição.',
+      });
+    } finally {
+      setCheckingRegisteredTeam(false);
+    }
+  };
 
   // ─── Cancel Registration ────────────────────────────────────────────────
-  const cancelTournamentRegistration = async (): Promise<CancelTournamentRegistrationResponse> =>  {
+  const cancelTournamentRegistration =
+    async (): Promise<CancelTournamentRegistrationResponse> => {
+      try {
+        setCancelingRegistration(true);
+        const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
+        const response = await apiFetch(
+          `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+          { method: 'PUT', body: JSON.stringify({ cancelRegistration: true }) }
+        );
+        if (!response.ok) {
+          throw new Error('Erro ao cancelar inscrição');
+        }
+        const data: CanceledTeamData = await response.json();
 
-    try {
-      setCancelingRegistration(true);
-      const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
-      const response = await apiFetch(
-        `http://localhost:8080/tournaments/${tournamentId}/registrations`,
-        { method: 'PUT',
-          body: JSON.stringify({ 'cancelRegistration' :  true })
-         }
-        
-      );
-      if (!response.ok) {
-        throw new Error('Erro ao cancelar inscrição');
+        return {
+          success: true,
+          message: 'Equipe cancelada com sucesso',
+          data: data,
+        };
+      } catch (err) {
+        setUiState({ status: 'error', message: 'Erro ao cancelar inscrição.' });
+        return {
+          success: false,
+          message: 'Erro ao cancelar inscrição',
+        };
+      } finally {
+        setCancelingRegistration(false);
       }
-      const data : CanceledTeamData = await response.json();
-
-      return {
-        success: true,
-        message: "Equipe cancelada com sucesso",
-        data: data,
-      };
-    } catch (err) {
-      setUiState({status: 'error', message: "Erro ao cancelar inscrição."});
-      return {
-        success: false,
-        message: "Erro ao cancelar inscrição",
-      };
-
-    }finally{
-      setCancelingRegistration(false);
-
-    }
-  }
+    };
 
   const handleCancelPayment = async () => {
     const response = await cancelTournamentRegistration();
 
     if (response.success) {
-      //setPaymentExpired(false);
-      setUiState({status: 'canceled', message: "Inscrição cancelada com sucesso."});
+      setUiState({
+        status: 'canceled',
+        message: 'Inscrição cancelada com sucesso.',
+      });
       resetForm();
     }
   };
@@ -440,17 +448,19 @@ export const useTeamRegistration = () => {
     try {
       const payload = new FormData();
 
-      //Se o estado isRetryRegister for true, não precisa enviar os dados da equipe e dos jogadores, apenas gerar um novo pagamento para a inscrição existente. O backend deve ser capaz de identificar isso pela ausência dos dados da equipe e jogadores, e associar o novo pagamento à inscrição existente.
-      if (!isRetryRegister) {
-        // ✅ Blob com Content-Type application/json — Spring consegue deserializar
-        const activePlayers = state.players.filter((p) => !p.disabledPlayer);
+      /**
+       *Se não houver retryRegisterData, é um registro novo → envia dados completos (team + players + payment).
+       *Se houver retryRegisterData, é uma tentativa de re-registrar após expiração ou falha de pagamento → envia apenas payment, pois team + players já existem e não podem ser alterados nessa situação.
+       **/ 
+      if (!retryRegisterData) {
+        const activePlayers = registrationData.players.filter((p) => !p.disabledPlayer);
 
         payload.append(
           'teamData',
           new Blob(
             [
               JSON.stringify({
-                teamName: state.team.teamName,
+                teamName: registrationData.team.teamName,
                 players: activePlayers,
               }),
             ],
@@ -459,20 +469,18 @@ export const useTeamRegistration = () => {
         );
 
         // Arquivo direto — sem Blob, sem JSON
-        if (state.team.teamShield) {
-          payload.append('teamShield', state.team.teamShield);
+        if (registrationData.team.teamShield) {
+          payload.append('teamShield', registrationData.team.teamShield);
         }
       }
-      
 
       payload.append(
         'paymentData',
-        new Blob([JSON.stringify(state.paymentForm)], {
+        new Blob([JSON.stringify(registrationData.paymentForm)], {
           type: 'application/json',
         })
       );
 
-      
       const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
         `http://localhost:8080/tournaments/${tournamentId}/registrations`,
@@ -488,7 +496,7 @@ export const useTeamRegistration = () => {
         throw new Error(errorBody.error ?? 'Erro ao enviar inscrição');
       }
 
-      const data : GeneratedPaymentData = await response.json();
+      const data: GeneratedPaymentData = await response.json();
 
       if (!data.uuid || !data.qrCode) {
         throw new Error('Resposta inválida do servidor');
@@ -506,11 +514,9 @@ export const useTeamRegistration = () => {
 
       return true;
     } catch (err) {
-      /*setError(
-        err instanceof Error ? err.message : 'Erro ao processar inscrição'
-      );*/
       showSnackbar({
-        message: err instanceof Error ? err.message : 'Erro ao processar inscrição',
+        message:
+          err instanceof Error ? err.message : 'Erro ao processar inscrição',
         severity: 'error',
       });
       return false;
@@ -518,21 +524,21 @@ export const useTeamRegistration = () => {
       setLoading(false);
     }
   }, [
-    state.team,
-    state.players,
-    state.paymentForm,
+    registrationData.team,
+    registrationData.players,
+    registrationData.paymentForm,
     handlePaymentWebSocketSubscribe,
   ]);
 
   // ─── Getters ────────────────────────────────────────────────────────────
 
   const getActivePlayers = useCallback((): Player[] => {
-    return state.players.filter((p) => !p.disabledPlayer);
-  }, [state.players]);
+    return registrationData.players.filter((p) => !p.disabledPlayer);
+  }, [registrationData.players]);
 
   const getPaymentValue = () => {
-    if(isRetryRegister) {
-      return state.teamPlayersAmount * 10; // R$10 por jogador, valor fixo para re-registrar após expiração ou falha de pagamento
+    if (retryRegisterData && retryRegisterData.teamPlayersAmount) {
+      return retryRegisterData.teamPlayersAmount * 10; // R$10 por jogador, valor fixo para re-registrar após expiração ou falha de pagamento
     }
     const active = getActivePlayers();
     return active.length * 10; // R$10 por jogador
@@ -541,32 +547,31 @@ export const useTeamRegistration = () => {
   // ─── Reset ──────────────────────────────────────────────────────────────
 
   const resetForm = useCallback(() => {
-    setState({
+    setRegistrationData({
       team: INITIAL_TEAM,
       players: INITIAL_PLAYERS,
       paymentForm: INITIAL_PAYMENT_FORM,
-      currentStep: 'teamInfo',
-      shieldPreview: null,
-      teamPlayersAmount: 0,
+      shieldPreview: null
     });
+    setStep('teamInfo');
     setLoading(false);
     setError(null);
     setPaymentData(null);
     setPaymentApproved(false);
-    setIsRetryRegister(false);
+    setRetryRegisterData(null);
   }, []);
 
   // ─────────────────────────────────────────────────────────────────────
 
   return {
     // State
-    state,
+    registrationData,
+    step,
     loading,
     checkingRegisteredTeam,
     error,
     paymentData,
     paymentApproved,
-    paymentExpired,
     cancelingRegistration,
     uiState,
 
@@ -574,7 +579,6 @@ export const useTeamRegistration = () => {
     updateTeam,
     setTeamShield,
     checkTeamNameAvailability,
-    
 
     // Shield
     handleShieldFileSelected,

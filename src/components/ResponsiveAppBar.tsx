@@ -29,8 +29,9 @@ const DRAWER_Z_INDEX = 2000;
 
 const pages = [
   { title: 'INÍCIO', url: '/' },
+  { title: 'TORNEIOS', url: '/torneios' },
   { title: 'NOTÍCIAS', url: '/noticias' },
-  { title: 'SOBRE', url: '/sobre' },
+  //{ title: 'SOBRE', url: '/sobre' },
 ];
 const games = [
   { title: 'League Of Legends', url: '/lol' },

@@ -6,7 +6,6 @@ export default function NotFound() {
       sx={{
         minHeight: '100dvh',
         width: '100%',
-        //backgroundColor: '#f1f3f4',
         display: 'grid',
         placeItems: 'start center',
         padding: "13vh",

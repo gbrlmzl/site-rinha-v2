@@ -163,9 +163,14 @@ export function PositionSelector({
               overflow: 'hidden',
             },
           },
+          list: {
+            sx: {
+              padding: 0,
+            },
+          },
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ p: 1 }}>
+        <Stack direction="row" spacing={{xs: 0.5, sm: 1, md: 1}} sx={{ p: {xs: 0.5, sm: 1, md: 1} }}>
           {PLAYER_POSITIONS.map((position, index) => (
             <MenuItem
               key={position.key}
@@ -180,8 +185,8 @@ export function PositionSelector({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: 60,
-                height: 60,
+                width: {xs: 50, sm: 50, md: 60},
+                height: {xs: 50, sm: 50, md: 60},
                 padding: '8px !important',
                 borderRadius: 2,
                 backgroundColor:

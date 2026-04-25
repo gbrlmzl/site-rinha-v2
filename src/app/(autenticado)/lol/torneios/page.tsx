@@ -7,7 +7,6 @@ export default function TorneiosLeagueOfLegends() {
     <div>
       <Typography>
         Testando a loucura
-
       </Typography>
       
     </div>

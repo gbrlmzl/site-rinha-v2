@@ -217,6 +217,7 @@ export const THEME_SECTIONS = {
         overflow: 'hidden',
       },
     },
+    
   },
 } as const;
 
