@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Alert, Snackbar, type AlertColor } from '@mui/material';
+import Slide, { SlideProps } from '@mui/material/Slide';
 
 type SnackbarOptions = {
   message: string;
@@ -73,6 +74,8 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
         autoHideDuration={snackbar.autoHideDuration}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        slots={{transition : Slide}}
+        
       >
         <Alert
           onClose={closeSnackbar}

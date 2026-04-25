@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const authRoutes = ['/login', '/cadastro', '/recuperar-senha'];
 
-const protectedRoutePrefixes = ['/perfil', '/lol/inscricoes', '/configuracoes'];
+const protectedRoutePrefixes = ['/perfil', '/lol/inscricoes', '/torneios/me'];
 
 async function tryRefreshJwt(
   request: NextRequest
@@ -105,7 +105,7 @@ export const config = {
     '/perfil/:path*',
     '/lol/inscricoes',
     '/lol/inscricoes/:path*',
-    '/configuracoes',
-    '/configuracoes/:path*',
+    '/torneios/me',
+    '/torneios/me/:path*',
   ],
 };

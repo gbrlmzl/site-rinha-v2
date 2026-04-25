@@ -13,7 +13,7 @@ function Inicio() {
         flexDirection: { xs: 'column', md: 'column' },
         justifyContent: 'center',
         alignItems: 'center',
-        bgcolor: '#000022',
+        bgcolor: (theme) => theme.appPalette.pageBackground,
         flexGrow: 1,
         width: '100%',
         minHeight: '100%',

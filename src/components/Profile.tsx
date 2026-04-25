@@ -7,36 +7,28 @@ import {
   IconButton,
   TextField,
   Button,
-  InputAdornment,
   Divider,
   Chip,
   Fade,
   Tooltip,
   Paper,
-  Snackbar,
-  Alert,
   Stack,
+  CircularProgress,
 } from '@mui/material';
 import CameraAltRoundedIcon from '@mui/icons-material/CameraAltRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
-import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import SaveIcon from '@mui/icons-material/Save';
 import { useProfile } from '@/hooks/useProfile';
-import Slide, { SlideProps } from '@mui/material/Slide';
 import ChangePassword from './ChangePassword';
 
-import {THEME_COLORS, inputSx} from '@/constants/styles/theme';
-// ─── Paleta coesa com o resto do projeto ───────────────────────────────────
+import { THEME_SECTIONS } from '@/theme';
 
-
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ProfilePage — responsável exclusivamente pela renderização
-// ═══════════════════════════════════════════════════════════════════════════
 
 export default function ProfilePage() {
+  const PROFILE_THEME = THEME_SECTIONS.authenticatedProfile;
+  const THEME_COLORS = PROFILE_THEME.colors;
+  const inputSx = PROFILE_THEME.sx.input;
+
   const nicknameInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
@@ -48,6 +40,7 @@ export default function ProfilePage() {
     nicknameInput,
     nicknameError,
     canSendChangeRequest,
+    loading,
     handleNicknameInputChange,
     confirmChanges,
     view,
@@ -84,27 +77,14 @@ export default function ProfilePage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        backgroundColor: THEME_COLORS.bg,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
+        ...PROFILE_THEME.sx.pageContainer,
         pt: view === 'password' ? { xs: '13vh', md: 8 } : { xs: 4, md: 6 },
-
-        px: 2,
       }}
     >
       <Paper
         elevation={0}
         sx={{
-          width: '100%',
-          maxWidth: 480,
-          backgroundColor: THEME_COLORS.surface,
-          borderRadius: 4,
-          border: `1px solid ${THEME_COLORS.border}`,
-          p: { xs: 3, md: 4 },
-          position: 'relative',
-          overflow: 'hidden',
+          ...PROFILE_THEME.sx.card,
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -363,30 +343,32 @@ export default function ProfilePage() {
                   startIcon={<SaveIcon />}
                   onClick={confirmChanges}
                   disabled={
-                    !canSendChangeRequest
+                    !canSendChangeRequest || loading
                   }
                   sx={{
-                    py: 1.4,
-                    backgroundColor: `${THEME_COLORS.accent}`,
-                    borderRadius: 3,
-                    borderColor: THEME_COLORS.border,
-                    color: THEME_COLORS.text,
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                    '&:hover': {
-                      borderColor: THEME_COLORS.accent,
-                      backgroundColor: `${THEME_COLORS.accentHover}`,
-                      color: THEME_COLORS.accent,
+                    ...PROFILE_THEME.sx.primaryActionButton,
+                    display: 'grid',
+                    gridTemplateColumns: '20px 1fr 20px',
+                    padding: '0 0px 0px 0px',
+                    alignItems: 'center',
+                    '& .MuiButton-startIcon': {
+                      gridColumn: 1,
+                      justifySelf: 'start',
+                      ml: 2
                     },
-                    ':disabled': {
-                      borderColor: THEME_COLORS.border,
-                      color: THEME_COLORS.textMuted,
-                      backgroundColor: 'transparent',
-                    },
-                    transition: 'all 0.2s',
                   }}
                 >
-                  Salvar alterações
+                  <Box
+                    component="span"
+                    sx={{
+                      gridColumn: 2,
+                      justifySelf: 'center',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {loading ? <CircularProgress size={22} color="inherit" /> : 'Salvar alterações'}
+                  </Box>
                 </Button>
 
                 <Button
@@ -394,21 +376,18 @@ export default function ProfilePage() {
                   variant="outlined"
                   startIcon={<LockRoundedIcon  />}
                   onClick={goToPassword}
-                  sx={{
-                    backgroundColor: `${THEME_COLORS.danger}`,
-                    py: 1.4,
-                    borderRadius: 3,
-                    borderColor: THEME_COLORS.border,
-                    color: THEME_COLORS.text,
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                    '&:hover': {
-                      borderColor: THEME_COLORS.danger,
-                      backgroundColor: `${THEME_COLORS.dangerHover}`,
-                      //color: THEME_COLORS.accent,
-                    },
-                    transition: 'all 0.2s',
-                  }}
+                  sx={
+                    {...PROFILE_THEME.sx.dangerActionButton,
+                      padding: '0 0px 0px 0px',
+                      display: 'grid',
+                      gridTemplateColumns: '20px 1fr 20px',
+                      alignItems: 'center',
+                      '& .MuiButton-startIcon': {
+                      gridColumn: 1,
+                      margin: 0,
+                      ml: 2
+                    }
+                    }}
                 >
                   Segurança
                 </Button>

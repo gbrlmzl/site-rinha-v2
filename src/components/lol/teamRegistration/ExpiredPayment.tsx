@@ -11,9 +11,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import BlitzcrankImage from '@/assets/imgs/lol/BlitzcrankExpiredPayment.jpg';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import  {THEME_SECTIONS}  from '@/theme';
 
 type ExpiredPaymentProps = {
   loading: boolean;
@@ -22,7 +23,13 @@ type ExpiredPaymentProps = {
 };
 
 export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: ExpiredPaymentProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const theme = useTheme();
+  const appPalette = theme.appPalette;
+  
+  const themeTeamRegistration = THEME_SECTIONS.teamRegistration;
+
+  
+
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   const handleCancel = () => {
@@ -54,25 +61,11 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
   return (
     <Box
       sx={{
-        width: '100%',
-        minHeight: '100vh',
-        backgroundColor: THEME_COLORS.bg,
-        px: 2,
-        py: { xs: 3, md: 4 },
-        display: 'flex',
-        alignItems: { xs: 'center', md: 'flex-start' },
-        justifyContent: 'center',
+        ...themeTeamRegistration.sx.expiredPaymentPageContainer,
       }}
     >
       <Card
-        sx={{
-          mt: { xs: 0, md: '10vh' },
-          width: '100%',
-          maxWidth: { xs: '100%', md: '30vw', lg: '33vw' },
-          boxShadow: 3,
-          borderRadius: 3,
-          overflow: 'hidden',
-        }}
+        sx={themeTeamRegistration.sx.expiredPaymentCard}
       >
         <Box sx={{ position: 'relative', width: '100%', height: { xs: '33vh', md: '40vh' } }}>
           <Image
@@ -80,7 +73,6 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
             alt="Blitzcrank"
             fill
             sizes="(max-width: 900px) 100vw, 33vw"
-            onLoad={() => setImageLoaded(true)}
             style={{ objectFit: 'cover' }}
             placeholder="blur"
             priority
@@ -94,7 +86,7 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
               bottom: 0,
               height: { xs: 56, md: 72 },
               pointerEvents: 'none',
-              background: `linear-gradient(to bottom, rgba(8, 13, 46, 0), ${THEME_COLORS.surface})`,
+              background: `linear-gradient(to bottom, ${alpha(appPalette.cardBackground, 0)}, ${appPalette.cardBackground})`,
             }}
           />
         </Box>
@@ -107,7 +99,7 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
             mt: { xs: -3, md: -4 },
             position: 'relative',
             zIndex: 1,
-            backgroundColor: THEME_COLORS.surface,
+            backgroundColor: appPalette.cardBackground,
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -116,19 +108,19 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
               right: 0,
               height: 32,
               pointerEvents: 'none',
-              background: `linear-gradient(to bottom, rgba(0, 0, 0, 0), ${THEME_COLORS.surface})`,
+              background: `linear-gradient(to bottom, ${alpha(appPalette.cardBackground, 0)}, ${appPalette.cardBackground})`,
             },
           }}
         >
-          <Typography gutterBottom variant="h5" component="div" sx={{ color: THEME_COLORS.text, fontWeight: 700, mb: 1.5 }}>
+          <Typography gutterBottom variant="h5" component="div" sx={{fontWeight: 700, mb: 1.5 }}>
             Pagamento expirado!
           </Typography>
 
-          <Typography variant="body1" sx={{ color: THEME_COLORS.text }}>
+          <Typography variant="body1" >
             O pagamento da inscrição da sua equipe expirou.
           </Typography>
 
-          <Typography variant="body1" sx={{ mt: 1.5, color: THEME_COLORS.text }}>
+          <Typography variant="body1">
             Você pode gerar um novo pagamento, ou cancelar e realizar uma nova inscrição.
           </Typography>
         </CardContent>
@@ -143,21 +135,13 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
             pb: 3,
             pt: 1,
             justifyContent: 'center',
-            backgroundColor: THEME_COLORS.surface,
           }}
         >
           <Button
             variant="contained"
             onClick={handleCancel}
             disabled={loading}
-            sx={{
-              justifySelf: 'stretch',
-              minWidth: { xs: '100%', sm: 0 },
-              backgroundColor: THEME_COLORS.accent,
-              '&:hover': {
-                backgroundColor: THEME_COLORS.accentHover,
-              },
-            }}
+            
           >
             Cancelar
           </Button>
@@ -167,13 +151,10 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
             onClick={handleRetryPayment}
             disabled={loading}
             sx={{
-              justifySelf: 'stretch',
-              minWidth: { xs: '100%', sm: 0 },
-              backgroundColor: '#62eb65',
-              //color: '#071022',
+              backgroundColor: themeTeamRegistration.colors.success,
               '&:hover': {
-                backgroundColor: '#62eb65cc',
-              },
+                backgroundColor: themeTeamRegistration.colors.successHover,
+              }
             }}
           >
            Pagamento
@@ -188,18 +169,16 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
         aria-describedby="cancel-registration-dialog-description"
         slotProps={{
           paper: { sx: {
-            backgroundColor: THEME_COLORS.surface,
-            border: `1px solid ${THEME_COLORS.border}`,
-            color: THEME_COLORS.text,
+            backgroundColor: '#0E1241',
           }}}
         }
         
       >
-        <DialogTitle id="cancel-registration-dialog-title" sx={{ color: THEME_COLORS.text, fontWeight: 700 }}>
+        <DialogTitle id="cancel-registration-dialog-title" >
           Cancelar inscrição?
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="cancel-registration-dialog-description" sx={{ color: THEME_COLORS.text }}>
+          <DialogContentText id="cancel-registration-dialog-description">
             Ao confirmar, essa ação não poderá ser desfeita.
           </DialogContentText>
         </DialogContent>
@@ -208,12 +187,6 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
             variant="contained"
             onClick={handleCloseCancelDialog}
             disabled={loading}
-            sx={{
-              backgroundColor: THEME_COLORS.accent,
-              '&:hover': {
-                backgroundColor: THEME_COLORS.accentHover,
-              },
-            }}
           >
             Voltar
           </Button>
@@ -221,12 +194,6 @@ export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: Ex
             variant="contained"
             onClick={handleConfirmCancel}
             disabled={loading}
-            sx={{
-              backgroundColor: THEME_COLORS.accent,
-              '&:hover': {
-                backgroundColor: THEME_COLORS.accentHover,
-              },
-            }}
           >
             Confirmar
           </Button>

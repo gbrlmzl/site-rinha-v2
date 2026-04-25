@@ -2,17 +2,22 @@
 import {
   CssBaseline,
   ThemeProvider,
-  createTheme,
-  darkScrollbar,
 } from '@mui/material';
+import { useMemo } from 'react';
 
-import theme from '@/theme';
+import { AppPaletteName, createAppTheme } from '@/theme';
 
 type AppThemeProviderProps = {
   children: React.ReactNode;
+  palette?: AppPaletteName;
 };
 
-export default function AppThemeProvider({ children }: AppThemeProviderProps) {
+export default function AppThemeProvider({
+  children,
+  palette = 'neutral',
+}: AppThemeProviderProps) {
+  const theme = useMemo(() => createAppTheme(palette), [palette]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

@@ -9,6 +9,7 @@ import ADCIcon from '@/assets/icons/Position-Bot.png';
 import SupportIcon from '@/assets/icons/Position-Support.png';
 import DefaultIcon from '@/assets/icons/Position-Fill.png';
 import { StepConfig, PlayerPosition } from '@/types/teamRegistration';
+import { TEAM_REGISTRATION_COLORS } from '@/theme';
 
 // ─── Steps ────────────────────────────────────────────────────────────────
 
@@ -111,17 +112,7 @@ export const VALIDATION_MESSAGES = {
 
 // ─── Theme Colors ────────────────────────────────────────────────────────
 
-export const THEME_COLORS = {
-  bg: '#080d2e',
-  surface: '#0E1241',
-  surfaceHigh: '#151a54',
-  border: 'rgba(255,255,255,0.08)',
-  accent: '#11B5E4',
-  accentHover: '#0b80a0',
-  danger: '#ff6b6b',
-  text: '#ffffff',
-  textMuted: 'rgba(255,255,255,0.45)',
-};
+export const THEME_COLORS = TEAM_REGISTRATION_COLORS;
 
 // ─── Initial States ──────────────────────────────────────────────────────
 

@@ -13,7 +13,6 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Box,
   Button,
@@ -25,6 +24,7 @@ import {
   Container,
   Paper,
 } from '@mui/material';
+
 import { useTeamRegistration } from '@/hooks/lol/teamRegistration/useTeamRegistration';
 import {
   validatePlayer,
@@ -32,6 +32,7 @@ import {
   validatePaymentForm,
   validateTeam,
 } from '@/schemas/validationSchemas';
+
 import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 
 // Componentes de Passos
@@ -43,19 +44,20 @@ import { PaymentStep } from './steps/PaymentStep';
 import ExpiredPayment from './ExpiredPayment';
 import TeamRegistrationLoadingScreen from './TeamRegistrationLoadingScreen';
 import InfoScreen from '@/components/lol/teamRegistration/UI/InfoScreen';
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
 // ─────────────────────────────────────────────────────────────────────────
 
 export function TeamRegistrationWizard() {
   const {
-    state,
+    registrationData,
+    step,
     loading,
     uiState,
     checkingRegisteredTeam,
     error,
     paymentData,
     paymentApproved,
-    paymentExpired,
     cancelingRegistration,
     updateTeam,
     handleShieldFileSelected,
@@ -65,7 +67,6 @@ export function TeamRegistrationWizard() {
     submitRegistration,
     nextStep,
     prevStep,
-    resetForm,
     checkTeamNameAvailability,
     checkRegisteredTeam,
     handleCancelPayment,
@@ -81,11 +82,11 @@ export function TeamRegistrationWizard() {
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
   const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
   const wizardCardRef = useRef<HTMLDivElement | null>(null);
+  const { showSnackbar } = useSnackbarContext();
 
   const theme = useTheme();
-  const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const stepIndex: number = STEPS.findIndex((s) => s.key === state.currentStep);
+  const stepIndex: number = STEPS.findIndex((s) => s.key === step);
 
   useEffect(() => {
     // Verificar se o usuário já tem uma inscrição ativa
@@ -96,10 +97,10 @@ export function TeamRegistrationWizard() {
   const handleNextStep = async () => {
     if (loading || isCheckingTeamName) return;
 
-    switch (state.currentStep) {
+    switch (step) {
       case 'teamInfo': {
         // Validar equipe
-        const validation = validateTeam(state.team);
+        const validation = validateTeam(registrationData.team);
         if (!validation.success) {
           const firstIssue = Array.isArray(validation.errors)
             ? validation.errors[0]
@@ -115,11 +116,16 @@ export function TeamRegistrationWizard() {
         setIsCheckingTeamName(true);
         try {
           const nameCheckResult = await checkTeamNameAvailability(
-            state.team.teamName
+            registrationData.team.teamName
           );
           if (!nameCheckResult) {
-            setValidationErrors({
+            /*setValidationErrors({
               0: 'Já existe uma equipe com esse nome. Por favor, escolha outro.',
+            });*/
+            showSnackbar({
+              message:
+                'Já existe uma equipe com esse nome. Por favor, escolha outro.',
+              severity: 'error',
             });
             return;
           }
@@ -134,12 +140,12 @@ export function TeamRegistrationWizard() {
 
       case 'playersInfo': {
         setValidationErrors({});
-        const isLastPlayer = currentPlayerIndex === state.players.length - 1;
-        const lastPlayerIndex = state.players.length - 1;
+        const isLastPlayer = currentPlayerIndex === registrationData.players.length - 1;
+        const lastPlayerIndex = registrationData.players.length - 1;
 
         if (!isLastPlayer) {
           const currentValidation = validatePlayer(
-            state.players[currentPlayerIndex],
+            registrationData.players[currentPlayerIndex],
             currentPlayerIndex
           );
 
@@ -147,8 +153,9 @@ export function TeamRegistrationWizard() {
             const firstIssue = Array.isArray(currentValidation.errors)
               ? currentValidation.errors[0]
               : null;
-            setValidationErrors({
-              [currentPlayerIndex]: firstIssue?.message || 'Dados inválidos',
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados inválidos'}`,
+              severity: 'error',
             });
             return;
           }
@@ -159,20 +166,21 @@ export function TeamRegistrationWizard() {
 
         // isLastPlayer === true, validar o conjunto completo antes de avançar
         // No último jogador, valida o conjunto completo antes de avançar
-        const validation = validateAllPLayers(state.players);
+        const validation = validateAllPLayers(registrationData.players);
         if (!validation.success) {
           console.log('Erro de validação dos jogadores:', validation.message);
           if (validation.playerIndex !== undefined) {
             const firstIssue = Array.isArray(validation.errors)
               ? validation.errors[0]
               : null;
-            setValidationErrors({
-              [validation.playerIndex]:
-                firstIssue?.message || 'Dados inválidos',
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados inválidos'}`,
+              severity: 'error',
             });
           } else {
-            setValidationErrors({
-              [lastPlayerIndex]: validation.message || 'Erro na validação',
+            showSnackbar({
+              message: `${validation.message || 'Erro na validação'}`,
+              severity: 'error',
             });
           }
           return;
@@ -186,8 +194,9 @@ export function TeamRegistrationWizard() {
       case 'confirmation': {
         setValidationErrors({});
         if (!termsAccepted) {
-          setValidationErrors({
-            0: 'Você deve concordar com os termos',
+          showSnackbar({
+            message: 'Você deve concordar com os termos',
+            severity: 'error',
           });
           return;
         }
@@ -199,13 +208,14 @@ export function TeamRegistrationWizard() {
       case 'payment': {
         setValidationErrors({});
         // Validar pagamento
-        const validation = validatePaymentForm(state.paymentForm);
+        const validation = validatePaymentForm(registrationData.paymentForm);
         if (!validation.success) {
           const firstIssue = Array.isArray(validation.errors)
             ? validation.errors[0]
             : null;
-          setValidationErrors({
-            0: firstIssue?.message || 'Dados de pagamento inválidos',
+          showSnackbar({
+            message: `${firstIssue?.message || 'Dados de pagamento inválidos'}`,
+            severity: 'error',
           });
           return;
         }
@@ -227,7 +237,7 @@ export function TeamRegistrationWizard() {
   const handlePrevStep = () => {
     setValidationErrors({});
 
-    if (state.currentStep === 'playersInfo' && currentPlayerIndex > 0) {
+    if (step === 'playersInfo' && currentPlayerIndex > 0) {
       setCurrentPlayerIndex((prev) => prev - 1);
       return;
     }
@@ -241,8 +251,8 @@ export function TeamRegistrationWizard() {
     const stepContentMap = {
       teamInfo: (
         <TeamInfoStep
-          data={state.team}
-          shieldPreview={state.shieldPreview}
+          data={registrationData.team}
+          shieldPreview={registrationData.shieldPreview}
           onTeamChange={updateTeam}
           onShieldFileSelected={handleShieldFileSelected}
           loading={loading}
@@ -251,7 +261,7 @@ export function TeamRegistrationWizard() {
       ),
       playersInfo: (
         <PlayersStep
-          data={state.players}
+          data={registrationData.players}
           onPlayerChange={updatePlayer}
           error={validationErrors}
           disabled={loading}
@@ -264,9 +274,9 @@ export function TeamRegistrationWizard() {
       ),
       confirmation: (
         <ConfirmationStep
-          team={state.team}
-          players={state.players}
-          shieldPreview={state.shieldPreview}
+          team={registrationData.team}
+          players={registrationData.players}
+          shieldPreview={registrationData.shieldPreview}
           termsAccepted={termsAccepted}
           onTermsChange={setTermsAccepted}
           error={validationErrors[0] || null}
@@ -274,7 +284,7 @@ export function TeamRegistrationWizard() {
       ),
       payment: (
         <PaymentStep
-          data={state.paymentForm}
+          data={registrationData.paymentForm}
           onDataChange={updatePaymentForm}
           paymentValue={getPaymentValue()}
           paymentData={paymentData}
@@ -285,14 +295,14 @@ export function TeamRegistrationWizard() {
       ),
     } as const;
 
-    return stepContentMap[state.currentStep] ?? null;
+    return stepContentMap[step] ?? null;
   };
 
   const isLastStep = stepIndex === STEPS.length - 1;
   const isPaymentScreen = paymentData !== null;
-  const isPaymentStep = state.currentStep === 'payment';
+  const isPaymentStep = step === 'payment';
   const isConfirmationBlocked =
-    state.currentStep === 'confirmation' && !termsAccepted;
+    step === 'confirmation' && !termsAccepted;
 
   const handleWizardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter') return;
@@ -328,8 +338,8 @@ export function TeamRegistrationWizard() {
   };
 
   const nextButtonLabel =
-    state.currentStep === 'playersInfo' &&
-    currentPlayerIndex < state.players.length - 1
+    step === 'playersInfo' &&
+    currentPlayerIndex < registrationData.players.length - 1
       ? 'Próximo'
       : isLastStep && !isPaymentScreen
         ? 'Gerar QR code PIX'
@@ -337,49 +347,15 @@ export function TeamRegistrationWizard() {
 
   //======================================================================
 
+
+  //Se estiver verificando se o usuário já tem inscrição ativa, mostra tela de loading
   if (checkingRegisteredTeam) {
     return <TeamRegistrationLoadingScreen />;
   }
 
-  if (uiState.status === 'tournament_closed') {
-    return (
-      <InfoScreen
-        event={'tournament_closed'}
-        title="Inscrições encerradas"
-        message={
-          uiState.message || 'As inscrições para este torneio foram encerradas.'
-        }
-        action={{ label: 'Voltar', onClick: () => router.back() }}
-      />
-    );
-  }
 
-  if (uiState.status === 'tournament_full') {
-    return (
-      <InfoScreen
-        event={'tournament_full'}
-        title="Vagas esgotadas"
-        message={
-          uiState.message ||
-          'Todas as vagas deste torneio já foram preenchidas.'
-        }
-        action={{ label: 'Voltar', onClick: () => router.back() }}
-      />
-    );
-  }
 
-  if (uiState.status === 'error') {
-    return (
-      <InfoScreen
-        event={'error'}
-        title="Algo deu errado"
-        message={uiState.message || 'Tente novamente mais tarde.'}
-        action={{ label: 'Início', onClick: () => router.push('/lol') }}
-      />
-    );
-  }
-
-  if (paymentExpired) {
+  if (uiState.status === 'payment_expired') {
     return (
       <ExpiredPayment
         loading={cancelingRegistration}
@@ -388,168 +364,178 @@ export function TeamRegistrationWizard() {
       />
     );
   }
+  
+  if (uiState.status !== 'can_register' && uiState.status !== 'pending_payment') {
+    console.log('Evento em estado de não inscrição:', uiState.status);
+      return (<InfoScreen event={uiState} />);
+  }
 
-  return (
-    <Box
-      onKeyDown={handleWizardKeyDown}
-      sx={{
-        width: '100%',
-        minHeight: '100vh',
-        backgroundColor: THEME_COLORS.bg,
-        py: { xs: 3, md: 4 },
-      }}
-    >
-      <Container maxWidth="md">
-        <Paper
-          elevation={0}
-          tabIndex={0}
-          ref={wizardCardRef}
-          onClick={handleWizardCardClick}
-          sx={{
-            backgroundColor: THEME_COLORS.surface,
-            borderRadius: 3,
-            border: `1px solid ${THEME_COLORS.border}`,
-            p: { xs: 0, md: 1 },
-            overflow: 'hidden',
-            '&:focus-visible': {
-              outline: `1px solid transparent`,
-            },
-          }}
-        >
-          <Box sx={{ p: { xs: 2, md: 4 } }}>
-            {/* Step Indicator */}
-            <StepIndicator steps={STEPS} activeStep={stepIndex} />
 
-            {/* Global Error Alert */}
-            {error && (
-              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                {error}
-              </Alert>
-            )}
 
-            {/* Step Content */}
-            <Box sx={{ mb: 4, minHeight: 400 }}>
-              {loading && stepIndex < 3 ? (
-                <Box
+
+
+    return (
+      <Box
+        onKeyDown={handleWizardKeyDown}
+        sx={{
+          width: '100%',
+          minHeight: '100vh',
+          backgroundColor: THEME_COLORS.bg,
+          py: { xs: 3, md: 4 },
+        }}
+      >
+        <Container maxWidth="md">
+          <Paper
+            elevation={0}
+            tabIndex={0}
+            ref={wizardCardRef}
+            onClick={handleWizardCardClick}
+            sx={{
+              backgroundColor: THEME_COLORS.surface,
+              borderRadius: 3,
+              border: `1px solid ${THEME_COLORS.border}`,
+              p: { xs: 0, md: 1 },
+              overflow: 'hidden',
+              '&:focus-visible': {
+                outline: `1px solid transparent`,
+              },
+            }}
+          >
+            <Box sx={{ p: { xs: 2, md: 4 } }}>
+              {/* Step Indicator */}
+              <StepIndicator steps={STEPS} activeStep={stepIndex} />
+
+              {/* Global Error Alert */}
+              {error && (
+                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
+              {/* Step Content */}
+              <Box sx={{ mb: 4, minHeight: 400 }}>
+                {loading && stepIndex < 3 ? (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      minHeight: 400,
+                    }}
+                  >
+                    <CircularProgress />
+                    {/*Criar skeleton para o formulario de inscricao */}
+                  </Box>
+                ) : (
+                  renderStepContent()
+                )}
+              </Box>
+
+              {/* Navigation Buttons */}
+              {!paymentApproved && !isPaymentScreen && (
+                <Stack
+                  direction={'row'}
+                  spacing={2}
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
+                    justifyContent: isPaymentStep ? 'center' : 'space-between',
                     alignItems: 'center',
-                    minHeight: 400,
                   }}
                 >
-                  <CircularProgress />
-                  {/*Criar skeleton para o formulario de inscricao */}
-                </Box>
-              ) : (
-                renderStepContent()
-              )}
-            </Box>
+                  {!isPaymentStep && (
+                    <Button
+                      variant="contained"
+                      onClick={handlePrevStep}
+                      disabled={
+                        stepIndex === 0 ||
+                        loading ||
+                        isCheckingTeamName ||
+                        isPaymentScreen
+                      }
+                      sx={{
+                        backgroundColor: THEME_COLORS.accent,
+                        color: THEME_COLORS.text,
+                        width: isMobile ? '33%' : '20%',
+                        '&:hover': {
+                          backgroundColor: 'rgba(17, 181, 228, 0.1)',
+                          borderColor: THEME_COLORS.accent,
+                        },
+                        '&:disabled': {
+                          opacity: 0.5,
+                        },
+                      }}
+                    >
+                      Voltar
+                    </Button>
+                  )}
 
-            {/* Navigation Buttons */}
-            {!paymentApproved && !isPaymentScreen && (
-              <Stack
-                direction={'row'}
-                spacing={2}
-                sx={{
-                  justifyContent: isPaymentStep ? 'center' : 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                {!isPaymentStep && (
                   <Button
                     variant="contained"
-                    onClick={handlePrevStep}
+                    onClick={handleNextStep}
                     disabled={
-                      stepIndex === 0 ||
-                      loading ||
-                      isCheckingTeamName ||
-                      isPaymentScreen
+                      loading || isCheckingTeamName || isConfirmationBlocked
                     }
                     sx={{
-                      backgroundColor: THEME_COLORS.accent,
-                      color: THEME_COLORS.text,
-                      width: isMobile ? '33%' : '20%',
+                      backgroundColor: isPaymentStep
+                        ? '#16a34a'
+                        : THEME_COLORS.accent,
+                      color: '#ffffff',
+                      width: isPaymentStep
+                        ? isMobile
+                          ? '75%'
+                          : '33%'
+                        : isMobile
+                          ? '33%'
+                          : '25%',
                       '&:hover': {
-                        backgroundColor: 'rgba(17, 181, 228, 0.1)',
-                        borderColor: THEME_COLORS.accent,
+                        backgroundColor: isPaymentStep
+                          ? '#15803d'
+                          : THEME_COLORS.accentHover,
                       },
                       '&:disabled': {
                         opacity: 0.5,
                       },
                     }}
                   >
-                    Voltar
+                    {loading || isCheckingTeamName ? (
+                      <>
+                        <CircularProgress size={18} sx={{ mr: 1 }} />
+                        {loading && 'Processando...'}
+                      </>
+                    ) : (
+                      `${nextButtonLabel}`
+                    )}
                   </Button>
-                )}
+                </Stack>
+              )}
 
-                <Button
-                  variant="contained"
-                  onClick={handleNextStep}
-                  disabled={
-                    loading || isCheckingTeamName || isConfirmationBlocked
-                  }
+              {/* Success Screen */}
+              {paymentApproved && (
+                <Stack
+                  spacing={2}
                   sx={{
-                    backgroundColor: isPaymentStep
-                      ? '#16a34a'
-                      : THEME_COLORS.accent,
-                    color: '#ffffff',
-                    width: isPaymentStep
-                      ? isMobile
-                        ? '75%'
-                        : '33%'
-                      : isMobile
-                        ? '33%'
-                        : '25%',
-                    '&:hover': {
-                      backgroundColor: isPaymentStep
-                        ? '#15803d'
-                        : THEME_COLORS.accentHover,
-                    },
-                    '&:disabled': {
-                      opacity: 0.5,
-                    },
+                    textAlign: 'center',
                   }}
                 >
-                  {loading || isCheckingTeamName ? (
-                    <>
-                      <CircularProgress size={18} sx={{ mr: 1 }} />
-                      {loading && 'Processando...'}
-                    </>
-                  ) : (
-                    `${nextButtonLabel}`
-                  )}
-                </Button>
-              </Stack>
-            )}
-
-            {/* Success Screen */}
-            {paymentApproved && (
-              <Stack
-                spacing={2}
-                sx={{
-                  textAlign: 'center',
-                }}
-              >
-                <Button
-                  variant="contained"
-                  href="/"
-                  sx={{
-                    width: isMobile ? '100%' : '50%',
-                    alignSelf: 'center',
-                    backgroundColor: THEME_COLORS.accent,
-                    '&:hover': {
-                      backgroundColor: THEME_COLORS.accentHover,
-                    },
-                  }}
-                >
-                  Voltar para Início
-                </Button>
-              </Stack>
-            )}
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
-  );
+                  <Button
+                    variant="contained"
+                    href="/"
+                    sx={{
+                      width: isMobile ? '100%' : '50%',
+                      alignSelf: 'center',
+                      backgroundColor: THEME_COLORS.accent,
+                      '&:hover': {
+                        backgroundColor: THEME_COLORS.accentHover,
+                      },
+                    }}
+                  >
+                    Voltar para Início
+                  </Button>
+                </Stack>
+              )}
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  
 }

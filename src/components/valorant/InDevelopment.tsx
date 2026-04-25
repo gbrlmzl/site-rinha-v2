@@ -13,23 +13,17 @@ import InDevArtDesktop from '@/assets/imgs/valorant/InDevArtDesktop.png';
 import inDevArtDesktopBlur from '@/assets/imgs/valorant/InDevArtDesktopBlur.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 export default function InDevelopmentValorant() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const router = useRouter();
-  const [imageLoading, setImageLoading] = useState(true);
 
   const handleGoBack = () => {
     router.push('/');
   };
 
-  //criar Url para o blurDataURL
-  const blurDataURL = `data:image/svg+xml;base64,${btoa(inDevArtDesktopBlur)}`;
-
   const navbarOffset = isMobile ? '17.5vh' : '15vh'; // Ajuste para evitar sobreposição com a navbar
-  console.log(inDevArtDesktopBlur.src);
   return (
     <Box
       sx={{
@@ -46,14 +40,13 @@ export default function InDevelopmentValorant() {
         preload
         loading="eager"
         placeholder="blur"
-        blurDataURL={blurDataURL}
+        blurDataURL={inDevArtDesktopBlur.src}
         sizes="100vw"
         style={{
           objectFit: 'cover',
           objectPosition: 'center',
           transition: 'opacity 1s ease-in-out',
         }}
-        //onLoad={() => setImageLoading(false)}
       />
 
       <Box
@@ -99,8 +92,8 @@ export default function InDevelopmentValorant() {
               py: 1,
               fontWeight: 700,
               letterSpacing: 0.3,
-              backgroundColor: '#ff4655',
-              '&:hover': { backgroundColor: '#d93b49' },
+              backgroundColor: theme.appPalette.primary,
+              '&:hover': { backgroundColor: theme.appPalette.primaryHover },
             }}
           >
             Início
