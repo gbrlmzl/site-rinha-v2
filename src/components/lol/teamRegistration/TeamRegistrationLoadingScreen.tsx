@@ -1,8 +1,10 @@
 import { Box, Container, Paper } from '@mui/material';
-import { THEME_COLORS } from '@/constants/styles/theme';
+import { THEME_SECTIONS } from '@/theme';
 import TeamInfoStepSkeleton from '@/components/lol/teamRegistration/UI/TeamInfoStepSkeleton';
 
 export default function TeamRegistrationLoadingScreen() {
+  const THEME_COLORS = THEME_SECTIONS.teamRegistration.colors;
+
     return (
         <Box
         sx={{

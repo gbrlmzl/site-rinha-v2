@@ -6,7 +6,7 @@ export default function TorneiosLeagueOfLegends() {
   return (
     <div>
       <Typography>
-        Vitor hugo é gay
+        Testando a loucura
 
       </Typography>
       

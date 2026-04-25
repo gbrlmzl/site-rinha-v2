@@ -1,11 +1,15 @@
+ 'use client';
+
 import { Box, Typography, Button } from '@mui/material';
 import Image from 'next/image';
 import gravesBackground from '@/assets/imgs/gravesSplashFHD.jpg';
 import gravesBackgroundMobile from '@/assets/imgs/gravesSplashMobile.jpg';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 
 function InfoBox() {
+  const theme = useTheme();
   const [imageLoaded, setImageLoaded] = useState(false);
   return (
     <Box
@@ -144,7 +148,10 @@ function InfoBox() {
                 fontSize: '1.25rem',
                 fontFamily: 'Russo One',
                 fontWeight: 'bold',
-                ':hover': { backgroundColor: '#0051E6', color: 'white' },
+                ':hover': {
+                  backgroundColor: theme.appPalette.primaryHover,
+                  color: 'white',
+                },
               }}
             >
               INSCREVA SUA EQUIPE

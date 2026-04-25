@@ -6,7 +6,6 @@ import AppThemeProvider from './theme-provider';
 
 import { AuthContextProvider } from '@/contexts/AuthContext';
 import { SnackbarProvider } from '@/contexts/SnackbarContext';
-import { isAuthenticated } from '@/utils/auth';
 
 //const hasToken = await isAuthenticated();
 

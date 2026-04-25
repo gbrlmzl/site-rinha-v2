@@ -74,6 +74,7 @@ export interface TeamRegistrationState {
   currentStep: StepType;
   //shieldFile: File | null; // Arquivo em memória antes do upload
   shieldPreview: string | null; // Data URL para preview
+  teamPlayersAmount: number;
 }
 
 // ─── Submission & API ──────────────────────────────────────────────────────
@@ -111,6 +112,7 @@ type TournamentStatus =
 type RegistrationData = {
   registered: boolean;
   teamStatus?: TeamStatus;
+  teamPlayersAmount?: number;
   tournamentStatus?: TournamentStatus;
   maxTeamsReached?: boolean;
 }
@@ -121,8 +123,8 @@ export type RegisterStatusResponse = {
 
 // types/registration.ts — adicione os estados de UI
 export type RegistrationUIState ={
-  status: 
-    | 'loading' 
+  status:  
+    | 'loading'
     | 'can_register'
     | 'tournament_closed'
     | 'tournament_full'

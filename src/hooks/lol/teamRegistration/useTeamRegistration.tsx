@@ -37,6 +37,7 @@ import {
 } from './constants';
 import { useRouter } from 'next/navigation';
 import { useSnackbarContext } from '@/contexts/SnackbarContext';
+import { set } from 'zod';
 
 // ────────────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,7 @@ export const useTeamRegistration = () => {
     paymentForm: INITIAL_PAYMENT_FORM,
     currentStep: 'teamInfo',
     shieldPreview: null,
+    teamPlayersAmount: 0,
   });
 
   const { showSnackbar } = useSnackbarContext();
@@ -56,12 +58,13 @@ export const useTeamRegistration = () => {
   const [loading, setLoading] = useState(false);
   const [checkingRegisteredTeam, setCheckingRegisteredTeam] = useState(true);
   const [cancelingRegistration, setCancelingRegistration] = useState(false);
-  const [uiState, setUiState] = useState<RegistrationUIState>({status: 'loading'});
+  const [uiState, setUiState] = useState<RegistrationUIState>({ status: 'loading' });
   const [error, setError] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<GeneratedPaymentData | null>(null);
   const [paymentApproved, setPaymentApproved] = useState(false);
   const [paymentExpired, setPaymentExpired] = useState(false);
   const [isRetryRegister, setIsRetryRegister] = useState(false); // Estado para controlar se é uma tentativa de re-registrar após falha ou expiração do pagamento
+
 
   const paymentSubscriptionRef = useRef<(() => void) | null>(null); // Ref para guardar função de cleanup do WebSocket
   const teamNameAvailabilityCacheRef = useRef<Record<string, boolean>>({});
@@ -148,6 +151,7 @@ export const useTeamRegistration = () => {
   const handleRetryPayment = () => {
     setPaymentExpired(false);
     setIsRetryRegister(true);
+    setUiState({status: 'can_register'});
     setState((prev) => ({
       ...prev,
       currentStep: 'payment',
@@ -326,23 +330,32 @@ export const useTeamRegistration = () => {
       case 'PENDING_PAYMENT':
         if (paymentData) {
           setPaymentData(paymentData);
+          console.log('Inscrição pendente de pagamento. Dados de pagamento recebidos:', paymentData);
           setUiState({status: 'pending_payment'});
           goToStep('payment');
           await handlePaymentWebSocketSubscribe(paymentData.uuid);
+          return;
         } else {
           // Inconsistência: PENDING sem paymentData → trata como erro
           setUiState({status: 'error', message: "Houve um erro ao processar a sua inscrição, tente novamente mais tarde."});
-          
+          console.error('Inscrição pendente de pagamento sem dados de pagamento disponíveis.');
         }
         break;
 
       case 'READY':
         setUiState({status: 'payment_approved'});
-        setPaymentApproved(true);
-        goToStep('payment');
+        //setPaymentApproved(true);
+        //goToStep('payment');
         break;
 
       case 'EXPIRED_PAYMENT':
+        //setPaymentExpired(true);
+        setUiState({status: 'payment_expired'});
+        setState((prev) => ({
+          ...prev,
+          teamPlayersAmount: registrationData.teamPlayersAmount || 0,
+        }));
+        break;
       case 'EXPIRED_PAYMENT_PROBLEM':
         if (registrationData.maxTeamsReached) {
           // Expirou mas torneio lotou → não pode fazer retry
@@ -397,7 +410,6 @@ export const useTeamRegistration = () => {
         data: data,
       };
     } catch (err) {
-      console.error('Erro ao cancelar inscrição', err);
       setUiState({status: 'error', message: "Erro ao cancelar inscrição."});
       return {
         success: false,
@@ -414,7 +426,7 @@ export const useTeamRegistration = () => {
     const response = await cancelTournamentRegistration();
 
     if (response.success) {
-      setPaymentExpired(false);
+      //setPaymentExpired(false);
       setUiState({status: 'canceled', message: "Inscrição cancelada com sucesso."});
       resetForm();
     }
@@ -491,16 +503,16 @@ export const useTeamRegistration = () => {
       });
 
       await handlePaymentWebSocketSubscribe(data.uuid);
-      console.log(
-        'Inscrição enviada com sucesso. UUID do pagamento:',
-        data.uuid
-      );
 
       return true;
     } catch (err) {
-      setError(
+      /*setError(
         err instanceof Error ? err.message : 'Erro ao processar inscrição'
-      );
+      );*/
+      showSnackbar({
+        message: err instanceof Error ? err.message : 'Erro ao processar inscrição',
+        severity: 'error',
+      });
       return false;
     } finally {
       setLoading(false);
@@ -518,10 +530,13 @@ export const useTeamRegistration = () => {
     return state.players.filter((p) => !p.disabledPlayer);
   }, [state.players]);
 
-  const getPaymentValue = useCallback((): number => {
+  const getPaymentValue = () => {
+    if(isRetryRegister) {
+      return state.teamPlayersAmount * 10; // R$10 por jogador, valor fixo para re-registrar após expiração ou falha de pagamento
+    }
     const active = getActivePlayers();
     return active.length * 10; // R$10 por jogador
-  }, [getActivePlayers]);
+  };
 
   // ─── Reset ──────────────────────────────────────────────────────────────
 
@@ -532,6 +547,7 @@ export const useTeamRegistration = () => {
       paymentForm: INITIAL_PAYMENT_FORM,
       currentStep: 'teamInfo',
       shieldPreview: null,
+      teamPlayersAmount: 0,
     });
     setLoading(false);
     setError(null);
