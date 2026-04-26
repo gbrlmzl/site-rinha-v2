@@ -20,7 +20,7 @@ import {
   CancelTournamentRegistrationResponse,
   ExceptionResponse,
   RegistrationUIState,
-  RegistrationData
+  RegistrationData,
 } from '@/types/teamRegistration';
 
 import { ApiResponseSuccess, ApiResponseError } from '@/types/api';
@@ -62,16 +62,18 @@ export const useTeamRegistration = () => {
   const [checkingRegisteredTeam, setCheckingRegisteredTeam] = useState(true);
   const [cancelingRegistration, setCancelingRegistration] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentData, setPaymentData] = useState<GeneratedPaymentData | null>(null);
+  const [paymentData, setPaymentData] = useState<GeneratedPaymentData | null>(
+    null
+  );
   const [paymentApproved, setPaymentApproved] = useState(false);
-  const [retryRegisterData, setRetryRegisterData] = useState<RegistrationData | null>(null); // Estado para armazenar os dados da inscrição existente ao tentar re-registrar após expiração ou falha de pagamento
-  
+  const [retryRegisterData, setRetryRegisterData] =
+    useState<RegistrationData | null>(null); // Estado para armazenar os dados da inscrição existente ao tentar re-registrar após expiração ou falha de pagamento
+
   const paymentSubscriptionRef = useRef<(() => void) | null>(null); // Ref para guardar função de cleanup do WebSocket
   const teamNameAvailabilityCacheRef = useRef<Record<string, boolean>>({});
 
   const { showSnackbar } = useSnackbarContext();
   const router = useRouter();
-
 
   useEffect(() => {
     return () => {
@@ -79,8 +81,6 @@ export const useTeamRegistration = () => {
       disconnectWebSocket();
     };
   }, []);
-
-
 
   // ─── Handlers: Team ────────────────────────────────────────────────────
 
@@ -222,7 +222,6 @@ export const useTeamRegistration = () => {
   }, []);
 
   // ─── Cleanup — cancela WebSocket ao desmontar o componente ────────────────
-  
 
   const checkTeamNameAvailability = useCallback(
     async (name: string): Promise<boolean> => {
@@ -237,7 +236,7 @@ export const useTeamRegistration = () => {
         return cachedResult;
       }
 
-      const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
+      const tournamentId = 3; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
         `http://localhost:8080/tournaments/${tournamentId}/teams/check-name?name=${encodeURIComponent(normalizedName)}`,
         { method: 'GET' }
@@ -249,7 +248,8 @@ export const useTeamRegistration = () => {
 
       return isAvailable;
     },
-    []);
+    []
+  );
 
   const checkRegisterStatus = async (tournamentId: number) => {
     const response = await apiFetch(
@@ -267,13 +267,13 @@ export const useTeamRegistration = () => {
   const checkRegisteredTeam = async () => {
     try {
       setCheckingRegisteredTeam(true);
-      const tournamentId = 1; // TODO: pegar do path
+      const tournamentId = 3; // TODO: pegar do path
 
       let registrationStatus: RegisterStatusResponse;
 
       try {
         registrationStatus = await checkRegisterStatus(tournamentId);
-      } catch (err : any) {
+      } catch (err: any) {
         // Trata exceções HTTP separadamente das lógicas de negócio
         if (err) {
           if (err.status === 404) {
@@ -402,7 +402,7 @@ export const useTeamRegistration = () => {
     async (): Promise<CancelTournamentRegistrationResponse> => {
       try {
         setCancelingRegistration(true);
-        const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
+        const tournamentId = 3; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
         const response = await apiFetch(
           `http://localhost:8080/tournaments/${tournamentId}/registrations`,
           { method: 'PUT', body: JSON.stringify({ cancelRegistration: true }) }
@@ -451,9 +451,11 @@ export const useTeamRegistration = () => {
       /**
        *Se não houver retryRegisterData, é um registro novo → envia dados completos (team + players + payment).
        *Se houver retryRegisterData, é uma tentativa de re-registrar após expiração ou falha de pagamento → envia apenas payment, pois team + players já existem e não podem ser alterados nessa situação.
-       **/ 
+       **/
       if (!retryRegisterData) {
-        const activePlayers = registrationData.players.filter((p) => !p.disabledPlayer);
+        const activePlayers = registrationData.players.filter(
+          (p) => !p.disabledPlayer
+        );
 
         payload.append(
           'teamData',
@@ -481,7 +483,7 @@ export const useTeamRegistration = () => {
         })
       );
 
-      const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
+      const tournamentId = 3; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
         `http://localhost:8080/tournaments/${tournamentId}/registrations`,
         {
@@ -551,7 +553,7 @@ export const useTeamRegistration = () => {
       team: INITIAL_TEAM,
       players: INITIAL_PLAYERS,
       paymentForm: INITIAL_PAYMENT_FORM,
-      shieldPreview: null
+      shieldPreview: null,
     });
     setStep('teamInfo');
     setLoading(false);

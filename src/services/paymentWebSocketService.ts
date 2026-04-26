@@ -37,7 +37,6 @@ export async function subscribeToPayment(
     `/topic/payment/${uuid}`,
     (message: IMessage) => {
       const body = JSON.parse(message.body);
-      console.log('Mensagem recebida:', body);
       if (body.status === 'APPROVED') {
         onApproved();
       }

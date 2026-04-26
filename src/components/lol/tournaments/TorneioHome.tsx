@@ -1,42 +1,106 @@
 'use client';
 
-import { useAuthContext } from "@/contexts/AuthContext";
-import { useTournament } from "@/hooks/lol/tournaments/useTournament";
-import { Box } from "@mui/material";
-import { useEffect } from "react";
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useTournament } from '@/hooks/lol/tournaments/useTournament';
+import { MyTournamentsSummaryData } from '@/types/lol/tournaments/tournament';
+import { toTournamentSlug } from '@/utils/tournament-slug';
+import { Box, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { JSX, useEffect, useState } from 'react';
+import ActiveTournamentCard from './cards/ActiveTournamentCard';
+import MyTournamentsCarousel from './MyTournamentsCarousel';
+import PendingPaymentCard from './cards/PendingPaymentCard';
+import TournamentExplorer from './explorer/TournamentExplorer';
 
 export default function TorneioHome() {
-    const { user, isAuthenticated, isLoading } = useAuthContext();
+  const { isAuthenticated } = useAuthContext();
+  const { getMyTournaments } = useTournament();
+  const router = useRouter();
+  const [myTournaments, setMyTournaments] = useState<
+    MyTournamentsSummaryData[]
+  >([]);
 
-    const {
+  useEffect(() => {
+    if (!isAuthenticated) return;
 
-    } = useTournament();
+    getMyTournaments('LEAGUE_OF_LEGENDS').then((page) => {
+      if (page) setMyTournaments(page.content);
+    });
+  }, [isAuthenticated]);
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            //Chamar método para buscar listas de inscrições da api(MyTournament)
-            findMyTournaments():
-        }
-    }, [isAuthenticated,]);
+  function updateMyTournaments() {
+    getMyTournaments('LEAGUE_OF_LEGENDS').then((page) => {
+      if (page) setMyTournaments(page.content);
+    });
+  }
 
-    return (
-        <Box>
-            <Box>
-                {/**
-                 Seção de Competições Ativas(MyTournament)
-                 -> Aqui o usuário LOGADO conseguirá visualizar os torneios em que ele está INSCRITO, com inscrição confirmada ou pendente.
-                 -> 
-                 */}
-            </Box>
-            <Box>
-                {
-                    /**
-                     * Aqui é a seção dos próximos Torneios
-                     * Regra: Mesmo o usuário não autenticado deve ter acesso aos próximos torneios, e ao participe(detalhar)
-                     * Gerar Componente: TournamentResume com as respectivas props tipadas
-                     */
-                }
-            </Box>
+  useEffect(() => {
+    window.addEventListener('tournament-payment-approved', updateMyTournaments);
+    return () =>
+      window.removeEventListener(
+        'tournament-payment-approved',
+        updateMyTournaments
+      );
+  }, []);
+
+  function renderCard(tournament: MyTournamentsSummaryData) {
+    const inscricoesPath = `/lol/torneios/${tournament.id}/inscricoes`;
+    const detailPath = `/lol/torneios/${toTournamentSlug(tournament.id, tournament.tournamentName)}`;
+
+    if (tournament.teamStatus === 'PENDING_PAYMENT') {
+      return (
+        <PendingPaymentCard
+          key={tournament.id}
+          data={tournament}
+          onPay={() => router.push(inscricoesPath)}
+        />
+      );
+    }
+    if (tournament.teamStatus === 'READY') {
+      return (
+        <ActiveTournamentCard
+          key={tournament.id}
+          data={tournament}
+          onView={() => router.push(detailPath)}
+        />
+      );
+    }
+    return null;
+  }
+
+  return (
+    <Box sx={{ maxWidth: 1400, mx: 'auto', px: { xs: 2, md: 6 }, pt: '13vh' }}>
+      {isAuthenticated && myTournaments.length > 0 && (
+        <Box sx={{ mb: 5 }}>
+          <Typography
+            sx={{
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: { xs: '1.4rem', md: '1.8rem' },
+              letterSpacing: -0.3,
+              mb: 0.5,
+            }}
+          >
+            Minhas Competições
+          </Typography>
+          <Typography
+            sx={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '0.85rem',
+              mb: 2.5,
+            }}
+          >
+            Torneios em que você está inscrito.
+          </Typography>
+          <MyTournamentsCarousel
+            items={myTournaments
+              .map(renderCard)
+              .filter((c): c is JSX.Element => c !== null)}
+          />
         </Box>
-    )
+      )}
+
+      <TournamentExplorer game="LEAGUE_OF_LEGENDS" />
+    </Box>
+  );
 }
