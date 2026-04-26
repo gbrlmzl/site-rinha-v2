@@ -9,6 +9,7 @@ import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import { toTournamentSlug } from '@/utils/tournament-slug';
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import TournamentStatusBadge from './TournamentStatusBadge';
 
@@ -68,10 +69,12 @@ export default function DesktopCarousel({
         }}
       >
         {/* Background image */}
-        <img
+        <Image
           key={t.id}
           src={t.imageUrl}
           alt={t.name}
+          fill
+          sizes="100vw"
           referrerPolicy="no-referrer"
           style={{
             position: 'absolute',
@@ -79,6 +82,8 @@ export default function DesktopCarousel({
             width: '100%',
             height: '100%',
             objectFit: 'cover',
+            objectPosition: 'top center',
+            display: 'block',
           }}
         />
 
@@ -205,7 +210,7 @@ export default function DesktopCarousel({
           <Stack direction="row" spacing={1.5}>
             <Button
               variant="contained"
-              onClick={() => router.push(`/lol/torneios/${toTournamentSlug(t.id, t.name)}`)}
+              onClick={() => router.push(`/lol/torneios/${/*toTournamentSlug(t.id, t.name)*/t.slug}`)}
               sx={{
                 backgroundColor: '#11B5E4',
                 color: '#ffffff',

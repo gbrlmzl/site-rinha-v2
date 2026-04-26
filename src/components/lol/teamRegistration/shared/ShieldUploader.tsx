@@ -20,7 +20,7 @@ import Image from 'next/image';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface ShieldUploaderProps {
   preview: string | null;
@@ -37,6 +37,7 @@ export function ShieldUploader({
   error = null,
   success = false,
 }: ShieldUploaderProps) {
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [shieldFileError, setShieldFileError] = useState<string | null>(null);
 

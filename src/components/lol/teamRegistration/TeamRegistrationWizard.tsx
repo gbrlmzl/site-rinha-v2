@@ -13,6 +13,8 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from 'react';
+
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Button,
@@ -33,7 +35,7 @@ import {
   validateTeam,
 } from '@/schemas/validationSchemas';
 
-import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { STEPS } from '@/hooks/lol/teamRegistration/constants';
 
 // Componentes de Passos
 import { StepIndicator } from './shared/StepIndicator';
@@ -45,10 +47,14 @@ import ExpiredPayment from './ExpiredPayment';
 import TeamRegistrationLoadingScreen from './TeamRegistrationLoadingScreen';
 import InfoScreen from '@/components/lol/teamRegistration/UI/InfoScreen';
 import { useSnackbarContext } from '@/contexts/SnackbarContext';
-
+import {TEAM_REGISTRATION_TOKENS} from '@/theme';
 // ─────────────────────────────────────────────────────────────────────────
+type TeamRegistrationWizardProps = {
+  slug: string;
+};
 
-export function TeamRegistrationWizard() {
+
+export function TeamRegistrationWizard({ slug }: TeamRegistrationWizardProps) {
   const {
     registrationData,
     step,
@@ -83,15 +89,23 @@ export function TeamRegistrationWizard() {
   const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
   const wizardCardRef = useRef<HTMLDivElement | null>(null);
   const { showSnackbar } = useSnackbarContext();
-
+  const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const stepIndex: number = STEPS.findIndex((s) => s.key === step);
 
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
+  
+
+
   useEffect(() => {
     // Verificar se o usuário já tem uma inscrição ativa
-    checkRegisteredTeam();
+    checkRegisteredTeam(slug);
   }, []);
+
+  const handleReturnToTournamentPage = () => {
+    router.push(`/lol/torneios/${slug}`);
+  }
   // ─── Step Handlers ────────────────────────────────────────────────────
 
   const handleNextStep = async () => {
@@ -141,7 +155,6 @@ export function TeamRegistrationWizard() {
       case 'playersInfo': {
         setValidationErrors({});
         const isLastPlayer = currentPlayerIndex === registrationData.players.length - 1;
-        const lastPlayerIndex = registrationData.players.length - 1;
 
         if (!isLastPlayer) {
           const currentValidation = validatePlayer(
@@ -367,7 +380,7 @@ export function TeamRegistrationWizard() {
   
   if (uiState.status !== 'can_register' && uiState.status !== 'pending_payment') {
     console.log('Evento em estado de não inscrição:', uiState.status);
-      return (<InfoScreen event={uiState} />);
+      return (<InfoScreen event={uiState} slug={slug} />);
   }
 
 
@@ -518,13 +531,15 @@ export function TeamRegistrationWizard() {
                 >
                   <Button
                     variant="contained"
-                    href="/"
+                    //href="/"
+                    onClick={handleReturnToTournamentPage}
                     sx={{
                       width: isMobile ? '100%' : '50%',
                       alignSelf: 'center',
-                      backgroundColor: THEME_COLORS.accent,
+                      //backgroundColor: THEME_COLORS.accent,
                       '&:hover': {
-                        backgroundColor: THEME_COLORS.accentHover,
+                        
+                        //backgroundColor: THEME_COLORS.accentHover,
                       },
                     }}
                   >

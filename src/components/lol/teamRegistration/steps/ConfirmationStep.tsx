@@ -26,9 +26,9 @@ import Image from 'next/image';
 import { Team, Player } from '@/types/teamRegistration';
 import {
   PLAYER_POSITIONS,
-  THEME_COLORS,
   getPositionIcon,
 } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface ConfirmationStepProps {
   team: Team;
@@ -47,6 +47,8 @@ export function ConfirmationStep({
   onTermsChange,
   error = null,
 }: ConfirmationStepProps) {
+
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const activePlayers = players.filter((p) => !p.disabledPlayer);
   const shieldSrc = shieldPreview;
 

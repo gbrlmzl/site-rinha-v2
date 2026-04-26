@@ -41,10 +41,7 @@ export default function RootLayout({
           <AppThemeProvider>
             <AuthContextProvider>
               <SnackbarProvider>
-                <Navbar></Navbar>
-                <main>
                   {children}
-                </main>
               </SnackbarProvider>
             </AuthContextProvider>
           </AppThemeProvider>

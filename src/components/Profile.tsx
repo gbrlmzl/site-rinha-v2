@@ -21,13 +21,13 @@ import SaveIcon from '@mui/icons-material/Save';
 import { useProfile } from '@/hooks/useProfile';
 import ChangePassword from './ChangePassword';
 
-import { THEME_SECTIONS } from '@/theme';
+import { AUTHENTICATED_PROFILE_TOKENS } from '@/theme';
 
 
 export default function ProfilePage() {
-  const PROFILE_THEME = THEME_SECTIONS.authenticatedProfile;
-  const THEME_COLORS = PROFILE_THEME.colors;
-  const inputSx = PROFILE_THEME.sx.input;
+  
+  const THEME_COLORS = AUTHENTICATED_PROFILE_TOKENS.colors;
+  const inputSx = AUTHENTICATED_PROFILE_TOKENS.sx.input;
 
   const nicknameInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -77,14 +77,14 @@ export default function ProfilePage() {
   return (
     <Box
       sx={{
-        ...PROFILE_THEME.sx.pageContainer,
+        ...AUTHENTICATED_PROFILE_TOKENS.sx.pageContainer,
         pt: view === 'password' ? { xs: '13vh', md: 8 } : { xs: 4, md: 6 },
       }}
     >
       <Paper
         elevation={0}
         sx={{
-          ...PROFILE_THEME.sx.card,
+          ...AUTHENTICATED_PROFILE_TOKENS.sx.card,
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -346,7 +346,7 @@ export default function ProfilePage() {
                     !canSendChangeRequest || loading
                   }
                   sx={{
-                    ...PROFILE_THEME.sx.primaryActionButton,
+                    ...AUTHENTICATED_PROFILE_TOKENS.sx.primaryActionButton,
                     display: 'grid',
                     gridTemplateColumns: '20px 1fr 20px',
                     padding: '0 0px 0px 0px',
@@ -377,7 +377,7 @@ export default function ProfilePage() {
                   startIcon={<LockRoundedIcon  />}
                   onClick={goToPassword}
                   sx={
-                    {...PROFILE_THEME.sx.dangerActionButton,
+                    {...AUTHENTICATED_PROFILE_TOKENS.sx.dangerActionButton,
                       padding: '0 0px 0px 0px',
                       display: 'grid',
                       gridTemplateColumns: '20px 1fr 20px',

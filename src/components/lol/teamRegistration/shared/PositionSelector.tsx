@@ -12,8 +12,8 @@ import { PlayerPosition } from '@/types/teamRegistration';
 import {
   PLAYER_POSITIONS,
   DEFAULT_POSITION_ICON,
-  THEME_COLORS,
 } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PositionSelectorProps {
   value: PlayerPosition;
@@ -30,6 +30,7 @@ export function PositionSelector({
   disabled = false,
   size = 'medium',
 }: PositionSelectorProps) {
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const positionItemRefs = useRef<(HTMLLIElement | null)[]>([]);
 

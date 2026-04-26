@@ -19,7 +19,7 @@ import {
 import { styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { StepConfig } from '@/types/teamRegistration';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface StepIndicatorProps {
   steps: StepConfig[];
@@ -27,6 +27,8 @@ interface StepIndicatorProps {
   onStepClick?: (stepIndex: number) => void;
   clickableSteps?: boolean;
 }
+
+ const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
 
 // ─── Customized StepConnector ─────────────────────────────────────────────
 
@@ -71,8 +73,9 @@ interface CustomStepIconProps {
 }
 
 function CustomStepIcon(props: CustomStepIconProps) {
-  const { active, completed, icon } = props;
 
+  const { active, completed, icon } = props;
+  
   return (
     <CustomStepIconRoot ownerState={{ active, completed }}>
       {completed ? (

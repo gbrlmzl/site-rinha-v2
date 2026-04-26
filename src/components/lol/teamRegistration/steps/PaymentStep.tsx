@@ -22,12 +22,12 @@ import Image from 'next/image';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { GeneratedPaymentData, PaymentForm } from '@/types/teamRegistration';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 import {
   formatTimeRemaining,
   copyToClipboard,
 } from '@/services/teamRegistrationUtils';
 import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PaymentStepProps {
   data: PaymentForm;
@@ -48,6 +48,7 @@ export function PaymentStep({
   loading = false,
   error = null,
 }: PaymentStepProps) {
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [copied, setCopied] = useState<boolean>(false);
   

@@ -137,7 +137,7 @@ function InfoBox() {
             width: '30vw',
           }}
         >
-          <Link href="/lol/inscricoes" passHref>
+          <Link href="/lol/torneios/rinha-do-campus-iv-edicao-ii" passHref>
             <Button
               variant="contained"
               size="large"
@@ -273,7 +273,7 @@ function InfoBox() {
               justifyContent: 'center',
             }}
           >
-            <Link href="/lol/inscricoes" passHref>
+            <Link href="/lol/torneios/rinha-do-campus-iv-edicao-ii" passHref>
               <Button
                 variant="contained"
                 size="large"

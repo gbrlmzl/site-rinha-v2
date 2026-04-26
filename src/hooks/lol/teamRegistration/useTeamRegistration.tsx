@@ -45,7 +45,7 @@ import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
 export const useTeamRegistration = () => {
   // ─── States ───────────────────────────────────────────────────────────────
-
+  const [tournamentId, setTournamentId] = useState<number>(0);
   const [registrationData, setRegistrationData] =
     useState<TeamRegistrationState>({
       team: INITIAL_TEAM,
@@ -236,7 +236,6 @@ export const useTeamRegistration = () => {
         return cachedResult;
       }
 
-      const tournamentId = 3; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
         `http://localhost:8080/tournaments/${tournamentId}/teams/check-name?name=${encodeURIComponent(normalizedName)}`,
         { method: 'GET' }
@@ -251,9 +250,9 @@ export const useTeamRegistration = () => {
     []
   );
 
-  const checkRegisterStatus = async (tournamentId: number) => {
+  const checkRegisterStatus = async (tournamentSlug: string) => {
     const response = await apiFetch(
-      `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+      `http://localhost:8080/tournaments/${tournamentSlug}/registrations`,
       { method: 'GET' }
     );
     if (!response.ok) {
@@ -264,15 +263,14 @@ export const useTeamRegistration = () => {
     return data;
   };
 
-  const checkRegisteredTeam = async () => {
+  const checkRegisteredTeam = async (slug: string) => {
     try {
       setCheckingRegisteredTeam(true);
-      const tournamentId = 3; // TODO: pegar do path
-
+      
       let registrationStatus: RegisterStatusResponse;
 
       try {
-        registrationStatus = await checkRegisterStatus(tournamentId);
+        registrationStatus = await checkRegisterStatus(slug);
       } catch (err: any) {
         // Trata exceções HTTP separadamente das lógicas de negócio
         if (err) {
@@ -306,6 +304,8 @@ export const useTeamRegistration = () => {
       }
 
       const { registrationData, paymentData } = registrationStatus;
+      setTournamentId(registrationData.tournamentId);
+      console.log('ID', registrationData.tournamentId);
 
       // ── Torneio lotado (sem inscrição prévia) ──────────────────────────────
       if (
@@ -402,7 +402,6 @@ export const useTeamRegistration = () => {
     async (): Promise<CancelTournamentRegistrationResponse> => {
       try {
         setCancelingRegistration(true);
-        const tournamentId = 3; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
         const response = await apiFetch(
           `http://localhost:8080/tournaments/${tournamentId}/registrations`,
           { method: 'PUT', body: JSON.stringify({ cancelRegistration: true }) }
@@ -483,7 +482,6 @@ export const useTeamRegistration = () => {
         })
       );
 
-      const tournamentId = 3; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
         `http://localhost:8080/tournaments/${tournamentId}/registrations`,
         {

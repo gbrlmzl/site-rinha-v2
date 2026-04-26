@@ -11,10 +11,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import DesktopCarousel from './DesktopCarousel';
 import MobileCarousel from './MobileCarousel';
 
-const FILTER_OPTIONS: { status: TournamentStatus; label: string; color: string }[] = [
-  { status: 'OPEN', label: 'OPEN', color: '#37963c' },
-  { status: 'ONGOING', label: 'ONGOING', color: '#11B5E4' },
-  { status: 'FULL', label: 'FULL', color: '#E07F0A' },
+type TournamentFilterLabel = 'ABERTO' | 'EM ANDAMENTO' | 'CHEIO';
+type TournamentFilterStatus = Extract<TournamentStatus, 'OPEN' | 'ONGOING' | 'FULL'>;
+
+const LABEL_STATUS_MAP: Record<TournamentFilterLabel, TournamentFilterStatus> = {
+  ABERTO: 'OPEN',
+  'EM ANDAMENTO': 'ONGOING',
+  CHEIO: 'FULL',
+};
+
+const FILTER_OPTIONS: { label: TournamentFilterLabel; color: string }[] = [
+  { label: 'ABERTO', color: '#37963c' },
+  { label: 'EM ANDAMENTO', color: '#11B5E4' },
+  { label: 'CHEIO', color: '#E07F0A' },
 ];
 
 interface TournamentExplorerProps {
@@ -105,14 +114,12 @@ export default function TournamentExplorer({ game }: TournamentExplorerProps) {
           >
             Explorar Torneios
           </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', mt: 0.2 }}>
-            As melhores competições de LOL em um só lugar.
-          </Typography>
         </Box>
 
         {/* Filter buttons */}
         <Stack direction="row" spacing={1}>
-          {FILTER_OPTIONS.map(({ status, label }) => {
+          {FILTER_OPTIONS.map(({ label }) => {
+            const status = LABEL_STATUS_MAP[label];
             const active = activeStatuses.includes(status);
             return (
               <Button

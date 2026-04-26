@@ -11,8 +11,8 @@ import { Player } from '@/types/teamRegistration';
 import { PlayerInfoForm } from './PlayerInfoForm';
 import {
   PLAYER_LABELS,
-  THEME_COLORS,
 } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PlayersStepProps {
   data: Player[];
@@ -33,6 +33,7 @@ export function PlayersStep({
   onCurrentPlayerIndexChange,
   onPositionKeyboardConfirm,
 }: PlayersStepProps) {
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const isReservaStep = currentPlayerIndex === 5;
 
   const handleReserveToggle = (checked: boolean) => {

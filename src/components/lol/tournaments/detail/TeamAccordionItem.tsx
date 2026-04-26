@@ -81,7 +81,7 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
                 lineHeight: 1.3,
               }}
             >
-              [{team.captainNickname}] {team.name}
+              {team.name}
             </Typography>
             {highlighted && highlightLabel && (
               <Chip

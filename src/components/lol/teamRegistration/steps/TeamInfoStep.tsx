@@ -9,7 +9,8 @@ import { type ChangeEvent } from 'react';
 import { Box, TextField, Stack, Typography } from '@mui/material';
 import { Team } from '@/types/teamRegistration';
 import { ShieldUploader } from '../shared/ShieldUploader';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
+
 
 interface TeamInfoStepProps {
   data: Team;
@@ -32,6 +33,7 @@ export function TeamInfoStep({
     onTeamChange({ teamName: e.target.value });
   };
 
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   return (
     <Box
       sx={{

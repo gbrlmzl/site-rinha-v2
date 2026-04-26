@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Box, Button, Card, CardActions, CardContent, Typography } from '@mui/material';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 import type { StaticImageData } from 'next/image';
 import FullTournamentArt from '@/assets/imgs/lol/Full_Tournament.jpg';
 import ClosedTournamentArt from '@/assets/imgs/lol/Closed_Tournament.jpg';
@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 
 interface InfoScreenProps {
   event: RegistrationUIState;
+  slug: string | undefined;
 }
 
 type EventConfig = {
@@ -33,16 +34,18 @@ type EventConfig = {
 }; 
 
 export default function InfoScreen({
-  event
+  event,
+  slug,
 }: InfoScreenProps) {
   const router = useRouter();
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
 
   const actionConfigMap: Map<RegistrationUIState['status'], InfoScreenAction> = new Map([
     ['tournament_closed', { label: 'Voltar', onClick: () => router.back() }],
     ['tournament_full', { label: 'Voltar', onClick: () => router.back() }],
-    ['payment_approved', { label: 'Meu time', onClick: () => router.push('/lol/torneios') }],
-    ['error', { label: 'Início', onClick: () => router.push('/lol') }],
-    ['canceled', { label: 'Início', onClick: () => router.push('/lol') }],
+    ['payment_approved', { label: 'Voltar', onClick: () => router.push(`/lol/torneios/${slug}`) }],
+    ['error', { label: 'Início', onClick: () => router.push(`/lol/torneios`) }],
+    ['canceled', { label: 'Início', onClick: () => router.push(`/lol/torneios`) }],
   ]);
 
   const eventConfigMap: Map<RegistrationUIState['status'], EventConfig> = new Map([

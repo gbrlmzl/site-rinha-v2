@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const authRoutes = ['/login', '/cadastro', '/recuperar-senha'];
 
-const protectedRoutePrefixes = ['/perfil', '/lol/inscricoes', '/torneios/me'];
+const protectedRoutePrefixes = ['/perfil', '/torneios/me'];
+
+function isTournamentRegistrationRoute(pathname: string): boolean {
+  return /^\/lol\/torneios\/[^/]+\/inscricoes(?:\/.*)?$/.test(pathname);
+}
 
 async function tryRefreshJwt(
   request: NextRequest
@@ -42,6 +46,12 @@ async function tryRefreshJwt(
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  if(pathname === '/') {
+    const homeUrl = new URL('/inicio', request.url);
+      return NextResponse.redirect(homeUrl);
+  }
+
+
   const hasJwt = request.cookies.has('JWT');
   const hasRefresh = request.cookies.has('REFRESH');
 
@@ -51,14 +61,14 @@ export async function proxy(request: NextRequest) {
 
   const isProtectedRoute = protectedRoutePrefixes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
+  ) || isTournamentRegistrationRoute(pathname);
 
   // Para páginas de auth, só bloqueia se já houver JWT ativo.
   // Ter apenas REFRESH (possivelmente expirado) não deve impedir acesso ao login.
 
   if (hasJwt) {
     if (isAuthRoute) {
-      const homeUrl = new URL('/', request.url);
+      const homeUrl = new URL('/inicio', request.url);
       return NextResponse.redirect(homeUrl);
     }
 
@@ -95,16 +105,17 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/:subpath*',
     '/login',
     '/cadastro',
     '/recuperar-senha',
     '/nova-senha',
-    '/nova-senha/:path*',
+    '/nova-senha/:path*', 
     '/perfil',
     '/perfil/:path*',
-    '/lol/inscricoes',
-    '/lol/inscricoes/:path*',
+    '/lol/torneios/:path*/inscricoes/',
+    '/lol/torneios/:path*/inscricoes/:path*',
     '/torneios/me',
     '/torneios/me/:path*',
   ],

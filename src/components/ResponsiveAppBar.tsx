@@ -1,58 +1,87 @@
 'use client';
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import Drawer from '@mui/material/Drawer';
-import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import Skeleton from '@mui/material/Skeleton';
-import Divider from '@mui/material/Divider';
+import { useEffect, useState, useRef } from 'react';
+import {
+  Tooltip, MenuItem, Button, ListItemIcon,
+  AppBar, Box, Toolbar, IconButton, Typography,
+  Menu, Drawer, Avatar, Skeleton, Divider,
+} from '@mui/material';
 import Link from 'next/link';
 import MenuIcon from '@mui/icons-material/Menu';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { Button, ListItemIcon } from '@mui/material';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import RouteProgressBar from '@/components/RouteProgressBar';
-import { useEffect } from 'react';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tipos e constantes
+// ─────────────────────────────────────────────────────────────────────────────
 
 const SCROLL_THRESHOLD = 30;
 const DRAWER_Z_INDEX = 2000;
 
-const pages = [
-  { title: 'INÍCIO', url: '/' },
-  { title: 'TORNEIOS', url: '/torneios' },
-  { title: 'NOTÍCIAS', url: '/noticias' },
-  //{ title: 'SOBRE', url: '/sobre' },
-];
-const games = [
+export type GameRoute = 'inicio' | 'lol' | 'valorant' | 'cs';
+
+interface NavPage {
+  title: string;
+  url: string;
+}
+
+/** Jogos disponíveis — aparecem no drawer de troca de jogo */
+const GAMES: NavPage[] = [
   { title: 'League Of Legends', url: '/lol' },
   { title: 'Valorant', url: '/valorant' },
   { title: 'Counter Strike', url: '/cs' },
 ];
 
-function ResponsiveAppBar() {
+/**
+ * Gera os itens de navegação do menu principal com base na rota ativa.
+ *
+ * - `inicio` → links globais, sem TORNEIOS
+ * - `lol | valorant | cs` → links contextualizados ao jogo + TORNEIOS
+ */
+function buildPages(gameRoute: GameRoute): NavPage[] {
+  if (gameRoute === 'inicio') {
+    return [
+      { title: 'INÍCIO', url: '/inicio' },
+      { title: 'NOTÍCIAS', url: '/noticias' },
+      { title: 'SOBRE', url: '/sobre' },
+    ];
+  }
+
+  return [
+    { title: 'INÍCIO', url: `/${gameRoute}` },
+    { title: 'TORNEIOS', url: `/${gameRoute}/torneios` },
+    { title: 'NOTÍCIAS', url: `/noticias?filter=${gameRoute}` },
+    { title: 'SOBRE', url: '/sobre' },
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Componente
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ResponsiveAppBarProps {
+  /** Rota/jogo atual. Determina quais itens aparecem e para onde apontam. */
+  gameRoute: GameRoute;
+}
+
+function ResponsiveAppBar({ gameRoute }: ResponsiveAppBarProps) {
   const { user, isAuthenticated, isLoading, logout } = useAuthContext();
   const router = useRouter();
 
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isNavDrawerOpen, setIsNavDrawerOpen] = React.useState(false);
-  const [isNavDrawerOptionsOpen, setIsNavDrawerOptionsOpen] =
-    React.useState(false);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
-  const avatarRef = React.useRef<HTMLButtonElement>(null);
+  const pages = buildPages(gameRoute);
+  const isGameRoute = gameRoute !== 'inicio';
 
-  // ── Detecta scroll ──────────────────────────────────────────────────────────
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
+  const [isNavDrawerOptionsOpen, setIsNavDrawerOptionsOpen] = useState(false);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const avatarRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -90,6 +119,8 @@ function ResponsiveAppBar() {
     }
 
     if (isAuthenticated && user) {
+      // Avatar só aparece no desktop via AuthSection; mobile usa a seção própria
+      if (isMobile) return null;
       return (
         <Tooltip title="Abrir menu do usuário">
           <IconButton
@@ -117,18 +148,8 @@ function ResponsiveAppBar() {
 
     if (isMobile) {
       return (
-        <Box
-          sx={{
-            pt: 3,
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <Link
-            href="/login"
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
+        <Box sx={{ pt: 3, width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Button
               variant="contained"
               sx={{ width: '100%', borderRadius: 8, paddingInline: 6 }}
@@ -159,29 +180,64 @@ function ResponsiveAppBar() {
     );
   };
 
+  // ── Conteúdo do drawer de jogos (mobile esquerdo / desktop top) ─────────────
+  // Em /inicio mostra os jogos disponíveis.
+  // Em rotas de jogo mostra os outros jogos (para trocar de jogo).
+  const drawerGameItems = isGameRoute
+    ? GAMES.filter((g) => g.url !== `/${gameRoute}`)
+    : GAMES;
+
+  const DrawerGamesContent = () => (
+    <>
+      <Box sx={{ background: '#0a247c', p: 1 }}>
+        <Typography sx={{ fontWeight: 'bold', fontSize: '1.25rem', pl: 2 }}>
+          JOGOS
+        </Typography>
+      </Box>
+      <Box role="presentation" sx={{ pt: 2 }}>
+        {drawerGameItems.map((game) => (
+          <MenuItem key={game.title} onClick={handleCloseNavMenu}>
+            <Link
+              href={game.url}
+              style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
+            >
+              {game.title}
+            </Link>
+          </MenuItem>
+        ))}
+      </Box>
+    </>
+  );
+
+  // ── Estilos comuns do drawer paper ──────────────────────────────────────────
+  const drawerPaperBase = {
+    zIndex: DRAWER_Z_INDEX + 1,
+    backgroundColor: '#0E1241',
+    color: 'white',
+  };
+
   return (
     <AppBar
       position="fixed"
       elevation={0}
       sx={{
-        // ── Transparente no topo → azul escuro ao scrollar ──────────────────
         backgroundColor: isScrolled ? 'rgba(14, 18, 65, 0.97)' : 'transparent',
         backdropFilter: isScrolled ? 'blur(12px)' : 'none',
         boxShadow: isScrolled ? '0 2px 20px rgba(0,0,0,0.4)' : 'none',
         borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        transition:
-          'background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease',
+        transition: 'background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease',
         zIndex: (theme) => theme.zIndex.appBar,
       }}
     >
       <Box sx={{ width: '100%', paddingInline: { xs: 1, md: 3 } }}>
         <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-          {/* === MOBILE: logo === */}
+
+          {/* === MOBILE: logo (abre drawer de jogos) === */}
           <IconButton
             size="large"
             edge="start"
             color="inherit"
-            aria-label="abrir menu"
+            aria-label="abrir menu de jogos"
             onClick={handleOpenNavMenu}
             sx={{ display: { xs: 'flex', md: 'none' }, mr: 2 }}
           >
@@ -189,14 +245,7 @@ function ResponsiveAppBar() {
           </IconButton>
 
           {/* === MOBILE: avatar + hamburguer === */}
-          <Box
-            sx={{
-              display: { xs: 'flex', md: 'none' },
-              alignItems: 'center',
-              gap: 1,
-              mr: 1,
-            }}
-          >
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1, mr: 1 }}>
             <AuthSection isMobile={false} />
             <IconButton
               size="large"
@@ -205,11 +254,11 @@ function ResponsiveAppBar() {
               aria-label="abrir menu de opções"
               onClick={handleOpenNavOptions}
             >
-              <MenuIcon sx={{ fontSize: '2.15rem' }} />
+              <MenuIcon sx={{ fontSize: '2.15rem', color: 'white' }} />
             </IconButton>
           </Box>
 
-          {/* === DRAWER MOBILE ESQUERDO (jogos) === */}
+          {/* === DRAWER MOBILE ESQUERDO (jogos / trocar jogo) === */}
           <Drawer
             anchor="left"
             open={isNavDrawerOpen}
@@ -219,12 +268,7 @@ function ResponsiveAppBar() {
               display: { xs: 'block', md: 'none' },
               zIndex: DRAWER_Z_INDEX,
               '& .MuiBackdrop-root': { zIndex: DRAWER_Z_INDEX },
-              '& .MuiDrawer-paper': {
-                zIndex: DRAWER_Z_INDEX + 1,
-                width: 280,
-                backgroundColor: '#0E1241',
-                color: 'white',
-              },
+              '& .MuiDrawer-paper': { ...drawerPaperBase, width: 280 },
             }}
           >
             <Box>
@@ -232,29 +276,7 @@ function ResponsiveAppBar() {
                 <img src="/logoMenuUp.svg" alt="" width={100} />
               </IconButton>
             </Box>
-            <Box sx={{ background: '#0a247c', p: 1 }}>
-              <Typography
-                sx={{ fontWeight: 'bold', fontSize: '1.25rem', pl: 2 }}
-              >
-                JOGOS
-              </Typography>
-            </Box>
-            <Box role="presentation" sx={{ pt: 2 }}>
-              {games.map((game) => (
-                <MenuItem key={game.title} onClick={handleCloseNavMenu}>
-                  <Link
-                    href={game.url}
-                    style={{
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      width: '100%',
-                    }}
-                  >
-                    {game.title}
-                  </Link>
-                </MenuItem>
-              ))}
-            </Box>
+            <DrawerGamesContent />
           </Drawer>
 
           {/* === DRAWER MOBILE DIREITO (páginas + login/perfil) === */}
@@ -267,22 +289,11 @@ function ResponsiveAppBar() {
               display: { xs: 'block', md: 'none' },
               zIndex: DRAWER_Z_INDEX,
               '& .MuiBackdrop-root': { zIndex: DRAWER_Z_INDEX },
-              '& .MuiDrawer-paper': {
-                zIndex: DRAWER_Z_INDEX + 1,
-                width: '100%',
-                backgroundColor: '#0E1241',
-                color: 'white',
-              },
+              '& .MuiDrawer-paper': { ...drawerPaperBase, width: '100%' },
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingInline: 3,
-              }}
-            >
+            {/* Header do drawer */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingInline: 3 }}>
               <IconButton sx={{ mt: 1 }}>
                 <img src="/logo.svg" alt="" width={60} />
               </IconButton>
@@ -292,6 +303,8 @@ function ResponsiveAppBar() {
                 sx={{ cursor: 'pointer' }}
               />
             </Box>
+
+            {/* Card do usuário logado */}
             {!isLoading && isAuthenticated && user && (
               <Box
                 sx={{
@@ -309,66 +322,47 @@ function ResponsiveAppBar() {
                 <Avatar
                   alt={user.nickname}
                   src={user.profilePic || undefined}
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    bgcolor: '#11B5E4',
-                    fontWeight: 'bold',
-                  }}
+                  sx={{ width: 44, height: 44, bgcolor: '#11B5E4', fontWeight: 'bold' }}
                 >
                   {!user.profilePic && avatarLetter}
                 </Avatar>
                 <Box>
-                  <Typography sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                    {user.nickname}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}
-                  >
+                  <Typography sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>{user.nickname}</Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
                     {user.email}
                   </Typography>
                 </Box>
               </Box>
             )}
+
+            {/* Links de navegação contextuais */}
             <Box role="presentation" sx={{ pt: 2, pl: 2 }}>
               {pages.map((page) => (
                 <MenuItem key={page.title} onClick={handleCloseNavOptions}>
                   <Link
                     href={page.url}
-                    style={{
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      width: '100%',
-                    }}
+                    style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
                   >
-                    <Typography sx={{ textAlign: 'left' }}>
-                      {page.title}
-                    </Typography>
+                    <Typography sx={{ textAlign: 'left' }}>{page.title}</Typography>
                   </Link>
                 </MenuItem>
               ))}
             </Box>
+
+            {/* Login (não autenticado) */}
             {!isLoading && !isAuthenticated && <AuthSection isMobile={true} />}
+
+            {/* Ações do usuário autenticado */}
             {!isLoading && isAuthenticated && (
               <Box sx={{ pt: 2, pl: 2 }}>
                 <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 1 }} />
-                <MenuItem
-                  onClick={() => {
-                    handleCloseNavOptions();
-                    router.push('/perfil');
-                  }}
-                >
+                <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/perfil'); }}>
                   <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                     <AccountCircleIcon sx={{ fontSize: '1.3rem' }} />
                   </ListItemIcon>
                   Minha conta
                 </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleCloseNavOptions();
-                    router.push('/torneios/me');
-                  }}
-                >
+                <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/torneios/me'); }}>
                   <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                     <EmojiEventsRoundedIcon sx={{ fontSize: '1.2rem' }} />
                   </ListItemIcon>
@@ -384,7 +378,7 @@ function ResponsiveAppBar() {
             )}
           </Drawer>
 
-          {/* === DESKTOP DRAWER TOP (jogos) === */}
+          {/* === DESKTOP DRAWER TOP (jogos / trocar jogo) === */}
           <Drawer
             anchor="top"
             open={isNavDrawerOpen}
@@ -394,23 +388,10 @@ function ResponsiveAppBar() {
               display: { xs: 'none', md: 'block' },
               zIndex: DRAWER_Z_INDEX,
               '& .MuiBackdrop-root': { zIndex: DRAWER_Z_INDEX },
-              '& .MuiDrawer-paper': {
-                zIndex: DRAWER_Z_INDEX + 1,
-                height: 300,
-                backgroundColor: '#0E1241',
-                color: 'white',
-              },
+              '& .MuiDrawer-paper': { ...drawerPaperBase, height: 300 },
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingInline: 2.5,
-                pt: 1,
-              }}
-            >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingInline: 2.5, pt: 1 }}>
               <IconButton onClick={handleCloseNavMenu}>
                 <img src="/logoMenuUp.svg" alt="" width={100} />
               </IconButton>
@@ -418,62 +399,24 @@ function ResponsiveAppBar() {
                 <CancelRoundedIcon fontSize="large" />
               </Button>
             </Box>
-            <Box sx={{ background: '#0a247c', p: 1 }}>
-              <Typography
-                sx={{ fontWeight: 'bold', fontSize: '1.25rem', pl: 2 }}
-              >
-                JOGOS
-              </Typography>
-            </Box>
-            <Box role="presentation" sx={{ pt: 2 }}>
-              {games.map((game) => (
-                <MenuItem key={game.title} onClick={handleCloseNavMenu}>
-                  <Link
-                    href={game.url}
-                    style={{
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      width: '100%',
-                    }}
-                  >
-                    {game.title}
-                  </Link>
-                </MenuItem>
-              ))}
-            </Box>
+            <DrawerGamesContent />
           </Drawer>
 
           {/* === DESKTOP: logo === */}
           <Box sx={{ display: { xs: 'none', md: 'block' }, mr: 2 }}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              onClick={handleOpenNavMenu}
-            >
+            <IconButton size="large" edge="start" color="inherit" onClick={handleOpenNavMenu}>
               <img src="/logoMenuDown.svg" alt="" width={100} />
             </IconButton>
           </Box>
 
-          {/* === DESKTOP: links com listra rosa no hover === */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: { xs: 'none', md: 'flex' },
-              alignSelf: 'stretch',
-            }}
-          >
+          {/* === DESKTOP: links de navegação === */}
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignSelf: 'stretch' }}>
             {pages.map((page) => (
               <Link
                 key={page.title}
                 href={page.url}
                 onClick={handleCloseNavMenu}
-                style={{
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
               >
                 <Box
                   sx={{
@@ -483,7 +426,6 @@ function ResponsiveAppBar() {
                     alignItems: 'center',
                     position: 'relative',
                     cursor: 'pointer',
-                    // Listra rosa no fundo — aparece no hover
                     '&::after': {
                       content: '""',
                       position: 'absolute',
@@ -496,12 +438,8 @@ function ResponsiveAppBar() {
                       transition: 'width 0.25s ease',
                       borderRadius: '2px 2px 0 0',
                     },
-                    '&:hover::after': {
-                      width: '80%',
-                    },
-                    '&:hover .nav-label': {
-                      color: 'rgba(255,255,255,0.8)',
-                    },
+                    '&:hover::after': { width: '80%' },
+                    '&:hover .nav-label': { color: 'rgba(255,255,255,0.8)' },
                   }}
                 >
                   <Typography
@@ -521,29 +459,14 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {/* === DESKTOP: botão de login OU avatar === */}
-          <Box
-            sx={{
-              display: { xs: 'none', md: 'flex' },
-              alignItems: 'center',
-              pr: 2,
-            }}
-          >
+          {/* === DESKTOP: botão de login ou avatar === */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', pr: 2 }}>
             {isLoading && (
-              <Skeleton
-                variant="circular"
-                width={38}
-                height={38}
-                sx={{ bgcolor: 'rgba(255,255,255,0.15)' }}
-              />
+              <Skeleton variant="circular" width={38} height={38} sx={{ bgcolor: 'rgba(255,255,255,0.15)' }} />
             )}
             {!isLoading && isAuthenticated && user && (
               <Tooltip title="Abrir menu do usuário">
-                <IconButton
-                  ref={avatarRef}
-                  onClick={handleOpenUserMenu}
-                  sx={{ p: 0 }}
-                >
+                <IconButton ref={avatarRef} onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                   <Avatar
                     alt={user.nickname}
                     src={user.profilePic || undefined}
@@ -562,18 +485,10 @@ function ResponsiveAppBar() {
               </Tooltip>
             )}
             {!isLoading && !isAuthenticated && (
-              <Link
-                href="/login"
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
+              <Link href="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
                 <Button
                   variant="contained"
-                  sx={{
-                    width: 150,
-                    borderRadius: 4,
-                    backgroundColor: '#11B5E4',
-                    '&:hover': { backgroundColor: '#0b80a0' },
-                  }}
+                  sx={{ width: 150, borderRadius: 4, backgroundColor: '#11B5E4', '&:hover': { backgroundColor: '#0b80a0' } }}
                 >
                   Fazer Login
                 </Button>
@@ -581,7 +496,7 @@ function ResponsiveAppBar() {
             )}
           </Box>
 
-          {/* === MENU DROPDOWN DO USUÁRIO === */}
+          {/* === MENU DROPDOWN DO USUÁRIO (desktop) === */}
           <Menu
             sx={{ mt: 1 }}
             id="menu-appbar"
@@ -603,48 +518,24 @@ function ResponsiveAppBar() {
             }}
           >
             {user && (
-              <Box
-                sx={{
-                  px: 2,
-                  py: 1.5,
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
-                }}
-              >
-                <Typography sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
-                  {user.nickname}
-                </Typography>
-                <Typography
-                  sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}
-                >
-                  {user.email}
-                </Typography>
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <Typography sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{user.nickname}</Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{user.email}</Typography>
               </Box>
             )}
-            <MenuItem
-              onClick={() => {
-                handleCloseUserMenu();
-                router.push('/perfil');
-              }}
-            >
+            <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/perfil'); }}>
               <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                 <AccountCircleIcon sx={{ fontSize: '1.3rem' }} />
               </ListItemIcon>
               Minha conta
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleCloseUserMenu();
-                router.push('/torneios/me');
-              }}
-            >
+            <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/torneios/me'); }}>
               <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                 <EmojiEventsRoundedIcon sx={{ fontSize: '1.2rem' }} />
               </ListItemIcon>
               Meus torneios
             </MenuItem>
-
             <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
-
             <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
               <ListItemIcon sx={{ color: '#ff6b6b', minWidth: 40 }}>
                 <LogoutIcon sx={{ fontSize: '1.2rem' }} />

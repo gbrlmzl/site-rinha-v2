@@ -43,6 +43,7 @@ export interface MyTournamentsSummaryData {
 
 export interface TournamentPublicSummaryData {
   id: number;
+  slug : string;
   name: string;
   game: GameType;
   status: TournamentStatus;
@@ -97,6 +98,7 @@ export interface UserTeamStatusData {
 
 export interface TournamentDetailData {
   id: number;
+  slug: string;
   name: string;
   description: string;
   rulesUrl: string;

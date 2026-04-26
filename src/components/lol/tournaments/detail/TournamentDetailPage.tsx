@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import TournamentStatusBadge from '../explorer/TournamentStatusBadge';
 import TeamAccordionItem from './TeamAccordionItem';
+import Image from 'next/image';
 
 function formatDateLong(iso: string) {
   return new Date(iso).toLocaleString('pt-BR', {
@@ -98,7 +99,7 @@ export default function TournamentDetailPage({ slug }: Props) {
 
   // Determine call-to-action button state
   let btnDisabled = false;
-  let btnLabel = 'Inscrever Equipe Agora';
+  let btnLabel = 'Inscreva-se';
 
   if (userTeam) {
     const ts = userTeam.teamStatus;
@@ -123,19 +124,20 @@ export default function TournamentDetailPage({ slug }: Props) {
   }
 
   const canClickRegister = !btnDisabled;
-  const inscricoesPath = `/lol/torneios/${tournament.id}/inscricoes`;
+  const inscricoesPath = `/lol/torneios/${tournament.slug}/inscricoes`;
 
   return (
     <Box sx={{ backgroundColor: '#080d2e', minHeight: '100vh' }}>
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <Box sx={{ position: 'relative', overflow: 'hidden' }}>
         {/* Image */}
-        <Box sx={{ height: { xs: 220, md: 420 }, position: 'relative' }}>
-          <img
+        <Box sx={{ height: { xs: 220, md: 420, lg: 500 }, position: 'relative' }}>
+          <Image
             src={tournament.imageUrl}
             alt={tournament.name}
+            fill
             referrerPolicy="no-referrer"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
           />
           {/* Bottom-to-top fade only */}
           <Box
@@ -223,9 +225,9 @@ export default function TournamentDetailPage({ slug }: Props) {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <SettingsRoundedIcon sx={{ color: '#11B5E4', fontSize: 20 }} />
+                {/*<SettingsRoundedIcon sx={{ color: '#11B5E4', fontSize: 20 }} />*/}
                 <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.05rem' }}>
-                  Informações Técnicas
+                  Informações gerais
                 </Typography>
               </Box>
 
@@ -356,9 +358,9 @@ export default function TournamentDetailPage({ slug }: Props) {
                   disabled={btnDisabled}
                   onClick={() => {
                     if (!canClickRegister) return;
-                    if (!isAuthenticated) {
+                    /*if (!isAuthenticated) { //proxy vai cuidar disso.
                       router.push('/lol/login');
-                    } else {
+                    }*/ else {
                       router.push(inscricoesPath);
                     }
                   }}

@@ -69,7 +69,7 @@ export default function TorneioHome() {
   }
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', px: { xs: 2, md: 6 }, pt: '13vh' }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', px: { xs: 2, md: 6 }, pt: '13vh', pb: '5vh' }}>
       {isAuthenticated && myTournaments.length > 0 && (
         <Box sx={{ mb: 5 }}>
           <Typography
