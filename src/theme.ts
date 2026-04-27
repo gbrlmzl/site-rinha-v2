@@ -1,4 +1,5 @@
-import { createTheme, darkScrollbar } from '@mui/material';
+import { createTheme, darkScrollbar, responsiveFontSizes } from '@mui/material';
+import { size } from 'zod';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tipos
@@ -186,8 +187,8 @@ export const AUTH_TOKENS = (() => {
         backgroundColor: palette.cardBackground,
       },
       wideCard: {
-        width: '100%',
-        maxWidth: 600,
+        width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '40vw',  },
+        height: 'fit-content',
         mx: 'auto',
         p: 3,
         paddingInline: { xs: '2rem', md: '4rem', lg: '8rem' },
@@ -573,8 +574,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
             transition: 'all 0.2s ease-in-out',
           },
           'a:hover': {
-            textDecoration: 'underline',
-            color: 'var(--mui-palette-primary-main, #1976d2)',
+            textDecoration: 'none'
           },
           'body[style*="overflow: hidden"]': {
             backgroundColor: themeParam.appPalette.pageBackground,
@@ -595,6 +595,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
             fontSize: '1rem',
             color: 'white',
             minHeight: 40,
+            paddingInline: 20,
             '&.auth-btn-primary': {
               backgroundColor: AUTH_TOKENS.colors.primary,
               color: '#fff',
@@ -621,6 +622,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
                 backgroundColor: 'transparent',
               },
             },
+            
           }),
         },
       },
@@ -630,6 +632,24 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
             backgroundColor: APP_PALETTES[paletteName].cardBackground,
             borderRadius: 4,
           },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            '&.auth-primary-title': {
+              ...theme.typography.h4,
+              fontWeight: 700,
+              color: AUTH_TOKENS.colors.text,
+            },
+            '&.auth-secondary-text': {
+              ...theme.typography.body1,
+              color: AUTH_TOKENS.colors.textMuted,
+              fontSize: '0.9rem',
+              whiteSpace: 'pre-line',
+              lineHeight: 1.4
+            },
+          }),
         },
       },
     },

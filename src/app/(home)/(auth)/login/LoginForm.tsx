@@ -2,11 +2,8 @@
 
 import Link from 'next/link';
 import Form from 'next/form';
-import { useEffect, useState } from 'react';
-import loginAction from '@/hooks/authentication/useLogin';
-import { useActionState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AUTH_BUTTON_CLASSES, AUTH_SX } from '@/theme';
+import { AUTH_BUTTON_CLASSES, AUTH_TOKENS } from '@/theme';
+import { useEffect } from 'react';
 
 import {
   Alert,
@@ -25,43 +22,31 @@ import {
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { useAuthContext } from '@/contexts/AuthContext';
+import useLogin from '@/hooks/authentication/useLogin';
 
-type LoginState = {
-  success: boolean | null;
-  message: string;
-};
-
-type LoginFormEntries = {
-  username: string;
-  password: string;
-};
-
-const initialState: LoginState = {
-  success: null,
-  message: '',
-};
 
 export default function LoginForm() {
-  const [state, formAction, isPending] = useActionState<LoginState, FormData>(
-    loginAction,
-    initialState
-  );
-  const [formEntries, setFormEntries] = useState<LoginFormEntries>({
-    username: '',
-    password: '',
-  });
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [keepLoggedIn, setKeepLoggedIn] = useState<boolean>(false);
-
-  const { isLoading, refreshUser } = useAuthContext();
-
-  const router = useRouter();
+  const {
+    state,
+    formAction,
+    isPending,
+    formEntries,
+    setFormEntries,
+    showPassword,
+    setShowPassword,
+    keepLoggedIn,
+    setKeepLoggedIn,
+    isLoading,
+    refreshUser,
+    router,
+    nextSafe,
+    dadosPreenchidos,
+  } = useLogin();
 
   useEffect(() => {
     if (state?.success) {
       refreshUser().then(() => {
-        router.push('/');
+        router.push(nextSafe);
       });
     }
   }, [state?.success, refreshUser]);
@@ -73,22 +58,13 @@ export default function LoginForm() {
     }
   }, [state]);
 
-  const dadosPreenchidos: boolean =
-    formEntries.username.trim().length > 0 &&
-    formEntries.password.trim().length > 0;
-
   return (
     <Card
       sx={{
-        ...AUTH_SX.card,
+        ...AUTH_TOKENS.sx.card,
       }}
     >
-      <Typography
-        variant="h4"
-        component="h1"
-        mb={2}
-        sx={AUTH_SX.title}
-      >
+      <Typography variant="h4" component="h1" mb={2} sx={AUTH_TOKENS.sx.title}>
         Fazer login
       </Typography>
 
@@ -177,16 +153,18 @@ export default function LoginForm() {
               className={AUTH_BUTTON_CLASSES.primary}
               disabled={isPending || !dadosPreenchidos}
             >
-              {isPending ? <CircularProgress color="inherit" size={16} /> : 'Entrar'}
+              {isPending ? (
+                <CircularProgress color="inherit" size={16} />
+              ) : (
+                'Entrar'
+              )}
             </Button>
           )}
         </Stack>
       </Form>
 
       {!isLoading && (
-        <Box
-          sx={AUTH_SX.centeredLinks}
-        >
+        <Box sx={AUTH_TOKENS.sx.centeredLinks}>
           <Link
             href="/recuperar-senha"
             style={{ textDecoration: 'none', fontSize: '0.875rem' }}

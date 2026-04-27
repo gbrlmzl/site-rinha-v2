@@ -25,7 +25,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import DoneIcon from '@mui/icons-material/Done';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSnackbarContext } from '@/contexts/SnackbarContext';
-import { AUTH_BUTTON_CLASSES, AUTH_SX } from '@/theme';
+import { AUTH_BUTTON_CLASSES, AUTH_TOKENS } from '@/theme';
 
 type RegisterFormEntries = {
   username: string;
@@ -48,10 +48,7 @@ const initialState: RegisterState = {
 export default function RegisterForm() {
   const { showSnackbar } = useSnackbarContext();
 
-  const [state, formAction, isPending] = useActionState<
-    RegisterState,
-    FormData
-  >(registerAction, initialState);
+  const [state, formAction, isPending] = useActionState<RegisterState, FormData>(registerAction, initialState);
 
   const [formEntries, setFormEntries] = useState<RegisterFormEntries>({
     username: '',
@@ -121,22 +118,11 @@ export default function RegisterForm() {
     }
   }, [state, showSnackbar]);
 
-  /*function handleGoogleSignIn() {
-    if (googleLoading) return;
-    setGoogleLoading(true);
-
-    // ...existing code...
-    console.log('Login com Google');
-    // ...existing code...
-
-    setGoogleLoading(false);
-  }*/
-
   if (state.success) {
     return (
       <Card
         sx={{
-          ...AUTH_SX.card,
+          ...AUTH_TOKENS.sx.card,
         }}
       >
         <Typography
@@ -178,10 +164,7 @@ export default function RegisterForm() {
 
         <Box display="flex" justifyContent="center">
           <Link href="/login" passHref>
-            <Button
-              variant="contained"
-              className={AUTH_BUTTON_CLASSES.primary}
-            >
+            <Button variant="contained" className={AUTH_BUTTON_CLASSES.primary}>
               Fazer login
             </Button>
           </Link>
@@ -193,141 +176,122 @@ export default function RegisterForm() {
   return (
     <Card
       sx={{
-        ...AUTH_SX.card,
+        ...AUTH_TOKENS.sx.card,
       }}
     >
-      <Typography
-        variant="h4"
-        component="h1"
-        mb={2}
-        sx={AUTH_SX.title}
-      >
+      <Typography variant="h4" component="h1" mb={2} sx={AUTH_TOKENS.sx.title}>
         Crie sua conta
       </Typography>
 
-      
-        <Form
-          action={formAction}
-          style={{ display: 'block', flexDirection: 'column' }}
-        >
-          <Stack spacing={1}>
-            <TextField
-              fullWidth
-              name="username"
-              label="Nome de usuário"
-              value={formEntries.username}
-              onChange={(e) =>
-                setFormEntries({
-                  ...formEntries,
-                  username: e.target.value.toLowerCase(),
-                })
-              }
-            />
-
-            <TextField
-              fullWidth
-              name="email"
-              type="email"
-              label="Email"
-              value={formEntries.email}
-              onChange={(e) =>
-                setFormEntries({ ...formEntries, email: e.target.value })
-              }
-            />
-
-            <TextField
-              fullWidth
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              label="Senha"
-              value={formEntries.password}
-              onChange={(e) =>
-                setFormEntries({ ...formEntries, password: e.target.value })
-              }
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        tabIndex={-1}
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        edge="end"
-                        aria-label="Mostrar/Ocultar senha"
-                        size="small"
-                      >
-                        {showPassword ? (
-                          <VisibilityIcon />
-                        ) : (
-                          <VisibilityOffIcon />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-
-            <TextField
-              fullWidth
-              name="confirmPassword"
-              type={showPassword ? 'text' : 'password'}
-              label="Confirmar senha"
-              value={formEntries.confirmPassword}
-              onChange={(e) =>
-                setFormEntries({
-                  ...formEntries,
-                  confirmPassword: e.target.value,
-                })
-              }
-            />
-          </Stack>
-
-          <Stack spacing={1} sx={{ mt: 2 }}>
-            <Condition
-              ok={passwordConditions.atLeast8Chars}
-              text="Ao menos 8 caracteres"
-            />
-            <Condition
-              ok={passwordConditions.hasNumberOrSymbol}
-              text="Deve conter um número ou símbolo"
-            />
-            <Condition
-              ok={passwordConditions.passwordsMatch}
-              text="As senhas devem coincidir"
-            />
-          </Stack>
-
-          {/*
-                    <Stack spacing={1} alignItems="center" pt={1}>
-                        <Typography variant="body2">Ou crie uma conta com</Typography>
-                        <Button
-                            type="button"
-                            variant="outlined"
-                            onClick={handleGoogleSignIn}
-                            disabled={googleLoading}
-                            startIcon={googleLoading ? <CircularProgress size={16} /> : <GoogleIcon />}
-                        >
-                            Google
-                        </Button>
-                    </Stack>
-                    */}
-
-          <Button
-            type="submit"
-            variant="contained"
-            className={AUTH_BUTTON_CLASSES.primary}
-            disabled={isPending || !dadosPreenchidos}
+      <Form
+        action={formAction}
+        style={{ display: 'block', flexDirection: 'column' }}
+      >
+        <Stack spacing={1}>
+          <TextField
             fullWidth
-            sx={{mt:2}}
-          >
-            {isPending ? <CircularProgress color="inherit" size={16} />  : 'Cadastrar'}
-          </Button>
-        </Form>
+            name="username"
+            label="Nome de usuário"
+            value={formEntries.username}
+            onChange={(e) =>
+              setFormEntries({
+                ...formEntries,
+                username: e.target.value.toLowerCase(),
+              })
+            }
+          />
 
-        <Box sx={AUTH_SX.centeredLinks}>
-          <Link href="/login">Já possuo uma conta</Link>
-        </Box>
+          <TextField
+            fullWidth
+            name="email"
+            type="email"
+            label="Email"
+            value={formEntries.email}
+            onChange={(e) =>
+              setFormEntries({ ...formEntries, email: e.target.value })
+            }
+          />
 
+          <TextField
+            fullWidth
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            label="Senha"
+            value={formEntries.password}
+            onChange={(e) =>
+              setFormEntries({ ...formEntries, password: e.target.value })
+            }
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      tabIndex={-1}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      edge="end"
+                      aria-label="Mostrar/Ocultar senha"
+                      size="small"
+                    >
+                      {showPassword ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            name="confirmPassword"
+            type={showPassword ? 'text' : 'password'}
+            label="Confirmar senha"
+            value={formEntries.confirmPassword}
+            onChange={(e) =>
+              setFormEntries({
+                ...formEntries,
+                confirmPassword: e.target.value,
+              })
+            }
+          />
+        </Stack>
+
+        <Stack spacing={1} sx={{ mt: 2 }}>
+          <Condition
+            ok={passwordConditions.atLeast8Chars}
+            text="Ao menos 8 caracteres"
+          />
+          <Condition
+            ok={passwordConditions.hasNumberOrSymbol}
+            text="Deve conter um número ou símbolo"
+          />
+          <Condition
+            ok={passwordConditions.passwordsMatch}
+            text="As senhas devem coincidir"
+          />
+        </Stack>
+        <Button
+          type="submit"
+          variant="contained"
+          className={AUTH_BUTTON_CLASSES.primary}
+          disabled={isPending || !dadosPreenchidos}
+          fullWidth
+          sx={{ mt: 2 }}
+        >
+          {isPending ? (
+            <CircularProgress color="inherit" size={16} />
+          ) : (
+            'Cadastrar'
+          )}
+        </Button>
+      </Form>
+
+      <Box sx={AUTH_TOKENS.sx.centeredLinks}>
+        <Link href="/login">Já possuo uma conta</Link>
+      </Box>
     </Card>
   );
 }

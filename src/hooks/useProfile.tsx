@@ -189,7 +189,7 @@ export function useProfile() {
   // ── Foto de perfil ──────────────────────────────────────────────────────
 
   const IMGUR_ALLOWED_FORMATS = ['image/jpeg', 'image/png'];
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (limite do Imgur)
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -212,7 +212,7 @@ export function useProfile() {
     //validar tamanho do arquivo
     if (file.size > MAX_FILE_SIZE) {
       showSnackbar({
-        message: 'Arquivo muito grande. Máximo de 10MB.',
+        message: 'Arquivo muito grande. Máximo de 5MB.',
         severity: 'error',
       });
       return;

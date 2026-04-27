@@ -31,7 +31,6 @@ export default async function registerAction(
 
   try {
     const response = await fetch(`${process.env.API_URL}/auth/register`, {
-      //URL da API de cadastro, posteriomente colocar isso em uma variável de ambiente
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

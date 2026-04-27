@@ -15,6 +15,7 @@ import {
   Stack,
   CircularProgress,
 } from '@mui/material';
+
 import CameraAltRoundedIcon from '@mui/icons-material/CameraAltRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import SaveIcon from '@mui/icons-material/Save';
@@ -55,7 +56,6 @@ export default function ProfilePage() {
     visibility,
     toggleVisibility,
     handlePasswordSubmit,
-    handleCloseSnackbar,
     passwordFieldsValidated,
     passwordRequirements,
   } = useProfile();
@@ -78,7 +78,7 @@ export default function ProfilePage() {
     <Box
       sx={{
         ...AUTHENTICATED_PROFILE_TOKENS.sx.pageContainer,
-        pt: view === 'password' ? { xs: '13vh', md: 8 } : { xs: 4, md: 6 },
+        pt: view === 'password' ? { xs: '13vh', md: 8 } : { xs: '8vh', md: 6 },
       }}
     >
       <Paper
@@ -121,7 +121,7 @@ export default function ProfilePage() {
                 <Typography
                   sx={{
                     fontWeight: 700,
-                    fontSize: '1.5rem',
+                    fontSize: '1.75rem',
                     color: THEME_COLORS.text,
                     textAlign: 'center',
                   }}
