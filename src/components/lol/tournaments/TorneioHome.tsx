@@ -44,8 +44,8 @@ export default function TorneioHome() {
   }, []);
 
   function renderCard(tournament: MyTournamentsSummaryData) {
-    const inscricoesPath = `/lol/torneios/${tournament.id}/inscricoes`;
-    const detailPath = `/lol/torneios/${toTournamentSlug(tournament.id, tournament.tournamentName)}`;
+    const inscricoesPath = `/lol/torneios/${tournament.slug}/pagamentos`;
+    const detailPath = `/lol/torneios/${tournament.slug}`;
 
     if (tournament.teamStatus === 'PENDING_PAYMENT') {
       return (

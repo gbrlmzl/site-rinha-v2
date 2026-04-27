@@ -148,20 +148,6 @@ export default function TournamentDetailPage({ slug }: Props) {
           />
         </Box>
 
-        {/* Back button */}
-        <IconButton
-          onClick={() => router.back()}
-          sx={{
-            position: 'absolute', top: 16, left: 16, zIndex: 10,
-            backgroundColor: 'rgba(8,13,46,0.6)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            color: '#ffffff',
-            '&:hover': { backgroundColor: 'rgba(8,13,46,0.85)' },
-          }}
-        >
-          <ArrowBackRoundedIcon />
-        </IconButton>
 
         {/* Desktop content overlay */}
         <Box
@@ -360,8 +346,11 @@ export default function TournamentDetailPage({ slug }: Props) {
                     if (!canClickRegister) return;
                     /*if (!isAuthenticated) { //proxy vai cuidar disso.
                       router.push('/lol/login');
-                    }*/ else {
+                    }*/ else { {
+                      console.log('Clicou para se inscrever! Redirecionar para:', inscricoesPath);
                       router.push(inscricoesPath);
+                    }
+                      
                     }
                   }}
                   sx={{

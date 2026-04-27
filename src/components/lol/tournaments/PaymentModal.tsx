@@ -27,12 +27,13 @@ import {
   GeneratedPaymentData,
   RegisterStatusResponse,
 } from '@/types/teamRegistration';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
 import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
+import {TEAM_REGISTRATION_TOKENS} from '@/theme';
 
 interface PaymentModalProps {
   torneioId: string;
 }
+const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
 
 export default function PaymentModal({ torneioId }: PaymentModalProps) {
   const router = useRouter();

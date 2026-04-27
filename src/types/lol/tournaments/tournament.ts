@@ -31,6 +31,7 @@ export type TeamStatus =
 
 export interface MyTournamentsSummaryData {
   id: number;
+  slug: string;
   tournamentName: string;
   teamName: string;
   game: GameType;
