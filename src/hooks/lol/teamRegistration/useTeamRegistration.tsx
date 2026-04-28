@@ -23,8 +23,6 @@ import {
   RegistrationData,
 } from '@/types/teamRegistration';
 
-import { ApiResponseSuccess, ApiResponseError } from '@/types/api';
-
 import {
   validatePlayer,
   validateAllPLayers,
@@ -49,13 +47,17 @@ import {
 import { useRouter } from 'next/navigation';
 import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
+type CacheEntry = { available: boolean; cachedAt: number };
+
 // ────────────────────────────────────────────────────────────────────────
 
 export const useTeamRegistration = () => {
   // ─── States ───────────────────────────────────────────────────────────────
   const [step, setStep] = useState<StepType>('teamInfo');
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
-  const [validationErrors, setValidationErrors] = useState<{ [key: number] : string;}>({});
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: number]: string;
+  }>({});
   const [wsError, setWsError] = useState<string | null>(null);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
   const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
@@ -85,10 +87,12 @@ export const useTeamRegistration = () => {
     useState<RegistrationData | null>(null); // Estado para armazenar os dados da inscrição existente ao tentar re-registrar após expiração ou falha de pagamento
 
   const paymentSubscriptionRef = useRef<(() => void) | null>(null); // Ref para guardar função de cleanup do WebSocket
-  const teamNameAvailabilityCacheRef = useRef<Record<string, boolean>>({});
+  const teamNameAvailabilityCacheRef = useRef<Record<string, CacheEntry>>({});
 
   const { showSnackbar } = useSnackbarContext();
   const router = useRouter();
+
+  const CACHE_TTL_MS = 15_000;
 
   useEffect(() => {
     return () => {
@@ -97,158 +101,152 @@ export const useTeamRegistration = () => {
     };
   }, []);
 
-
-
   //Step handlers
   const handleNextStep = async () => {
-      if (loading || isCheckingTeamName) return;
-  
-      switch (step) {
-        case 'teamInfo': {
-          // Validar equipe
-          const validation = validateTeam(registrationData.team);
-          if (!validation.success) {
-            const firstIssue = Array.isArray(validation.errors)
-              ? validation.errors[0]
-              : null;
-            const errorMsg = firstIssue?.message || 'Erro na validação';
-            setValidationErrors({
-              0: errorMsg,
-            });
-            return;
-          }
-  
-          //Verificar se já existe uma equipe com o mesmo nome
-          setIsCheckingTeamName(true);
-          try {
-            const nameCheckResult = await checkTeamNameAvailability(
-              registrationData.team.teamName
-            );
-            if (!nameCheckResult) {
-              /*setValidationErrors({
-                0: 'Já existe uma equipe com esse nome. Por favor, escolha outro.',
-              });*/
-              showSnackbar({
-                message:
-                  'Já existe uma equipe com esse nome. Por favor, escolha outro.',
-                severity: 'error',
-              });
-              return;
-            }
-  
-            setValidationErrors({});
-            nextStep();
-          } finally {
-            setIsCheckingTeamName(false);
-          }
-          break;
+    if (loading || isCheckingTeamName) return;
+
+    switch (step) {
+      case 'teamInfo': {
+        // Validar equipe
+        const validation = validateTeam(registrationData.team);
+        if (!validation.success) {
+          const firstIssue = Array.isArray(validation.errors)
+            ? validation.errors[0]
+            : null;
+          const errorMsg = firstIssue?.message || 'Erro na validação';
+          setValidationErrors({
+            0: errorMsg,
+          });
+          return;
         }
-  
-        case 'playersInfo': {
-          setValidationErrors({});
-          const isLastPlayer = currentPlayerIndex === registrationData.players.length - 1;
-  
-          if (!isLastPlayer) {
-            const currentValidation = validatePlayer(
-              registrationData.players[currentPlayerIndex],
-              currentPlayerIndex
-            );
-  
-            if (!currentValidation.success) {
-              const firstIssue = Array.isArray(currentValidation.errors)
-                ? currentValidation.errors[0]
-                : null;
-              showSnackbar({
-                message: `${firstIssue?.message || 'Dados inválidos'}`,
-                severity: 'error',
-              });
-              return;
-            }
-  
-            setCurrentPlayerIndex((prev) => prev + 1);
-            return;
-          }
-  
-          // isLastPlayer === true, validar o conjunto completo antes de avançar
-          // No último jogador, valida o conjunto completo antes de avançar
-          const validation = validateAllPLayers(registrationData.players);
-          if (!validation.success) {
-            console.log('Erro de validação dos jogadores:', validation.message);
-            if (validation.playerIndex !== undefined) {
-              const firstIssue = Array.isArray(validation.errors)
-                ? validation.errors[0]
-                : null;
-              showSnackbar({
-                message: `${firstIssue?.message || 'Dados inválidos'}`,
-                severity: 'error',
-              });
-            } else {
-              showSnackbar({
-                message: `${validation.message || 'Erro na validação'}`,
-                severity: 'error',
-              });
-            }
-            return;
-          }
-  
-          setCurrentPlayerIndex(0);
-          nextStep();
-          break;
-        }
-  
-        case 'confirmation': {
-          setValidationErrors({});
-          if (!termsAccepted) {
+
+        //Verificar se já existe uma equipe com o mesmo nome
+        setIsCheckingTeamName(true);
+        try {
+          const nameCheckResult = await checkTeamNameAvailability(
+            registrationData.team.teamName, tournamentId
+          );
+          if (!nameCheckResult) {
             showSnackbar({
-              message: 'Você deve concordar com os termos',
+              message: `Já existe uma equipe com esse nome.\nPor favor, escolha outro.`,
               severity: 'error',
             });
             return;
           }
-  
-          nextStep();
-          break;
-        }
-  
-        case 'payment': {
+
           setValidationErrors({});
-          // Validar pagamento
-          const validation = validatePaymentForm(registrationData.paymentForm);
-          if (!validation.success) {
-            const firstIssue = Array.isArray(validation.errors)
-              ? validation.errors[0]
-              : null;
-            showSnackbar({
-              message: `${firstIssue?.message || 'Dados de pagamento inválidos'}`,
-              severity: 'error',
-            });
-            return;
-          }
-  
-          // Enviar inscrição e gerar QR Code
-          const success = await submitRegistration();
-          if (!success) {
-            return;
-          }
-  
-          break;
+          nextStep();
+        } finally {
+          setIsCheckingTeamName(false);
         }
-  
-        default:
-          break;
+        break;
       }
-    };
-  
+
+      case 'playersInfo': {
+        setValidationErrors({});
+        const isLastPlayer =
+          currentPlayerIndex === registrationData.players.length - 1;
+
+        if (!isLastPlayer) {
+          const currentValidation = validatePlayer(
+            registrationData.players[currentPlayerIndex],
+            currentPlayerIndex
+          );
+
+          if (!currentValidation.success) {
+            const firstIssue = Array.isArray(currentValidation.errors)
+              ? currentValidation.errors[0]
+              : null;
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados inválidos'}`,
+              severity: 'error',
+            });
+            return;
+          }
+
+          setCurrentPlayerIndex((prev) => prev + 1);
+          return;
+        }
+
+        // isLastPlayer === true, validar o conjunto completo antes de avançar
+        // No último jogador, valida o conjunto completo antes de avançar
+        const validation = validateAllPLayers(registrationData.players);
+        if (!validation.success) {
+          if (validation.playerIndex !== undefined) {
+            const firstIssue = Array.isArray(validation.errors)
+              ? validation.errors[0]
+              : null;
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados inválidos'}`,
+              severity: 'error',
+            });
+          } else {
+            showSnackbar({
+              message: `${validation.message || 'Erro na validação'}`,
+              severity: 'error',
+            });
+          }
+          return;
+        }
+
+        setCurrentPlayerIndex(0);
+        nextStep();
+        break;
+      }
+
+      case 'confirmation': {
+        setValidationErrors({});
+        if (!termsAccepted) {
+          showSnackbar({
+            message: 'Você deve concordar com os termos',
+            severity: 'error',
+          });
+          return;
+        }
+
+        nextStep();
+        break;
+      }
+
+      case 'payment': {
+        setValidationErrors({});
+        // Validar pagamento
+        const validation = validatePaymentForm(registrationData.paymentForm);
+        if (!validation.success) {
+          const firstIssue = Array.isArray(validation.errors)
+            ? validation.errors[0]
+            : null;
+          showSnackbar({
+            message: `${firstIssue?.message || 'Dados de pagamento inválidos'}`,
+            severity: 'error',
+          });
+          return;
+        }
+
+        // Enviar inscrição e gerar QR Code
+        const success = await submitRegistration();
+        if (!success) {
+          return;
+        }
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  };
+
   const handlePrevStep = () => {
-      setValidationErrors({});
-  
-      if (step === 'playersInfo' && currentPlayerIndex > 0) {
-        setCurrentPlayerIndex((prev) => prev - 1);
-        return;
-      }
-  
-      prevStep();
-    };
+    setValidationErrors({});
+
+    if (step === 'playersInfo' && currentPlayerIndex > 0) {
+      setCurrentPlayerIndex((prev) => prev - 1);
+      return;
+    }
+
+    prevStep();
+  };
 
   // ─── Handlers: Team ────────────────────────────────────────────────────
 
@@ -332,9 +330,9 @@ export const useTeamRegistration = () => {
     setStep('payment');
   };
 
-  const handleReturnToTournamentPage = (slug : string) => {
+  const handleReturnToTournamentPage = (slug: string) => {
     router.push(`/lol/torneios/${slug}`);
-  }
+  };
 
   // ─── Handlers: Step Navigation ──────────────────────────────────────────
 
@@ -396,31 +394,33 @@ export const useTeamRegistration = () => {
   // ─── Cleanup — cancela WebSocket ao desmontar o componente ────────────────
 
   const checkTeamNameAvailability = useCallback(
-    async (name: string): Promise<boolean> => {
-      const normalizedName = name.trim();
+  async (name: string, tournamentId: number): Promise<boolean> => {
+    if (!tournamentId) return false;
+    const normalizedName = name.trim();
+    if (!normalizedName) return false;
 
-      if (!normalizedName) {
-        return false;
-      }
 
-      const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
-      if (cachedResult !== undefined) {
-        return cachedResult;
-      }
+    const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
+    if (cachedResult && (Date.now() - cachedResult.cachedAt < CACHE_TTL_MS)) { //libera para tentar novamente após expiração do cache
+      return cachedResult.available;  // retorna cache sem fazer requisição
+    }
 
-      const response = await apiFetch(
-        `http://localhost:8080/tournaments/${tournamentId}/teams/check-name?name=${encodeURIComponent(normalizedName)}`,
-        { method: 'GET' }
-      );
 
-      // 204 → disponível, 409 → já existe
-      const isAvailable = response.status === 204;
-      teamNameAvailabilityCacheRef.current[normalizedName] = isAvailable;
+    const response = await apiFetch(
+      `http://localhost:8080/tournaments/${tournamentId}/teams/name-availability?name=${encodeURIComponent(normalizedName)}`,
+      { method: 'GET' }
+    );
 
-      return isAvailable;
-    },
-    []
-  );
+
+    const isAvailable = response.status === 200;
+    teamNameAvailabilityCacheRef.current[normalizedName] = {
+      available: isAvailable,
+      cachedAt: Date.now(),
+    };
+    return isAvailable;
+  },
+  []
+);
 
   const checkRegisterStatus = async (tournamentSlug: string) => {
     const response = await apiFetch(
@@ -477,7 +477,7 @@ export const useTeamRegistration = () => {
 
       const { registrationData, paymentData } = registrationStatus;
       setTournamentId(registrationData.tournamentId);
-      console.log('ID', registrationData.tournamentId);
+    
 
       // ── Torneio lotado (sem inscrição prévia) ──────────────────────────────
       if (
@@ -503,10 +503,6 @@ export const useTeamRegistration = () => {
         case 'PENDING_PAYMENT':
           if (paymentData) {
             setPaymentData(paymentData);
-            console.log(
-              'Inscrição pendente de pagamento. Dados de pagamento recebidos:',
-              paymentData
-            );
             setUiState({ status: 'pending_payment' });
             goToStep('payment');
             await handlePaymentWebSocketSubscribe(paymentData.uuid);
@@ -518,16 +514,11 @@ export const useTeamRegistration = () => {
               message:
                 'Houve um erro ao processar a sua inscrição, tente novamente mais tarde.',
             });
-            console.error(
-              'Inscrição pendente de pagamento sem dados de pagamento disponíveis.'
-            );
           }
           break;
 
         case 'READY':
           setUiState({ status: 'payment_approved' });
-          //setPaymentApproved(true);
-          //goToStep('payment');
           break;
 
         case 'EXPIRED_PAYMENT':
@@ -755,7 +746,8 @@ export const useTeamRegistration = () => {
     isCheckingTeamName,
     setIsCheckingTeamName,
     stepIndex,
-    validationErrors, setValidationErrors,
+    validationErrors,
+    setValidationErrors,
 
     //Step Handlers
     handlePrevStep,
