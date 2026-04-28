@@ -11,6 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -368,6 +369,14 @@ function ResponsiveAppBar({ gameRoute }: ResponsiveAppBarProps) {
                   </ListItemIcon>
                   Meus torneios
                 </MenuItem>
+                {user?.role === 'ADMIN' && (
+                  <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/admin'); }}>
+                    <ListItemIcon sx={{ color: '#FF00EE', minWidth: 40 }}>
+                      <AdminPanelSettingsRoundedIcon sx={{ fontSize: '1.3rem' }} />
+                    </ListItemIcon>
+                    Painel administrativo
+                  </MenuItem>
+                )}
                 <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
                   <ListItemIcon sx={{ color: '#ff6b6b', minWidth: 40 }}>
                     <LogoutIcon sx={{ fontSize: '1.2rem' }} />
@@ -535,6 +544,14 @@ function ResponsiveAppBar({ gameRoute }: ResponsiveAppBarProps) {
               </ListItemIcon>
               Meus torneios
             </MenuItem>
+            {user?.role === 'ADMIN' && (
+              <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/admin'); }}>
+                <ListItemIcon sx={{ color: '#FF00EE', minWidth: 40 }}>
+                  <AdminPanelSettingsRoundedIcon sx={{ fontSize: '1.3rem' }} />
+                </ListItemIcon>
+                Painel administrativo
+              </MenuItem>
+            )}
             <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
             <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
               <ListItemIcon sx={{ color: '#ff6b6b', minWidth: 40 }}>

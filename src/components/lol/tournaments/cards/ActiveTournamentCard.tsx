@@ -1,6 +1,10 @@
 'use client';
 
-import { MyTournamentsSummaryData } from '@/types/lol/tournaments/tournament';
+import {
+  MyTournamentsSummaryData,
+  TEAM_STATUS_LABELS,
+  TOURNAMENT_STATUS_LABELS,
+} from '@/types/lol/tournaments/tournament';
 import AppsRoundedIcon from '@mui/icons-material/AppsRounded';
 import { Box, Button, Chip, Typography } from '@mui/material';
 
@@ -38,7 +42,10 @@ interface ActiveTournamentCardProps {
   onView?: () => void;
 }
 
-export default function ActiveTournamentCard({ data, onView }: ActiveTournamentCardProps) {
+export default function ActiveTournamentCard({
+  data,
+  onView,
+}: ActiveTournamentCardProps) {
   const isOngoing = data.status === 'ONGOING';
 
   const badgeColor = isOngoing ? C.ongoingBlue : C.readyGreen;
@@ -50,7 +57,9 @@ export default function ActiveTournamentCard({ data, onView }: ActiveTournamentC
       : '—'
     : formatDate(data.startsAt);
 
-  const subLabel = isOngoing ? 'TÉRMINO' : `INÍCIO · ${formatTime(data.startsAt)}`;
+  const subLabel = isOngoing
+    ? 'TÉRMINO'
+    : `INÍCIO · ${formatTime(data.startsAt)}`;
 
   return (
     <Box
@@ -59,105 +68,124 @@ export default function ActiveTournamentCard({ data, onView }: ActiveTournamentC
         border: `1px solid ${isOngoing ? C.ongoingBorder : C.border}`,
         borderRadius: 3,
         p: 2.5,
+        width: '100%',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
-        width: '100%',
-        maxWidth: 360,
+        justifyContent: 'space-between',
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
-          <Chip
-            label={isOngoing ? 'ONGOING' : 'READY'}
-            size="small"
-            sx={{
-              backgroundColor: badgeBg,
-              color: badgeColor,
-              fontWeight: 700,
-              fontSize: '0.62rem',
-              letterSpacing: 0.6,
-              border: `1px solid ${badgeColor}`,
-              height: 22,
-              alignSelf: 'flex-start',
-            }}
-          />
-          {isOngoing && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              {/* pulsing dot */}
-              <Box
-                sx={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  backgroundColor: C.ongoingBlue,
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1, transform: 'scale(1)' },
-                    '50%': { opacity: 0.4, transform: 'scale(0.7)' },
-                  },
-                  animation: 'pulse 1.6s ease-in-out infinite',
-                }}
-              />
-              <Typography
-                sx={{
-                  color: C.ongoingBlue,
-                  fontSize: '0.6rem',
-                  fontWeight: 700,
-                  letterSpacing: 0.8,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Em andamento
-              </Typography>
-            </Box>
-          )}
+      {/* --- GRUPO DE TEXTO E INFORMAÇÕES (Tudo junto no topo) --- */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Bloco Superior: Chip/Bolinha e Data */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+            <Chip
+              size="small"
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  {/* A bolinha piscando só aparece se for Ongoing */}
+                  {isOngoing && (
+                    <Box
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        backgroundColor: badgeColor,
+                        '@keyframes pulse': {
+                          '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                          '50%': { opacity: 0.4, transform: 'scale(0.7)' },
+                        },
+                        animation: 'pulse 1.6s ease-in-out infinite',
+                      }}
+                    />
+                  )}
+                  {/* O Texto muda conforme o status */}
+                  <span>
+                    {isOngoing
+                      ? TOURNAMENT_STATUS_LABELS.ONGOING
+                      : TEAM_STATUS_LABELS[data.teamStatus]}
+                  </span>
+                </Box>
+              }
+              sx={{
+                backgroundColor: badgeBg,
+                color: badgeColor,
+                fontWeight: 700,
+                fontSize: '0.62rem',
+                letterSpacing: 0.6,
+                border: `1px solid ${badgeColor}`,
+                height: 22,
+                alignSelf: 'flex-start',
+                textTransform: 'uppercase',
+                // Ajuste fino para o label ficar perfeitamente alinhado com a bolinha
+                '& .MuiChip-label': {
+                  px: 1.2,
+                },
+              }}
+            />
+          </Box>
+
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography
+              sx={{
+                color: C.text,
+                fontWeight: 700,
+                fontSize: '1rem',
+                lineHeight: 1.2,
+              }}
+            >
+              {dateDisplay}
+            </Typography>
+            <Typography
+              sx={{
+                color: C.gold,
+                fontSize: '0.65rem',
+                letterSpacing: 0.6,
+                fontWeight: 600,
+                mt: 0.3,
+              }}
+            >
+              {subLabel}
+            </Typography>
+          </Box>
         </Box>
 
-        <Box sx={{ textAlign: 'right' }}>
+        {/* Bloco Inferior: Nome do Torneio e Equipe */}
+        <Box>
+          <Typography
+            sx={{
+              color: C.tournamentLabel,
+              fontSize: '0.68rem',
+              letterSpacing: 0.8,
+              textTransform: 'uppercase',
+              mb: 0.5,
+            }}
+          >
+            {data.tournamentName}
+          </Typography>
           <Typography
             sx={{
               color: C.text,
               fontWeight: 700,
-              fontSize: '1rem',
-              lineHeight: 1.2,
+              fontSize: '1.1rem',
+              lineHeight: 1.3,
             }}
           >
-            {dateDisplay}
-          </Typography>
-          <Typography
-            sx={{
-              color: C.gold,
-              fontSize: '0.65rem',
-              letterSpacing: 0.6,
-              fontWeight: 600,
-              mt: 0.3,
-            }}
-          >
-            {subLabel}
+            Equipe: {data.teamName}
           </Typography>
         </Box>
       </Box>
 
-      <Box>
-        <Typography
-          sx={{
-            color: C.tournamentLabel,
-            fontSize: '0.68rem',
-            letterSpacing: 0.8,
-            textTransform: 'uppercase',
-            mb: 0.5,
-          }}
-        >
-          {data.tournamentName}
-        </Typography>
-        <Typography sx={{ color: C.text, fontWeight: 700, fontSize: '1.1rem', lineHeight: 1.3 }}>
-          {data.teamName}
-        </Typography>
-      </Box>
-
+      {/* --- BOTÃO (Isolado, empurrado para a base) --- */}
       <Button
         variant="contained"
-        startIcon={<AppsRoundedIcon />}
         onClick={onView}
         fullWidth
         sx={{
@@ -167,11 +195,12 @@ export default function ActiveTournamentCard({ data, onView }: ActiveTournamentC
           fontSize: '0.9rem',
           letterSpacing: 0.5,
           borderRadius: 2,
-          py: 1.3,
+          py: '14px',
+          mt: 2,
           '&:hover': { backgroundColor: '#0b80a0' },
         }}
       >
-        VER TORNEIO
+        IR PARA TORNEIO
       </Button>
     </Box>
   );

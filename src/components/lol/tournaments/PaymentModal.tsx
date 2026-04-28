@@ -28,7 +28,8 @@ import {
   RegisterStatusResponse,
 } from '@/types/teamRegistration';
 import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
-import {TEAM_REGISTRATION_TOKENS} from '@/theme';
+import { TOURNAMENT_PAYMENT_APPROVED_EVENT } from '@/hooks/lol/tournaments/useTournamentPaymentApproved';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PaymentModalProps {
   torneioId: string;
@@ -62,7 +63,7 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
           subscribeToPayment(data.paymentData.uuid, () => {
             setPaymentApproved(true);
             window.dispatchEvent(
-              new CustomEvent('tournament-payment-approved')
+              new CustomEvent(TOURNAMENT_PAYMENT_APPROVED_EVENT)
             );
           }).then((unsub) => {
             unsubscribeRef.current = unsub;
@@ -181,10 +182,15 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
         {!loading && paymentApproved && (
           <Stack
             spacing={2}
-            sx={{ textAlign: 'center', py: 1, justifyContent: 'center' }}
+            sx={{
+              textAlign: 'center',
+              py: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
           >
             <CheckCircleIcon
-              sx={{ fontSize: 64, color: '#4caf50', mx: 'auto' }}
+              sx={{ fontSize: 64, color: '#4caf50', margin: 'auto' }}
             />
             <Typography
               variant="h6"

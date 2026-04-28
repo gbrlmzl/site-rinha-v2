@@ -29,6 +29,24 @@ export type TeamStatus =
   | 'CANCELED'
   | 'BANNED';
 
+export const TOURNAMENT_STATUS_LABELS: Record<TournamentStatus, string> = {
+  OPEN: 'Inscrições Abertas',
+  FULL: 'Vagas Esgotadas',
+  ONGOING: 'Em Andamento',
+  FINISHED: 'Finalizado',
+  CANCELED: 'Cancelado',
+};
+
+export const TEAM_STATUS_LABELS: Record<TeamStatus, string> = {
+  PENDING_PAYMENT: 'Aguardando Pagamento',
+  EXPIRED_PAYMENT: 'Pagamento Expirado',
+  EXPIRED_PAYMENT_PROBLEM: 'Problema No Pagamento',
+  READY: 'Confirmado',
+  FINISHED: 'Finalizado',
+  CANCELED: 'Cancelado',
+  BANNED: 'Banido',
+};
+
 export interface MyTournamentsSummaryData {
   id: number;
   slug: string;

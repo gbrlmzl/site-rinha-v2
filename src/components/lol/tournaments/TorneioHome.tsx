@@ -2,8 +2,8 @@
 
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useTournament } from '@/hooks/lol/tournaments/useTournament';
+import { useTournamentPaymentApproved } from '@/hooks/lol/tournaments/useTournamentPaymentApproved';
 import { MyTournamentsSummaryData } from '@/types/lol/tournaments/tournament';
-import { toTournamentSlug } from '@/utils/tournament-slug';
 import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { JSX, useEffect, useState } from 'react';
@@ -20,14 +20,6 @@ export default function TorneioHome() {
     MyTournamentsSummaryData[]
   >([]);
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    getMyTournaments('LEAGUE_OF_LEGENDS').then((page) => {
-      if (page) setMyTournaments(page.content);
-    });
-  }, [isAuthenticated]);
-
   function updateMyTournaments() {
     getMyTournaments('LEAGUE_OF_LEGENDS').then((page) => {
       if (page) setMyTournaments(page.content);
@@ -35,13 +27,11 @@ export default function TorneioHome() {
   }
 
   useEffect(() => {
-    window.addEventListener('tournament-payment-approved', updateMyTournaments);
-    return () =>
-      window.removeEventListener(
-        'tournament-payment-approved',
-        updateMyTournaments
-      );
-  }, []);
+    if (!isAuthenticated) return;
+    updateMyTournaments();
+  }, [isAuthenticated]);
+
+  useTournamentPaymentApproved(updateMyTournaments);
 
   function renderCard(tournament: MyTournamentsSummaryData) {
     const inscricoesPath = `/lol/torneios/${tournament.slug}/pagamentos`;
@@ -69,7 +59,15 @@ export default function TorneioHome() {
   }
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', px: { xs: 2, md: 6 }, pt: '13vh', pb: '5vh' }}>
+    <Box
+      sx={{
+        maxWidth: 1400,
+        mx: 'auto',
+        px: { xs: 2, md: 6 },
+        pt: '13vh',
+        pb: '5vh',
+      }}
+    >
       {isAuthenticated && myTournaments.length > 0 && (
         <Box sx={{ mb: 5 }}>
           <Typography

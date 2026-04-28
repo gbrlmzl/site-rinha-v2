@@ -1,6 +1,9 @@
 'use client';
 
-import { MyTournamentsSummaryData } from '@/types/lol/tournaments/tournament';
+import {
+  MyTournamentsSummaryData,
+  TEAM_STATUS_LABELS,
+} from '@/types/lol/tournaments/tournament';
 import BoltIcon from '@mui/icons-material/Bolt';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -8,6 +11,7 @@ import { useEffect, useState } from 'react';
 const C = {
   surface: '#0E1241',
   border: 'rgba(255,255,255,0.08)',
+  pendingBorder: 'rgba(255, 184, 0, 0.35)',
   gold: '#FFB800',
   goldHover: '#C9A227',
   goldBg: 'rgba(255,184,0,0.12)',
@@ -50,73 +54,104 @@ interface PendingPaymentCardProps {
   onPay?: () => void;
 }
 
-export default function PendingPaymentCard({ data, onPay }: PendingPaymentCardProps) {
+export default function PendingPaymentCard({
+  data,
+  onPay,
+}: PendingPaymentCardProps) {
   const timeLeft = useCountdown(data.expiresAtPayment);
 
   return (
     <Box
       sx={{
         backgroundColor: C.surface,
-        border: `1px solid ${C.border}`,
+        border: `1px solid ${C.pendingBorder}`,
         borderRadius: 3,
         p: 2.5,
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
+        height: '100%',
+        justifyContent: 'space-between',
         width: '100%',
         maxWidth: 360,
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Chip
-          label="PENDING PAYMENT"
-          size="small"
+      {/* --- GRUPO DE TEXTO E INFORMAÇÕES (Tudo junto no topo) --- */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Bloco Superior: Chip e Cronômetro */}
+        <Box
           sx={{
-            backgroundColor: C.goldBg,
-            color: C.gold,
-            fontWeight: 700,
-            fontSize: '0.62rem',
-            letterSpacing: 0.6,
-            border: `1px solid ${C.goldBorder}`,
-            height: 22,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
           }}
-        />
-        <Box sx={{ textAlign: 'right' }}>
-          <Typography
+        >
+          <Chip
+            label={TEAM_STATUS_LABELS[data.teamStatus]}
+            size="small"
             sx={{
+              backgroundColor: C.goldBg,
               color: C.gold,
               fontWeight: 700,
-              fontSize: '1.3rem',
-              lineHeight: 1.1,
-              fontVariantNumeric: 'tabular-nums',
-              letterSpacing: 1,
+              fontSize: '0.62rem',
+              letterSpacing: 0.6,
+              border: `1px solid ${C.goldBorder}`,
+              height: 22,
+              textTransform: 'uppercase',
+            }}
+          />
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography
+              sx={{
+                color: C.gold,
+                fontWeight: 700,
+                fontSize: '1.3rem',
+                lineHeight: 1.1,
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: 1,
+              }}
+            >
+              {timeLeft}
+            </Typography>
+            <Typography
+              sx={{
+                color: C.textMuted,
+                fontSize: '0.6rem',
+                letterSpacing: 0.8,
+                mt: 0.3,
+              }}
+            >
+              EXPIRA EM
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Bloco Inferior: Nome do Torneio e Equipe */}
+        <Box>
+          <Typography
+            sx={{
+              color: C.tournamentLabel,
+              fontSize: '0.68rem',
+              letterSpacing: 0.8,
+              textTransform: 'uppercase',
+              mb: 0.5,
             }}
           >
-            {timeLeft}
+            {data.tournamentName}
           </Typography>
-          <Typography sx={{ color: C.textMuted, fontSize: '0.6rem', letterSpacing: 0.8, mt: 0.3 }}>
-            EXPIRA EM
+          <Typography
+            sx={{
+              color: C.text,
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              lineHeight: 1.3,
+            }}
+          >
+            Equipe: {data.teamName}
           </Typography>
         </Box>
       </Box>
 
-      <Box>
-        <Typography
-          sx={{
-            color: C.tournamentLabel,
-            fontSize: '0.68rem',
-            letterSpacing: 0.8,
-            textTransform: 'uppercase',
-            mb: 0.5,
-          }}
-        >
-          {data.tournamentName}
-        </Typography>
-        <Typography sx={{ color: C.text, fontWeight: 700, fontSize: '1.1rem', lineHeight: 1.3 }}>
-          {data.teamName}
-        </Typography>
-      </Box>
-
+      {/* --- BOTÃO (Isolado, empurrado para a base) --- */}
       <Button
         variant="contained"
         startIcon={<BoltIcon />}
@@ -129,7 +164,8 @@ export default function PendingPaymentCard({ data, onPay }: PendingPaymentCardPr
           fontSize: '0.9rem',
           letterSpacing: 0.5,
           borderRadius: 2,
-          py: 1.3,
+          py: '14px',
+          mt: 2,
           transition: 'background-color 0.2s ease',
           '&:hover': { backgroundColor: C.goldHover },
           '&:disabled': { opacity: 0.5 },

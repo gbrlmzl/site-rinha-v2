@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const authRoutes = ['/login', '/cadastro', '/recuperar-senha'];
 
-const protectedRoutePrefixes = ['/perfil', '/torneios/me'];
+const protectedRoutePrefixes = ['/perfil', '/torneios/me', '/admin'];
 
 function isTournamentRegistrationRoute(pathname: string): boolean {
   return /^\/lol\/torneios\/[^/]+\/inscricoes(?:\/.*)?$/.test(pathname);

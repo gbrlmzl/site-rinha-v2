@@ -7,7 +7,6 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
-import { toTournamentSlug } from '@/utils/tournament-slug';
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -210,7 +209,7 @@ export default function DesktopCarousel({
           <Stack direction="row" spacing={1.5}>
             <Button
               variant="contained"
-              onClick={() => router.push(`/lol/torneios/${/*toTournamentSlug(t.id, t.name)*/t.slug}`)}
+              onClick={() => router.push(`/lol/torneios/${t.slug}`)}
               sx={{
                 backgroundColor: '#11B5E4',
                 color: '#ffffff',

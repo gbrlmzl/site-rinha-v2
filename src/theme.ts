@@ -507,6 +507,172 @@ export const LOL_HOME_TOKENS = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Painel Administrativo
+//
+// Mantém a paleta visual do site (mesmo `surface` e `accent` da navbar
+// principal), mas com identidade própria via `adminAccent` (roxo) para
+// diferenciar contexto sem destoar do resto. Inspirado no doc do admin.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ADMIN_TOKENS = {
+  colors: {
+    ...GLOBAL_TOKENS,
+    /** Roxo de destaque do painel — usado em CTAs e ícones de ações */
+    adminAccent: '#8B5CF6',
+    adminAccentHover: '#7C3AED',
+    /** Cinza levemente mais escuro pra cards do painel */
+    panelBg: '#0a0f33',
+    panelHeaderBg: 'rgba(14, 18, 65, 0.97)',
+    /** Cores semânticas dos badges de status do torneio */
+    statusOpen: '#3B82F6',
+    statusFull: '#8B5CF6',
+    statusOngoing: '#22C55E',
+    statusFinished: '#94A3B8',
+    statusCanceled: '#EF4444',
+    /** Cores semânticas dos status de pagamento */
+    paymentApproved: '#22C55E',
+    paymentPending: '#F59E0B',
+    paymentCanceled: '#EF4444',
+  },
+
+  /** Tipografia do painel */
+  typography: {
+    pageTitle: {
+      fontFamily: FONT.roboto,
+      fontWeight: 700,
+      fontSize: { xs: '1.75rem', md: '2.25rem' },
+      color: text,
+      letterSpacing: '-0.01em',
+    },
+    pageSubtitle: {
+      fontFamily: FONT.roboto,
+      fontSize: '0.95rem',
+      color: textMuted,
+    },
+    sectionLabel: {
+      fontFamily: FONT.roboto,
+      fontSize: '0.7rem',
+      fontWeight: 600,
+      color: textMuted,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase' as const,
+    },
+  },
+
+  sx: {
+    /** Wrapper centralizado da página do painel */
+    pageContainer: {
+      minHeight: '100vh',
+      backgroundColor: GLOBAL_TOKENS.bg,
+      pt: { xs: 9, md: 11 },
+      pb: { xs: 4, md: 6 },
+      px: { xs: 2, md: 3 },
+      maxWidth: 1280,
+      mx: 'auto',
+    },
+
+    /** Card que envolve a lista (visual de painel centralizado) */
+    panelSection: {
+      backgroundColor: GLOBAL_TOKENS.surface,
+      border: `1px solid ${GLOBAL_TOKENS.border}`,
+      borderRadius: 3,
+      p: { xs: 2, md: 3 },
+    },
+
+    /** Header fixo do painel — substitui a navbar do site */
+    shellAppBar: {
+      backgroundColor: 'rgba(14, 18, 65, 0.97)',
+      backdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
+      boxShadow: '0 2px 20px rgba(0,0,0,0.4)',
+    },
+
+    /** Bloco com ícone gear + textos do header */
+    shellBrand: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5,
+    },
+
+    /** Avatar quadrado roxo com o ícone gear */
+    shellBrandIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 1.5,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#8B5CF6',
+      color: '#fff',
+    },
+
+    /** Botão "Sair do Painel" */
+    shellExitButton: {
+      borderRadius: 2,
+      paddingInline: 2,
+      backgroundColor: 'rgba(255,255,255,0.06)',
+      color: text,
+      fontWeight: 500,
+      '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+    },
+
+    /** Card padrão do painel (lista de torneios, etc.) */
+    panelCard: {
+      backgroundColor: surface,
+      borderRadius: 2,
+      border: `1px solid ${border}`,
+    },
+
+    /** Toolbar com filtros + botão "Criar Novo Torneio" */
+    toolbar: {
+      display: 'flex',
+      flexDirection: { xs: 'column', md: 'row' },
+      gap: 1.5,
+      alignItems: { xs: 'stretch', md: 'center' },
+      mb: 3,
+    },
+
+    /** Botão CTA primário do painel (roxo) */
+    primaryCta: {
+      backgroundColor: '#8B5CF6',
+      color: '#fff',
+      fontWeight: 600,
+      borderRadius: 2,
+      paddingInline: 3,
+      height: 44,
+      '&:hover': { backgroundColor: '#7C3AED' },
+    },
+
+    /** Modal padrão do painel — Dialog com header próprio */
+    modalPaper: {
+      backgroundColor: surface,
+      borderRadius: 3,
+      border: `1px solid ${border}`,
+      backgroundImage: 'none',
+    },
+
+    modalHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      px: 3,
+      py: 2,
+      borderBottom: `1px solid ${border}`,
+    },
+
+    /** Inputs do painel — variante escura */
+    input: INPUT_SX,
+
+    /** Esconde scrollbar visual (mobile usa toque) */
+    scrollableNoScrollbar: {
+      overflowY: 'auto' as const,
+      scrollbarWidth: 'none' as const,
+      '&::-webkit-scrollbar': { display: 'none' },
+    },
+  },
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Aliases de retrocompatibilidade
 // ─────────────────────────────────────────────────────────────────────────────
 

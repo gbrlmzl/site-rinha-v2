@@ -4,7 +4,7 @@ import { TournamentPublicSummaryData } from '@/types/lol/tournaments/tournament'
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
-import { toTournamentSlug } from '@/utils/tournament-slug';
+
 import { Box, Button, LinearProgress, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import TournamentStatusBadge from './TournamentStatusBadge';
@@ -51,22 +51,36 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
           src={tournament.imageUrl}
           alt={tournament.name}
           referrerPolicy="no-referrer"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
         />
         <Box
           sx={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to top, rgba(14,18,65,0.85) 0%, transparent 60%)',
+            background:
+              'linear-gradient(to top, rgba(14,18,65,0.85) 0%, transparent 60%)',
           }}
         />
         <Box sx={{ position: 'absolute', top: 10, left: 10 }}>
-          <TournamentStatusBadge status={tournament.status} />
+          <TournamentStatusBadge status={tournament.status} variant="solid" />
         </Box>
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.2, flex: 1 }}>
+      <Box
+        sx={{
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.2,
+          flex: 1,
+        }}
+      >
         <Typography
           sx={{
             color: '#ffffff',
@@ -84,14 +98,20 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
 
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarTodayRoundedIcon sx={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }} />
-            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+            <CalendarTodayRoundedIcon
+              sx={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}
+            />
+            <Typography
+              sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}
+            >
               {formatDate(tournament.startsAt)}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <EmojiEventsRoundedIcon sx={{ fontSize: 13, color: '#E07F0A' }} />
-            <Typography sx={{ color: '#E07F0A', fontSize: '0.75rem', fontWeight: 600 }}>
+            <Typography
+              sx={{ color: '#E07F0A', fontSize: '0.75rem', fontWeight: 600 }}
+            >
               {formatPrize(tournament.prizePool)}
             </Typography>
           </Box>
@@ -99,11 +119,22 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
 
         {/* Teams progress */}
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', letterSpacing: 0.6, textTransform: 'uppercase' }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}
+          >
+            <Typography
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.68rem',
+                letterSpacing: 0.6,
+                textTransform: 'uppercase',
+              }}
+            >
               Equipes
             </Typography>
-            <Typography sx={{ color: '#ffffff', fontSize: '0.75rem', fontWeight: 700 }}>
+            <Typography
+              sx={{ color: '#ffffff', fontSize: '0.75rem', fontWeight: 700 }}
+            >
               {tournament.confirmedTeamsCount}/{tournament.maxTeams}
             </Typography>
           </Box>
@@ -114,7 +145,10 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
               height: 4,
               borderRadius: 2,
               backgroundColor: 'rgba(255,255,255,0.1)',
-              '& .MuiLinearProgress-bar': { backgroundColor: '#11B5E4', borderRadius: 2 },
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: '#11B5E4',
+                borderRadius: 2,
+              },
             }}
           />
         </Box>
@@ -134,7 +168,10 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
               color: 'rgba(255,255,255,0.8)',
               fontSize: '0.75rem',
               py: 0.8,
-              '&:hover': { borderColor: 'rgba(255,255,255,0.4)', backgroundColor: 'rgba(255,255,255,0.05)' },
+              '&:hover': {
+                borderColor: 'rgba(255,255,255,0.4)',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+              },
             }}
           >
             Regras
@@ -142,7 +179,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
           <Button
             variant="contained"
             size="small"
-            onClick={() => router.push(`/lol/torneios/${toTournamentSlug(tournament.id, tournament.name)}`)}
+            onClick={() => router.push(`/lol/torneios/${tournament.slug}`)}
             sx={{
               flex: 1,
               backgroundColor: '#11B5E4',

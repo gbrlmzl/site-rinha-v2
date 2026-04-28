@@ -17,6 +17,8 @@ const NAV_BTN_SX = {
   width: 36,
   height: 36,
   flexShrink: 0,
+  // Adicionamos um backdrop-filter sutil para o botão se destacar ainda mais sobre o fundo
+  backdropFilter: 'blur(4px)',
   '&:hover': { backgroundColor: 'rgba(255,255,255,0.18)' },
   '&.Mui-disabled': { opacity: 0.25, pointerEvents: 'none' },
 };
@@ -41,41 +43,111 @@ export default function MyTournamentsCarousel({ items }: Props) {
     setIndex((i) => Math.min(maxIndex, i + 1));
   }
 
+  const showLeftFade = safeIndex > 0;
+  const showRightFade = safeIndex < maxIndex;
+
+  // 0.05 = Praticamente invisível na ponta.
+  // 60px = Distância do degradê (cobre a largura do botão + um pequeno respiro).
+  let fadeMask = 'none';
+  if (showLeftFade && showRightFade) {
+    fadeMask =
+      'linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) 60px, rgba(0,0,0,1) calc(100% - 60px), rgba(0,0,0,0.05) 100%)';
+  } else if (showLeftFade) {
+    fadeMask =
+      'linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) 60px)';
+  } else if (showRightFade) {
+    fadeMask =
+      'linear-gradient(to left, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) 60px)';
+  }
+
   return (
     <>
-      {/* Desktop: fixed-width cards, arrow navigation */}
-      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+      {/* DESKTOP VIEW (900px ou mais) - Navegação por Setas Sobrepostas */}
+      <Box
+        sx={{
+          display: { xs: 'none', md: 'block' }, // Mudou para block para usar relative
+          position: 'relative', // Essencial para ancorar os botões
+        }}
+      >
+        {/* BOTÃO VOLTAR - Absoluto na Esquerda */}
         {showArrows && (
-          <IconButton onClick={prev} disabled={safeIndex === 0} sx={NAV_BTN_SX}>
-            <ChevronLeftRoundedIcon />
-          </IconButton>
+          <Box
+            sx={{
+              position: 'absolute',
+              left: -18, // Puxa metade do botão pra fora. Troque por 8 se quiser totalmente dentro
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 2, // Garante que a seta fique por cima do fade e dos cards
+            }}
+          >
+            <IconButton
+              onClick={prev}
+              disabled={safeIndex === 0}
+              sx={NAV_BTN_SX}
+            >
+              <ChevronLeftRoundedIcon />
+            </IconButton>
+          </Box>
         )}
 
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        {/* CONTAINER DOS CARDS (A Máscara vai apenas aqui) */}
+        <Box
+          sx={{
+            overflow: 'hidden',
+            maskImage: fadeMask,
+            WebkitMaskImage: fadeMask, // Necessário para Safari e Chrome
+            // Adicionado um pequeno padding horizontal para o card não colar na borda do container caso precise
+            px: 1,
+          }}
+        >
           <Box
             sx={{
               display: 'flex',
               gap: `${GAP}px`,
               transform: `translateX(-${safeIndex * (CARD_WIDTH + GAP)}px)`,
               transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+              alignItems: 'stretch',
             }}
           >
             {items.map((item, i) => (
-              <Box key={i} sx={{ flexShrink: 0, width: CARD_WIDTH }}>
+              <Box
+                key={i}
+                sx={{
+                  flexShrink: 0,
+                  width: CARD_WIDTH,
+                  display: 'flex',
+                  '& > *': { width: '100%' },
+                }}
+              >
                 {item}
               </Box>
             ))}
           </Box>
         </Box>
 
+        {/* BOTÃO AVANÇAR - Absoluto na Direita */}
         {showArrows && (
-          <IconButton onClick={next} disabled={safeIndex >= maxIndex} sx={NAV_BTN_SX}>
-            <ChevronRightRoundedIcon />
-          </IconButton>
+          <Box
+            sx={{
+              position: 'absolute',
+              right: -18, // Puxa metade do botão pra fora. Troque por 8 se quiser totalmente dentro
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+            }}
+          >
+            <IconButton
+              onClick={next}
+              disabled={safeIndex >= maxIndex}
+              sx={NAV_BTN_SX}
+            >
+              <ChevronRightRoundedIcon />
+            </IconButton>
+          </Box>
         )}
       </Box>
 
-      {/* Mobile: 1 card per view with peek of next, swipeable, no scrollbar */}
+      {/* MOBILE & TABLET VIEW (Até 899px) - Navegação por Swipe Nativo */}
       <Box
         sx={{
           display: { xs: 'flex', md: 'none' },
@@ -83,6 +155,7 @@ export default function MyTournamentsCarousel({ items }: Props) {
           overflowX: 'auto',
           scrollSnapType: 'x mandatory',
           scrollbarWidth: 'none',
+          alignItems: 'stretch',
           '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
@@ -90,9 +163,11 @@ export default function MyTournamentsCarousel({ items }: Props) {
           <Box
             key={i}
             sx={{
-              minWidth: 'calc(100% - 48px)',
+              minWidth: { xs: 'calc(100% - 48px)', sm: CARD_WIDTH },
               scrollSnapAlign: 'start',
               flexShrink: 0,
+              display: 'flex',
+              '& > *': { width: '100%' },
             }}
           >
             {item}
