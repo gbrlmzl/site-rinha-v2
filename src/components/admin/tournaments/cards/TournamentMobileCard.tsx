@@ -12,6 +12,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import BlockIcon from '@mui/icons-material/Block';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import Link from 'next/link';
@@ -21,10 +22,10 @@ import {
   formatDateTime,
   formatPrize,
 } from '@/components/admin/tournaments/formatters';
-import TournamentStatusBadge from '@/components/admin/tournaments/badges/TournamentStatusBadge';
-import TournamentGameBadge from '@/components/admin/tournaments/badges/TournamentGameBadge';
+import TournamentStatusBadge from '@/components/shared/badges/TournamentStatusBadge';
+import GameBadge from '@/components/shared/badges/GameBadge';
 import { getAdminTournamentById } from '@/services/admin/adminTournamentService';
-import { ADMIN_TOKENS } from '@/theme';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
 import type { AdminTournamentSummary } from '@/types/admin/tournament';
 
 interface TournamentMobileCardProps {
@@ -66,7 +67,7 @@ export default function TournamentMobileCard({
           <Box sx={tournamentStyles.mobileCardThumbnail} />
         )}
         <Box sx={tournamentStyles.mobileCardThumbnailOverlayBadges}>
-          <TournamentStatusBadge status={tournament.status} />
+          <TournamentStatusBadge status={tournament.status} variant="solid" />
           <Box
             sx={{
               display: 'inline-flex',
@@ -90,7 +91,7 @@ export default function TournamentMobileCard({
       <Box sx={{ p: 2 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
           <EmojiEventsRoundedIcon sx={{ color: ADMIN_TOKENS.colors.adminAccent, fontSize: 18 }} />
-          <TournamentGameBadge game={tournament.game} />
+          <GameBadge game={tournament.game} />
         </Stack>
 
         <Typography sx={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff', mb: 1.5 }}>
@@ -146,7 +147,7 @@ export default function TournamentMobileCard({
           <Box sx={tournamentStyles.mobileCardActionsGrid} onClick={(e) => e.stopPropagation()}>
             <Button
               component={Link}
-              href={`/admin/tournaments/${tournament.id}/equipes`}
+              href={`/admin/torneios/${tournament.id}/equipes`}
               sx={tournamentStyles.mobileActionButton('teams')}
             >
               <PeopleAltOutlinedIcon />
@@ -154,7 +155,7 @@ export default function TournamentMobileCard({
             </Button>
             <Button
               component={Link}
-              href={`/admin/tournaments/${tournament.id}/pagamentos`}
+              href={`/admin/torneios/${tournament.id}/pagamentos`}
               sx={tournamentStyles.mobileActionButton('payments')}
             >
               <ReceiptLongOutlinedIcon />
@@ -162,7 +163,7 @@ export default function TournamentMobileCard({
             </Button>
             <Button
               component={Link}
-              href={`/admin/tournaments/${tournament.id}/editar`}
+              href={`/admin/torneios/${tournament.id}/editar`}
               sx={tournamentStyles.mobileActionButton('edit')}
             >
               <EditOutlinedIcon />
@@ -172,8 +173,17 @@ export default function TournamentMobileCard({
               onClick={() => onCancelClick(tournament.id)}
               sx={tournamentStyles.mobileActionButton('cancel')}
             >
-              <DeleteOutlineIcon />
-              CANCELAR
+              {tournament.activeTeamsCount === 0 ? (
+                <>
+                  <DeleteOutlineIcon />
+                  EXCLUIR
+                </>
+              ) : (
+                <>
+                  <BlockIcon />
+                  CANCELAR
+                </>
+              )}
             </Button>
           </Box>
         </Collapse>

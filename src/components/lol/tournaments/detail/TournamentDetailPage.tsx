@@ -265,98 +265,97 @@ export default function TournamentDetailPage({ slug }: Props) {
             )}
 
             {/* Technical Info */}
-            <Box
-              sx={{
-                backgroundColor: '#0E1241',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 3,
-                p: { xs: 2.5, md: 3.5 },
-              }}
-            >
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}
-              >
-                {/*<SettingsRoundedIcon sx={{ color: '#11B5E4', fontSize: 20 }} />*/}
-                <Typography
-                  sx={{
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '1.05rem',
-                  }}
-                >
-                  Informações gerais
-                </Typography>
-              </Box>
-
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <SectionTitle>Informações Técnicas</SectionTitle>
               <Box
                 sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                  gap: 3,
+                  backgroundColor: '#0E1241',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 3,
+                  p: { xs: 2.5, md: 2 },
                 }}
               >
-                <Box>
-                  <Typography
-                    sx={{
-                      color: 'rgba(255,255,255,0.4)',
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      letterSpacing: 1.2,
-                      textTransform: 'uppercase',
-                      mb: 1.5,
-                    }}
-                  >
-                    Cronograma
-                  </Typography>
-                  <Box
-                    sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}
-                  >
-                    <InfoRow
-                      label="Início em"
-                      value={formatDateLong(tournament.startsAt)}
-                    />
-                    {tournament.endsAt && (
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                    gap: 3,
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      sx={{
+                        color: 'rgba(255,255,255,0.4)',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                        mb: 1.5,
+                      }}
+                    >
+                      Cronograma
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1.5,
+                      }}
+                    >
                       <InfoRow
-                        label="Término em"
-                        value={formatDateLong(tournament.endsAt)}
+                        label="Início em"
+                        value={formatDateLong(tournament.startsAt)}
                       />
-                    )}
+                      {tournament.endsAt && (
+                        <InfoRow
+                          label="Término em"
+                          value={formatDateLong(tournament.endsAt)}
+                        />
+                      )}
+                    </Box>
                   </Box>
-                </Box>
 
-                <Box>
-                  <Typography
-                    sx={{
-                      color: 'rgba(255,255,255,0.4)',
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      letterSpacing: 1.2,
-                      textTransform: 'uppercase',
-                      mb: 1.5,
-                    }}
-                  >
-                    Regras Gerais
-                  </Typography>
-                  <Box
-                    sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}
-                  >
-                    {[
-                      'Início pontual no horário marcado.',
-                      'Respeito mútuo entre participantes.',
-                      'Uso de hack/cheat causa banimento.',
-                    ].map((rule) => (
-                      <Typography
-                        key={rule}
-                        sx={{
-                          color: '#ffffff',
-                          fontWeight: 700,
-                          fontSize: '1rem',
-                          mt: 0.2,
-                        }}
-                      >
-                        • {rule}
-                      </Typography>
-                    ))}
+                  <Box>
+                    <Typography
+                      sx={{
+                        color: 'rgba(255,255,255,0.4)',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                        mb: 1.5,
+                      }}
+                    >
+                      Regras Gerais
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0.8,
+                      }}
+                    >
+                      {[
+                        'Início pontual no horário marcado.',
+                        'Respeito mútuo entre participantes.',
+                        'Uso de hack/cheat causa banimento.',
+                      ].map((rule) => (
+                        <Typography
+                          key={rule}
+                          sx={{
+                            color: '#ffffff',
+                            fontFamily:
+                              'family: "Roboto Mono", Roboto Fallback',
+                            lineHeight: 1.5,
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            mt: 0.2,
+                          }}
+                        >
+                          • {rule}
+                        </Typography>
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
               </Box>
@@ -567,7 +566,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
         color: '#ffffff',
         fontWeight: 800,
         fontSize: { xs: '1.1rem', md: '1.25rem' },
-        mb: 2,
+        mb: 0,
       }}
     >
       {children}

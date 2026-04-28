@@ -1,5 +1,6 @@
-import { ADMIN_TOKENS, GLOBAL_TOKENS } from '@/theme';
-import type { TournamentGame, TournamentStatus } from '@/types/admin/tournament';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
+import { GLOBAL_TOKENS } from '@/theme';
+import type { TournamentStatus } from '@/types/admin/tournament';
 import { TOURNAMENT_STATUS_LABELS } from '@/types/lol/tournaments/tournament';
 
 const { border, surface, surfaceHigh, text, textMuted } = GLOBAL_TOKENS;
@@ -16,23 +17,10 @@ export const TOURNAMENT_STATUS_PALETTE: Record<
   CANCELED: { color: c.statusCanceled, label: TOURNAMENT_STATUS_LABELS.CANCELED },
 };
 
-export const TOURNAMENT_GAME_PALETTE: Record<
-  TournamentGame,
-  { color: string; label: string }
-> = {
-  LEAGUE_OF_LEGENDS: { color: '#11B5E4', label: 'LOL' },
-  VALORANT: { color: '#F34251', label: 'VALORANT' },
-  COUNTER_STRIKE: { color: '#E07F0A', label: 'CS2' },
-};
-
-const FALLBACK_PALETTE_ENTRY = { color: '#9CA3AF', label: '—' };
+const FALLBACK_STATUS_ENTRY = { color: '#9CA3AF', label: '—' };
 
 function safeStatusEntry(status: TournamentStatus) {
-  return TOURNAMENT_STATUS_PALETTE[status] ?? FALLBACK_PALETTE_ENTRY;
-}
-
-function safeGameEntry(game: TournamentGame) {
-  return TOURNAMENT_GAME_PALETTE[game] ?? FALLBACK_PALETTE_ENTRY;
+  return TOURNAMENT_STATUS_PALETTE[status] ?? FALLBACK_STATUS_ENTRY;
 }
 
 export const tournamentStyles = {
@@ -67,33 +55,16 @@ export const tournamentStyles = {
     border: `1px solid ${border}`,
     color: text,
     '& .MuiMenuItem-root': {
-      '&:hover': { backgroundColor: 'rgba(139, 92, 246, 0.12)' },
+      '&:hover': { backgroundColor: `${c.adminAccent}1F` },
       '&.Mui-selected': {
-        backgroundColor: 'rgba(139, 92, 246, 0.18)',
-        '&:hover': { backgroundColor: 'rgba(139, 92, 246, 0.24)' },
+        backgroundColor: `${c.adminAccent}2E`,
+        '&:hover': { backgroundColor: `${c.adminAccent}3D` },
       },
     },
   },
 
   statusBadge: (status: TournamentStatus) => {
     const { color } = safeStatusEntry(status);
-    return {
-      display: 'inline-flex',
-      alignItems: 'center',
-      paddingInline: 1.25,
-      height: 24,
-      borderRadius: 1,
-      fontSize: '0.7rem',
-      fontWeight: 700,
-      letterSpacing: '0.05em',
-      color,
-      backgroundColor: `${color}1F`,
-      border: `1px solid ${color}55`,
-    };
-  },
-
-  gameBadge: (game: TournamentGame) => {
-    const { color } = safeGameEntry(game);
     return {
       display: 'inline-flex',
       alignItems: 'center',
@@ -136,8 +107,8 @@ export const tournamentStyles = {
     overflow: 'hidden',
     transition: 'border-color 0.15s, background-color 0.15s',
     '&:hover': {
-      borderColor: 'rgba(139, 92, 246, 0.4)',
-      backgroundColor: 'rgba(139, 92, 246, 0.04)',
+      borderColor: `${c.adminAccent}66`,
+      backgroundColor: `${c.adminAccent}0A`,
     },
   },
 
@@ -180,7 +151,7 @@ export const tournamentStyles = {
     transition: 'all 0.15s',
     '&:hover': {
       color: c.adminAccent,
-      backgroundColor: 'rgba(139, 92, 246, 0.12)',
+      backgroundColor: `${c.adminAccent}1F`,
     },
   },
 
@@ -191,12 +162,12 @@ export const tournamentStyles = {
     transition: 'all 0.15s',
     '&:hover': {
       color: c.statusCanceled,
-      backgroundColor: 'rgba(239, 68, 68, 0.12)',
+      backgroundColor: `${c.statusCanceled}1F`,
     },
   },
 
   expandedDetails: {
-    backgroundColor: 'rgba(139, 92, 246, 0.06)',
+    backgroundColor: `${c.adminAccent}0F`,
     paddingInline: { xs: 2.5, md: 3.5 },
     paddingBlock: { xs: 2.5, md: 3 },
     borderTop: `1px solid ${border}`,
@@ -251,8 +222,8 @@ export const tournamentStyles = {
 
   mobileActionButton: (variant: 'teams' | 'payments' | 'edit' | 'cancel') => {
     const map = {
-      teams: { color: '#3B82F6', icon: '#60A5FA' },
-      payments: { color: '#F59E0B', icon: '#FBBF24' },
+      teams: { color: c.statusOpen, icon: c.statusOpen },
+      payments: { color: c.paymentPending, icon: c.paymentPending },
       edit: { color: text, icon: text },
       cancel: { color: c.statusCanceled, icon: c.statusCanceled },
     } as const;

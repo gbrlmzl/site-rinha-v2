@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Box, Collapse, Stack, Typography } from '@mui/material';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
 import { formatDateOnly } from '@/components/admin/tournaments/formatters';
-import TournamentStatusBadge from '@/components/admin/tournaments/badges/TournamentStatusBadge';
-import TournamentGameBadge from '@/components/admin/tournaments/badges/TournamentGameBadge';
+import TournamentStatusBadge from '@/components/shared/badges/TournamentStatusBadge';
+import GameBadge from '@/components/shared/badges/GameBadge';
 import TournamentRowActions from '@/components/admin/tournaments/actions/TournamentRowActions';
 import TournamentExpandedDetails from '@/components/admin/tournaments/TournamentExpandedDetails';
 import type { AdminTournamentSummary } from '@/types/admin/tournament';
@@ -60,7 +60,7 @@ export default function TournamentTableRow({
         </Stack>
 
         <Box>
-          <TournamentGameBadge game={tournament.game} />
+          <GameBadge game={tournament.game} />
         </Box>
         <Box>
           <TournamentStatusBadge status={tournament.status} />
@@ -74,6 +74,7 @@ export default function TournamentTableRow({
 
         <TournamentRowActions
           tournamentId={tournament.id}
+          activeTeamsCount={tournament.activeTeamsCount}
           onCancelClick={onCancelClick}
         />
       </Box>

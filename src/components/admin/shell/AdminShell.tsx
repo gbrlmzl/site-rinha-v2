@@ -14,7 +14,7 @@ import {
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
-import { ADMIN_TOKENS } from '@/theme';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
 
 interface AdminShellProps {
   children: ReactNode;

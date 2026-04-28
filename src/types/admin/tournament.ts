@@ -1,20 +1,18 @@
-export type TournamentGame = 'LEAGUE_OF_LEGENDS' | 'VALORANT' | 'COUNTER_STRIKE';
+import type { GameType, TournamentStatus, Page } from '@/types/tournaments/common';
 
-export type TournamentStatus =
-  | 'OPEN'
-  | 'FULL'
-  | 'ONGOING'
-  | 'FINISHED'
-  | 'CANCELED';
+export type { GameType, TournamentStatus, Page };
 
 /** Espelha TournamentAdminSummaryData do back. */
 export interface AdminTournamentSummary {
   id: number;
   slug: string;
   name: string;
-  game: TournamentGame;
+  game: GameType;
   status: TournamentStatus;
+  /** Equipes em READY — contador "X/16" exibido na lista. */
   confirmedTeamsCount: number;
+  /** Equipes ativas (PENDING_PAYMENT + READY) — usado para decidir delete vs cancel. */
+  activeTeamsCount: number;
   maxTeams: number;
   prizePool: number;
   startsAt: string;
@@ -27,7 +25,7 @@ export interface AdminTournamentDetail {
   id: number;
   slug: string;
   name: string;
-  game: TournamentGame;
+  game: GameType;
   status: TournamentStatus;
   maxTeams: number;
   prizePool: number;
@@ -37,16 +35,4 @@ export interface AdminTournamentDetail {
   description: string;
   imageUrl: string | null;
   rulesUrl: string;
-}
-
-/** Página paginada genérica do Spring Data. */
-export interface SpringPage<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
 }

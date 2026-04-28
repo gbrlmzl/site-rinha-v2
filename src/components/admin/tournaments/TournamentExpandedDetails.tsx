@@ -2,7 +2,7 @@
 
 import { Box, Link as MuiLink, Stack, Typography } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { ADMIN_TOKENS } from '@/theme';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
 import {
   formatDateTime,

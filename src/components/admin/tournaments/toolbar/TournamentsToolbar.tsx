@@ -10,11 +10,11 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import Link from 'next/link';
-import { ADMIN_TOKENS } from '@/theme';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
-import type { TournamentGame } from '@/types/admin/tournament';
+import type { GameType } from '@/types/admin/tournament';
 
-const GAME_OPTIONS: ReadonlyArray<{ value: TournamentGame | ''; label: string }> = [
+const GAME_OPTIONS: ReadonlyArray<{ value: GameType | ''; label: string }> = [
   { value: '', label: 'Todos os jogos' },
   { value: 'LEAGUE_OF_LEGENDS', label: 'League of Legends' },
   { value: 'VALORANT', label: 'Valorant' },
@@ -32,8 +32,8 @@ export type TournamentsSort = (typeof SORT_OPTIONS)[number]['value'];
 interface TournamentsToolbarProps {
   search: string;
   onSearchChange: (value: string) => void;
-  game: TournamentGame | '';
-  onGameChange: (value: TournamentGame | '') => void;
+  game: GameType | '';
+  onGameChange: (value: GameType | '') => void;
   sort: TournamentsSort;
   onSortChange: (value: TournamentsSort) => void;
 }
@@ -69,10 +69,16 @@ export default function TournamentsToolbar({
         size="small"
         select
         value={game}
-        onChange={(e) => onGameChange(e.target.value as TournamentGame | '')}
+        onChange={(e) => onGameChange(e.target.value as GameType | '')}
         sx={tournamentStyles.toolbarSelect}
         slotProps={{
           select: {
+            displayEmpty: true,
+            renderValue: (selected) => {
+              const value = selected as GameType | '';
+              const opt = GAME_OPTIONS.find((o) => o.value === value);
+              return opt?.label ?? 'Todos os jogos';
+            },
             MenuProps: { slotProps: { paper: { sx: tournamentStyles.selectMenuPaper } } },
           },
         }}
@@ -105,7 +111,7 @@ export default function TournamentsToolbar({
 
       <Button
         component={Link}
-        href="/admin/tournaments/criar"
+        href="/admin/torneios/criar"
         startIcon={<AddIcon />}
         sx={ADMIN_TOKENS.sx.primaryCta}
       >

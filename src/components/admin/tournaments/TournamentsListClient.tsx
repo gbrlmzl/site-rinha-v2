@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import {
   Alert,
   Box,
+  Snackbar,
   TablePagination,
   useMediaQuery,
   useTheme,
@@ -14,24 +15,27 @@ import TournamentsToolbar, {
 } from '@/components/admin/tournaments/toolbar/TournamentsToolbar';
 import TournamentsTable from '@/components/admin/tournaments/table/TournamentsTable';
 import TournamentsCardList from '@/components/admin/tournaments/cards/TournamentsCardList';
+import TournamentCancelDialog from '@/components/admin/tournaments/cancel/TournamentCancelDialog';
 import { useAdminTournaments } from '@/hooks/admin/useAdminTournaments';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
-import type { TournamentGame } from '@/types/admin/tournament';
+import type { GameType } from '@/types/admin/tournament';
 
 const DEFAULT_PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
+const SNACKBAR_AUTO_HIDE_MS = 4000;
 
 export default function TournamentsListClient() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [search, setSearch] = useState('');
-  const [game, setGame] = useState<TournamentGame | ''>('');
+  const [game, setGame] = useState<GameType | ''>('');
   const [sort, setSort] = useState<TournamentsSort>(SORT_OPTIONS[0].value);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const debouncedSearch = useDebouncedValue(search, 300);
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
   const queryParams = useMemo(
     () => ({
@@ -52,9 +56,36 @@ export default function TournamentsListClient() {
     return data.content.filter((t) => t.name.toLowerCase().includes(needle));
   }, [data, debouncedSearch]);
 
+  const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'info';
+  }>({ open: false, message: '', severity: 'success' });
+
+  const cancelTarget = useMemo(
+    () =>
+      cancelTargetId != null
+        ? filteredContent.find((t) => t.id === cancelTargetId) ?? null
+        : null,
+    [cancelTargetId, filteredContent]
+  );
+
   const handleCancelClick = (tournamentId: number) => {
-    // TODO: abrir TournamentCancelDialog (próximo passo)
-    void tournamentId;
+    setCancelTargetId(tournamentId);
+  };
+
+  const handleCancelClose = () => setCancelTargetId(null);
+
+  const handleCancelSuccess = (mode: 'deleted' | 'canceled') => {
+    setFeedback({
+      open: true,
+      severity: mode === 'deleted' ? 'success' : 'info',
+      message:
+        mode === 'deleted'
+          ? 'Torneio excluído com sucesso.'
+          : 'Torneio cancelado. Pagamentos pendentes foram cancelados no Mercado Pago.',
+    });
   };
 
   return (
@@ -112,6 +143,28 @@ export default function TournamentsListClient() {
         labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
         sx={tournamentStyles.paginationContainer}
       />
+
+      <TournamentCancelDialog
+        open={cancelTargetId != null}
+        tournamentId={cancelTargetId}
+        activeTeamsCount={cancelTarget?.activeTeamsCount ?? 0}
+        onClose={handleCancelClose}
+        onSuccess={handleCancelSuccess}
+      />
+
+      <Snackbar
+        open={feedback.open}
+        autoHideDuration={SNACKBAR_AUTO_HIDE_MS}
+        onClose={() => setFeedback((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity={feedback.severity}
+          onClose={() => setFeedback((s) => ({ ...s, open: false }))}
+        >
+          {feedback.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

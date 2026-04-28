@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { Box, Stack, Typography } from '@mui/material';
-import { ADMIN_TOKENS } from '@/theme';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
 
 interface AdminPageHeaderProps {
   title: string;

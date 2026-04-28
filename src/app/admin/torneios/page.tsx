@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import AdminPageHeader from '@/components/admin/shell/AdminPageHeader';
 import TournamentsListClient from '@/components/admin/tournaments/TournamentsListClient';
-import { ADMIN_TOKENS } from '@/theme';
+import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
 
 export default function TournamentsListPage() {
   return (
