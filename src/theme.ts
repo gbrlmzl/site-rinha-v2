@@ -187,7 +187,7 @@ export const AUTH_TOKENS = (() => {
         backgroundColor: palette.cardBackground,
       },
       wideCard: {
-        width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '40vw',  },
+        width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '40vw' },
         height: 'fit-content',
         mx: 'auto',
         p: 3,
@@ -357,7 +357,10 @@ export const PLAYER_FORM_TOKENS = {
       padding: '10px',
       border: `2px solid ${border}`,
       transition: 'all 0.2s',
-      '&:hover:not(:disabled)': { backgroundColor: accent, borderColor: accent },
+      '&:hover:not(:disabled)': {
+        backgroundColor: accent,
+        borderColor: accent,
+      },
       '&:disabled': { opacity: 0.5 },
     },
     positionMenuPaper: {
@@ -574,7 +577,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
             transition: 'all 0.2s ease-in-out',
           },
           'a:hover': {
-            textDecoration: 'none'
+            textDecoration: 'none',
           },
           'body[style*="overflow: hidden"]': {
             backgroundColor: themeParam.appPalette.pageBackground,
@@ -622,7 +625,6 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
                 backgroundColor: 'transparent',
               },
             },
-            
           }),
         },
       },
@@ -647,7 +649,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
               color: AUTH_TOKENS.colors.textMuted,
               fontSize: '0.9rem',
               whiteSpace: 'pre-line',
-              lineHeight: 1.4
+              lineHeight: 1.4,
             },
           }),
         },

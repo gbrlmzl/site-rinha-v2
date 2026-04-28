@@ -26,6 +26,13 @@ import {
 import { ApiResponseSuccess, ApiResponseError } from '@/types/api';
 
 import {
+  validatePlayer,
+  validateAllPLayers,
+  validatePaymentForm,
+  validateTeam,
+} from '@/schemas/teamRegistrationSchemas';
+
+import {
   subscribeToPayment,
   disconnectWebSocket,
 } from '@/services/paymentWebSocketService';
@@ -37,7 +44,8 @@ import {
   INITIAL_PLAYERS,
   INITIAL_PAYMENT_FORM,
   STEP_LIST,
-} from './constants';
+  STEPS,
+} from './teamRegistrationConstants';
 import { useRouter } from 'next/navigation';
 import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
@@ -45,6 +53,14 @@ import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
 export const useTeamRegistration = () => {
   // ─── States ───────────────────────────────────────────────────────────────
+  const [step, setStep] = useState<StepType>('teamInfo');
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
+  const [validationErrors, setValidationErrors] = useState<{ [key: number] : string;}>({});
+  const [wsError, setWsError] = useState<string | null>(null);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
+  const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
+  const stepIndex: number = STEPS.findIndex((s) => s.key === step);
+
   const [tournamentId, setTournamentId] = useState<number>(0);
   const [registrationData, setRegistrationData] =
     useState<TeamRegistrationState>({
@@ -57,7 +73,6 @@ export const useTeamRegistration = () => {
     status: 'loading',
   });
 
-  const [step, setStep] = useState<StepType>('teamInfo');
   const [loading, setLoading] = useState(false);
   const [checkingRegisteredTeam, setCheckingRegisteredTeam] = useState(true);
   const [cancelingRegistration, setCancelingRegistration] = useState(false);
@@ -81,6 +96,159 @@ export const useTeamRegistration = () => {
       disconnectWebSocket();
     };
   }, []);
+
+
+
+  //Step handlers
+  const handleNextStep = async () => {
+      if (loading || isCheckingTeamName) return;
+  
+      switch (step) {
+        case 'teamInfo': {
+          // Validar equipe
+          const validation = validateTeam(registrationData.team);
+          if (!validation.success) {
+            const firstIssue = Array.isArray(validation.errors)
+              ? validation.errors[0]
+              : null;
+            const errorMsg = firstIssue?.message || 'Erro na validação';
+            setValidationErrors({
+              0: errorMsg,
+            });
+            return;
+          }
+  
+          //Verificar se já existe uma equipe com o mesmo nome
+          setIsCheckingTeamName(true);
+          try {
+            const nameCheckResult = await checkTeamNameAvailability(
+              registrationData.team.teamName
+            );
+            if (!nameCheckResult) {
+              /*setValidationErrors({
+                0: 'Já existe uma equipe com esse nome. Por favor, escolha outro.',
+              });*/
+              showSnackbar({
+                message:
+                  'Já existe uma equipe com esse nome. Por favor, escolha outro.',
+                severity: 'error',
+              });
+              return;
+            }
+  
+            setValidationErrors({});
+            nextStep();
+          } finally {
+            setIsCheckingTeamName(false);
+          }
+          break;
+        }
+  
+        case 'playersInfo': {
+          setValidationErrors({});
+          const isLastPlayer = currentPlayerIndex === registrationData.players.length - 1;
+  
+          if (!isLastPlayer) {
+            const currentValidation = validatePlayer(
+              registrationData.players[currentPlayerIndex],
+              currentPlayerIndex
+            );
+  
+            if (!currentValidation.success) {
+              const firstIssue = Array.isArray(currentValidation.errors)
+                ? currentValidation.errors[0]
+                : null;
+              showSnackbar({
+                message: `${firstIssue?.message || 'Dados inválidos'}`,
+                severity: 'error',
+              });
+              return;
+            }
+  
+            setCurrentPlayerIndex((prev) => prev + 1);
+            return;
+          }
+  
+          // isLastPlayer === true, validar o conjunto completo antes de avançar
+          // No último jogador, valida o conjunto completo antes de avançar
+          const validation = validateAllPLayers(registrationData.players);
+          if (!validation.success) {
+            console.log('Erro de validação dos jogadores:', validation.message);
+            if (validation.playerIndex !== undefined) {
+              const firstIssue = Array.isArray(validation.errors)
+                ? validation.errors[0]
+                : null;
+              showSnackbar({
+                message: `${firstIssue?.message || 'Dados inválidos'}`,
+                severity: 'error',
+              });
+            } else {
+              showSnackbar({
+                message: `${validation.message || 'Erro na validação'}`,
+                severity: 'error',
+              });
+            }
+            return;
+          }
+  
+          setCurrentPlayerIndex(0);
+          nextStep();
+          break;
+        }
+  
+        case 'confirmation': {
+          setValidationErrors({});
+          if (!termsAccepted) {
+            showSnackbar({
+              message: 'Você deve concordar com os termos',
+              severity: 'error',
+            });
+            return;
+          }
+  
+          nextStep();
+          break;
+        }
+  
+        case 'payment': {
+          setValidationErrors({});
+          // Validar pagamento
+          const validation = validatePaymentForm(registrationData.paymentForm);
+          if (!validation.success) {
+            const firstIssue = Array.isArray(validation.errors)
+              ? validation.errors[0]
+              : null;
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados de pagamento inválidos'}`,
+              severity: 'error',
+            });
+            return;
+          }
+  
+          // Enviar inscrição e gerar QR Code
+          const success = await submitRegistration();
+          if (!success) {
+            return;
+          }
+  
+          break;
+        }
+  
+        default:
+          break;
+      }
+    };
+  
+  const handlePrevStep = () => {
+      setValidationErrors({});
+  
+      if (step === 'playersInfo' && currentPlayerIndex > 0) {
+        setCurrentPlayerIndex((prev) => prev - 1);
+        return;
+      }
+  
+      prevStep();
+    };
 
   // ─── Handlers: Team ────────────────────────────────────────────────────
 
@@ -163,6 +331,10 @@ export const useTeamRegistration = () => {
     setUiState({ status: 'can_register' });
     setStep('payment');
   };
+
+  const handleReturnToTournamentPage = (slug : string) => {
+    router.push(`/lol/torneios/${slug}`);
+  }
 
   // ─── Handlers: Step Navigation ──────────────────────────────────────────
 
@@ -266,7 +438,7 @@ export const useTeamRegistration = () => {
   const checkRegisteredTeam = async (slug: string) => {
     try {
       setCheckingRegisteredTeam(true);
-      
+
       let registrationStatus: RegisterStatusResponse;
 
       try {
@@ -574,6 +746,20 @@ export const useTeamRegistration = () => {
     paymentApproved,
     cancelingRegistration,
     uiState,
+    termsAccepted,
+    setTermsAccepted,
+    wsError,
+    setWsError,
+    currentPlayerIndex,
+    setCurrentPlayerIndex,
+    isCheckingTeamName,
+    setIsCheckingTeamName,
+    stepIndex,
+    validationErrors, setValidationErrors,
+
+    //Step Handlers
+    handlePrevStep,
+    handleNextStep,
 
     // Team
     updateTeam,
@@ -596,6 +782,7 @@ export const useTeamRegistration = () => {
     handlePaymentApproved,
     handleCancelPayment,
     handleRetryPayment,
+    handleReturnToTournamentPage,
 
     // Navigation
     goToStep,

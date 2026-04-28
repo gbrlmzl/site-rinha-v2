@@ -28,7 +28,7 @@ import {
 } from '@/services/teamRegistrationUtils';
 import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
 import { TEAM_REGISTRATION_TOKENS } from '@/theme';
-
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
 interface PaymentStepProps {
   data: PaymentForm;
   onDataChange: (updates: Partial<PaymentForm>) => void;
@@ -51,6 +51,7 @@ export function PaymentStep({
    const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [copied, setCopied] = useState<boolean>(false);
+  const { showSnackbar } = useSnackbarContext();
   
 
   // Timer para QR Code
@@ -86,6 +87,13 @@ export function PaymentStep({
 
     return () => clearInterval(interval);
   }, [paymentData?.expiresAt, paymentApproved]);
+
+  useEffect(() => {
+    if(error) {
+      showSnackbar({ message: error, severity: 'error' });
+    }
+  }, [error]);
+
 
   const handleChange =
     (field: keyof PaymentForm) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -490,13 +498,6 @@ export function PaymentStep({
             }}
           />
         </Stack>
-
-        {/* Error */}
-        {error && (
-          <Alert severity="error" sx={{ borderRadius: 2 }}>
-            {error}
-          </Alert>
-        )}
 
         {/* Loading State */}
         {loading && (

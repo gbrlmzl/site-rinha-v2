@@ -2,7 +2,7 @@
 
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useTournament } from '@/hooks/lol/tournaments/useTournament';
-import { PAYMENT_FEE_PER_PLAYER } from '@/hooks/lol/teamRegistration/constants';
+import { PAYMENT_FEE_PER_PLAYER } from '@/hooks/lol/teamRegistration/teamRegistrationConstants';
 import { TournamentDetailData } from '@/types/lol/tournaments/tournament';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';

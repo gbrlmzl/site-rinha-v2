@@ -83,8 +83,8 @@ function CustomStepIcon(props: CustomStepIconProps) {
       ) : (
         <Box
           sx={{
-            width: 32,
-            height: 32,
+            width: {xs: 24, md: 26, lg: 32},
+            height: {xs: 24, md: 26, lg: 32},
             borderRadius: '50%',
             backgroundColor: active
               ? THEME_COLORS.accent
@@ -93,9 +93,9 @@ function CustomStepIcon(props: CustomStepIconProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 16,
+            fontSize: {xs: 14, md: 14, lg: 16},
             fontWeight: 600,
-            padding: 2,
+            padding: {xs: 2, md: 1, lg: 2},
             color: active ? '#000' : THEME_COLORS.textMuted,
             transition: 'all 0.3s',
           }}
@@ -112,7 +112,7 @@ function CustomStepIcon(props: CustomStepIconProps) {
 const CustomStepLabel = styled(StepLabel)({
   '& .MuiStepLabel-label': {
     color: THEME_COLORS.textMuted,
-    marginTop: 8,
+    marginTop: 6,
     fontSize: '0.85rem',
     fontWeight: 500,
     transition: 'color 0.3s',
@@ -179,43 +179,6 @@ export function StepIndicator({
           </Step>
         ))}
       </MuiStepper>
-
-      {/* Step Description */}
-      {/*<Box
-        sx={{
-          mt: 3,
-          p: 2,
-          backgroundColor: THEME_COLORS.surfaceHigh,
-          borderRadius: 2,
-          border: `1px solid ${THEME_COLORS.border}`,
-        }}
-      >
-        
-        
-        <Stack spacing={0.5}>
-          <Typography
-            variant="h6"
-            sx={{
-              color: THEME_COLORS.text,
-              fontWeight: 600,
-              fontSize: '1rem',
-            }}
-          >
-            {steps[activeStep].title}
-          </Typography>
-          {steps[activeStep].description && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: THEME_COLORS.textMuted,
-                fontSize: '0.9rem',
-              }}
-            >
-              {steps[activeStep].description}
-            </Typography>
-          )}
-        </Stack>
-      </Box>*/}
     </Box>
   );
 }

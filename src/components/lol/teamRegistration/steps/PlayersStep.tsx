@@ -11,7 +11,7 @@ import { Player } from '@/types/teamRegistration';
 import { PlayerInfoForm } from './PlayerInfoForm';
 import {
   PLAYER_LABELS,
-} from '@/hooks/lol/teamRegistration/constants';
+} from '@/hooks/lol/teamRegistration/teamRegistrationConstants';
 import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PlayersStepProps {
@@ -30,7 +30,6 @@ export function PlayersStep({
   error = {},
   disabled = false,
   currentPlayerIndex,
-  onCurrentPlayerIndexChange,
   onPositionKeyboardConfirm,
 }: PlayersStepProps) {
    const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
@@ -57,25 +56,6 @@ export function PlayersStep({
     });
   };
 
-  {
-    /* const handleNextPlayer = () => {
-    if (currentPlayerIndex < 5) {
-      onCurrentPlayerIndexChange(currentPlayerIndex + 1);
-    }
-  };
-
-  const handlePrevPlayer = () => {
-    if (currentPlayerIndex > 0) {
-      onCurrentPlayerIndexChange(currentPlayerIndex - 1);
-    }
-  };
-
-  const handlePlayerClick = (index: number) => {
-    onCurrentPlayerIndexChange(index);
-  };
-  */
-  }
-
   return (
     <Box
       sx={{
@@ -86,7 +66,7 @@ export function PlayersStep({
       }}
     >
       <Stack
-        spacing={3}
+        spacing={2}
         sx={{
           width: '100%',
           maxWidth: 600,

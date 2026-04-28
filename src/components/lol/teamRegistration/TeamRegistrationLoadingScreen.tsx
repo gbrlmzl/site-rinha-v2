@@ -27,7 +27,6 @@ export default function TeamRegistrationLoadingScreen() {
             }}
           >
             <Box sx={{ p: { xs: 2, md: 4 } }}>
-              {/*<StepIndicator steps={STEPS} activeStep={0} />*/}
               <Box sx={{ mb: 4, minHeight: 400 }}>
                 <TeamInfoStepSkeleton />
               </Box>

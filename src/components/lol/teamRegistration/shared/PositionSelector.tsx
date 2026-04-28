@@ -12,7 +12,7 @@ import { PlayerPosition } from '@/types/teamRegistration';
 import {
   PLAYER_POSITIONS,
   DEFAULT_POSITION_ICON,
-} from '@/hooks/lol/teamRegistration/constants';
+} from '@/hooks/lol/teamRegistration/teamRegistrationConstants';
 import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PositionSelectorProps {

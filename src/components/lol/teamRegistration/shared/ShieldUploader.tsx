@@ -5,14 +5,13 @@
  * Inclui preview, upload e feedback visual
  */
 
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import {
   Box,
   Button,
   Card,
   Typography,
   CircularProgress,
-  Alert,
   Stack,
   IconButton,
 } from '@mui/material';
@@ -21,6 +20,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { TEAM_REGISTRATION_TOKENS } from '@/theme';
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
 interface ShieldUploaderProps {
   preview: string | null;
@@ -37,31 +37,34 @@ export function ShieldUploader({
   error = null,
   success = false,
 }: ShieldUploaderProps) {
-   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [shieldFileError, setShieldFileError] = useState<string | null>(null);
+  const { showSnackbar } = useSnackbarContext();
+
+  useEffect(() => {
+    if (error) {
+      showSnackbar({ message: error, severity: 'error' });
+    }
+  }, [error, showSnackbar]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validar tipo de arquivo
-      if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
-        //alert('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)');
-        //Snackbar de erro
-        setShieldFileError(
-          'Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)'
-        );
+      if (!file.type.match(/^image\/(png|jpe?g)$/)) {
+        showSnackbar({
+          message:
+            'Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG)',
+          severity: 'error',
+        });
         return;
       }
-
-      // Validar tamanho (máx 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setShieldFileError('O tamanho do arquivo deve ser menor que 5MB');
+        showSnackbar({
+          message: 'O tamanho do arquivo deve ser menor que 5MB',
+          severity: 'error',
+        });
         return;
       }
-      // Se passou nas validações, limpar erros anteriores
-      setShieldFileError(null);
-
       onFileSelected(file);
     }
   };
@@ -78,12 +81,12 @@ export function ShieldUploader({
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={1} sx={{ p: 0 }}>
       {/* Card Preview */}
       <Card
         sx={{
-          width: 250,
-          height: 250,
+          width: { xs: 180, md: 200, lg: 200, xl: 220 },
+          height: { xs: 180, md: 200, lg: 200, xl: 220 },
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -217,17 +220,6 @@ export function ShieldUploader({
           </IconButton>
         )}
       </Box>
-
-      {/* Error Message */}
-      {error ? (
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
-      ) : shieldFileError ? (
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          {shieldFileError}
-        </Alert>
-      ) : null}
     </Stack>
   );
 }
