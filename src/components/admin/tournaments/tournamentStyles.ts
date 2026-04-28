@@ -83,8 +83,13 @@ export const tournamentStyles = {
   /** Layout de 6 colunas — usado tanto no header quanto em cada row */
   gridColumns: {
     display: 'grid',
-    gridTemplateColumns:
-      'minmax(220px, 2.4fr) 110px 130px 130px 100px 180px',
+    // 1. Torneio: Leva a maior parte (3fr)
+    // 2. Jogo: 1fr
+    // 3. Status: 1.5fr (um pouco maior pois a badge é larga)
+    // 4. Início: 1fr
+    // 5. Equipes: 1fr
+    // 6. Ações: 160px fixos (para os ícones não encolherem/quebrarem)
+    gridTemplateColumns: 'minmax(220px, 3fr) minmax(100px, 1fr) minmax(130px, 1.5fr) minmax(100px, 1fr) minmax(90px, 1fr) 160px',
     alignItems: 'center',
     gap: 2,
   },

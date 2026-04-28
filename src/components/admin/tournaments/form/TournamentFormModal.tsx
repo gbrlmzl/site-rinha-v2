@@ -174,7 +174,10 @@ export default function TournamentFormModal({
         <Typography sx={formStyles.title}>
           {mode === 'create' ? 'Criar Novo Torneio' : 'Editar Torneio'}
         </Typography>
-        <IconButton onClick={handleClose} sx={{ color: 'rgba(255,255,255,0.7)' }}>
+        <IconButton
+          onClick={handleClose}
+          sx={{ color: 'rgba(255,255,255,0.7)' }}
+        >
           <CloseIcon />
         </IconButton>
       </Box>
@@ -188,7 +191,9 @@ export default function TournamentFormModal({
           ) : (
             <Grid container spacing={2.5}>
               <Grid size={12}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.name}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.name}
+                </Typography>
                 <Controller
                   name="name"
                   control={control}
@@ -206,7 +211,9 @@ export default function TournamentFormModal({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.game}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.game}
+                </Typography>
                 <Controller
                   name="game"
                   control={control}
@@ -221,7 +228,9 @@ export default function TournamentFormModal({
                       slotProps={{
                         select: {
                           MenuProps: {
-                            slotProps: { paper: { sx: formStyles.selectMenuPaper } },
+                            slotProps: {
+                              paper: { sx: formStyles.selectMenuPaper },
+                            },
                           },
                         },
                       }}
@@ -237,7 +246,9 @@ export default function TournamentFormModal({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.maxTeams}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.maxTeams}
+                </Typography>
                 <Controller
                   name="maxTeams"
                   control={control}
@@ -253,15 +264,30 @@ export default function TournamentFormModal({
                           e.target.value === '' ? NaN : Number(e.target.value)
                         )
                       }
+                      onFocus={(e) => e.target.select()}
                       onBlur={field.onBlur}
                       name={field.name}
                       inputRef={field.ref}
                       type="number"
-                      inputProps={{ min: 2 }}
+                      slotProps={{
+                        htmlInput: {
+                          min: 2,
+                        },
+                      }}
                       fullWidth
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
-                      sx={formStyles.field}
+                      sx={{
+                        ...formStyles.field,
+                        '& input[type=number]': {
+                          MozAppearance: 'textfield',
+                        },
+                        '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button':
+                          {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
+                      }}
                     />
                   )}
                 />
@@ -269,7 +295,9 @@ export default function TournamentFormModal({
 
               {mode === 'edit' && (
                 <Grid size={12}>
-                  <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.status}</Typography>
+                  <Typography sx={formStyles.fieldLabel}>
+                    {FIELD_LABELS.status}
+                  </Typography>
                   <Controller
                     name="status"
                     control={control}
@@ -285,7 +313,9 @@ export default function TournamentFormModal({
                         slotProps={{
                           select: {
                             MenuProps: {
-                              slotProps: { paper: { sx: formStyles.selectMenuPaper } },
+                              slotProps: {
+                                paper: { sx: formStyles.selectMenuPaper },
+                              },
                             },
                           },
                         }}
@@ -302,7 +332,9 @@ export default function TournamentFormModal({
               )}
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.prizePool}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.prizePool}
+                </Typography>
                 <Controller
                   name="prizePool"
                   control={control}
@@ -318,22 +350,40 @@ export default function TournamentFormModal({
                           e.target.value === '' ? NaN : Number(e.target.value)
                         )
                       }
+                      onFocus={(e) => e.target.select()}
                       onBlur={field.onBlur}
                       name={field.name}
                       inputRef={field.ref}
                       type="number"
-                      inputProps={{ min: 0, step: '0.01' }}
+                      slotProps={{
+                        htmlInput: {
+                          min: 0,
+                          step: '0.01',
+                        },
+                      }}
                       fullWidth
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
-                      sx={formStyles.field}
+                      sx={{
+                        ...formStyles.field,
+                        '& input[type=number]': {
+                          MozAppearance: 'textfield',
+                        },
+                        '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button':
+                          {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
+                      }}
                     />
                   )}
                 />
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.startsAt}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.startsAt}
+                </Typography>
                 <Controller
                   name="startsAt"
                   control={control}
@@ -358,7 +408,9 @@ export default function TournamentFormModal({
               </Grid>
 
               <Grid size={12}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.endsAt}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.endsAt}
+                </Typography>
                 <Controller
                   name="endsAt"
                   control={control}
@@ -383,7 +435,9 @@ export default function TournamentFormModal({
               </Grid>
 
               <Grid size={12}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.image}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.image}
+                </Typography>
                 <Controller
                   name="image"
                   control={control}
@@ -391,7 +445,9 @@ export default function TournamentFormModal({
                     <ImageUploadField
                       value={field.value ?? null}
                       onChange={field.onChange}
-                      currentImageUrl={mode === 'edit' ? tournament?.imageUrl : null}
+                      currentImageUrl={
+                        mode === 'edit' ? tournament?.imageUrl : null
+                      }
                       errorMessage={errors.image?.message}
                     />
                   )}
@@ -399,7 +455,9 @@ export default function TournamentFormModal({
               </Grid>
 
               <Grid size={12}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.rulesUrl}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.rulesUrl}
+                </Typography>
                 <Controller
                   name="rulesUrl"
                   control={control}
@@ -417,7 +475,9 @@ export default function TournamentFormModal({
               </Grid>
 
               <Grid size={12}>
-                <Typography sx={formStyles.fieldLabel}>{FIELD_LABELS.description}</Typography>
+                <Typography sx={formStyles.fieldLabel}>
+                  {FIELD_LABELS.description}
+                </Typography>
                 <Controller
                   name="description"
                   control={control}
@@ -459,7 +519,9 @@ export default function TournamentFormModal({
   );
 }
 
-function buildCreatePayload(values: TournamentFormValues): Record<string, unknown> {
+function buildCreatePayload(
+  values: TournamentFormValues
+): Record<string, unknown> {
   return {
     name: values.name.trim(),
     game: values.game,

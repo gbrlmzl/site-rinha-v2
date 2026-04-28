@@ -46,15 +46,34 @@ export default function TournamentTableRow({
       sx={{ ...tournamentStyles.rowCard, ...tournamentStyles.rowCardClickable }}
       onClick={toggleExpanded}
     >
-      <Box sx={{ ...tournamentStyles.gridColumns, ...tournamentStyles.rowMain }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+      <Box
+        sx={{ ...tournamentStyles.gridColumns, ...tournamentStyles.rowMain }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1.5}
+          sx={{ minWidth: 0 }}
+        >
           {tournament.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <Box component="img" src={tournament.imageUrl} alt="" sx={tournamentStyles.rowThumbnail} />
+            <Box
+              component="img"
+              src={tournament.imageUrl}
+              alt=""
+              sx={tournamentStyles.rowThumbnail}
+            />
           ) : (
             <Box sx={tournamentStyles.rowThumbnail} />
           )}
-          <Typography sx={{ ...tournamentStyles.rowName, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Typography
+            sx={{
+              ...tournamentStyles.rowName,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {tournament.name}
           </Typography>
         </Stack>
@@ -66,7 +85,9 @@ export default function TournamentTableRow({
           <TournamentStatusBadge status={tournament.status} />
         </Box>
 
-        <Box sx={{ fontWeight: 600 }}>{formatDateOnly(tournament.startsAt)}</Box>
+        <Box sx={{ fontWeight: 600 }}>
+          {formatDateOnly(tournament.startsAt)}
+        </Box>
 
         <Box sx={{ fontWeight: 600 }}>
           {tournament.confirmedTeamsCount}/{tournament.maxTeams}
