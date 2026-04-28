@@ -3,22 +3,34 @@
 import { useTournament } from '@/hooks/lol/tournaments/useTournament';
 import {
   GameType,
+  TeamStatus,
   TournamentPublicSummaryData,
   TournamentStatus,
 } from '@/types/lol/tournaments/tournament';
-import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import DesktopCarousel from './DesktopCarousel';
 import MobileCarousel from './MobileCarousel';
+import EnrolledBadge from '@/components/shared/badges/EnrolledBadge';
 
 type TournamentFilterLabel = 'ABERTO' | 'EM ANDAMENTO' | 'CHEIO';
-type TournamentFilterStatus = Extract<TournamentStatus, 'OPEN' | 'ONGOING' | 'FULL'>;
+type TournamentFilterStatus = Extract<
+  TournamentStatus,
+  'OPEN' | 'ONGOING' | 'FULL'
+>;
 
-const LABEL_STATUS_MAP: Record<TournamentFilterLabel, TournamentFilterStatus> = {
-  ABERTO: 'OPEN',
-  'EM ANDAMENTO': 'ONGOING',
-  CHEIO: 'FULL',
-};
+const LABEL_STATUS_MAP: Record<TournamentFilterLabel, TournamentFilterStatus> =
+  {
+    ABERTO: 'OPEN',
+    'EM ANDAMENTO': 'ONGOING',
+    CHEIO: 'FULL',
+  };
 
 const FILTER_OPTIONS: { label: TournamentFilterLabel; color: string }[] = [
   { label: 'ABERTO', color: '#37963c' },
@@ -28,11 +40,17 @@ const FILTER_OPTIONS: { label: TournamentFilterLabel; color: string }[] = [
 
 interface TournamentExplorerProps {
   game: GameType;
+  enrolledTournamentIds: Map<number, TeamStatus>;
 }
 
-export default function TournamentExplorer({ game }: TournamentExplorerProps) {
+export default function TournamentExplorer({
+  game,
+  enrolledTournamentIds,
+}: TournamentExplorerProps) {
   const { getPublicTournaments } = useTournament();
-  const [tournaments, setTournaments] = useState<TournamentPublicSummaryData[]>([]);
+  const [tournaments, setTournaments] = useState<TournamentPublicSummaryData[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [activeStatuses, setActiveStatuses] = useState<TournamentStatus[]>([
     'OPEN',
@@ -42,39 +60,56 @@ export default function TournamentExplorer({ game }: TournamentExplorerProps) {
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
-    getPublicTournaments(game).then((page) => {
-      if (page) setTournaments(page.content);
-      setLoading(false);
-    });
-  }, [game]);
+    let ignore = false;
+
+    const fetchTournaments = async () => {
+      setLoading(true);
+
+      try {
+        const page = await getPublicTournaments(game);
+
+        if (!ignore) {
+          if (page) setTournaments(page.content);
+          setLoading(false);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setLoading(false);
+          console.error(error);
+        }
+      }
+    };
+
+    fetchTournaments();
+    return () => {
+      ignore = true;
+    };
+  }, [game, getPublicTournaments]);
 
   const filtered = useMemo(
     () => tournaments.filter((t) => activeStatuses.includes(t.status)),
     [tournaments, activeStatuses]
   );
 
-  // safeIndex é calculado no próprio render — nunca chega ao carousel com índice fora dos limites
-  const safeIndex = filtered.length > 0 ? Math.min(carouselIndex, filtered.length - 1) : 0;
+  const safeIndex =
+    filtered.length > 0 ? Math.min(carouselIndex, filtered.length - 1) : 0;
 
-  // Mantém o índice bruto sincronizado quando a lista encolhe
-  const prevFilteredLength = useRef(filtered.length);
-  if (filtered.length !== prevFilteredLength.current) {
-    prevFilteredLength.current = filtered.length;
-    if (carouselIndex >= filtered.length) {
-      setCarouselIndex(0);
-    }
-  }
-
-  function toggleStatus(status: TournamentStatus) {
+  const toggleStatus = (status: TournamentStatus) => {
     setActiveStatuses((prev) => {
+      let newStatuses;
+
       if (prev.includes(status)) {
-        if (prev.length === 1) return prev;
-        return prev.filter((s) => s !== status);
+        if (prev.length === 1) return prev; // Não deixa desmarcar o último
+        newStatuses = prev.filter((s) => s !== status);
+      } else {
+        newStatuses = [...prev, status];
       }
-      return [...prev, status];
+
+      setCarouselIndex(0);
+
+      return newStatuses;
     });
-  }
+  };
 
   function prevSlide() {
     setCarouselIndex((i) => {
@@ -175,7 +210,9 @@ export default function TournamentExplorer({ game }: TournamentExplorerProps) {
             borderRadius: 3,
           }}
         >
-          <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>
+          <Typography
+            sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}
+          >
             Nenhum torneio encontrado com os filtros selecionados.
           </Typography>
         </Box>
@@ -190,12 +227,16 @@ export default function TournamentExplorer({ game }: TournamentExplorerProps) {
               index={safeIndex}
               onPrev={prevSlide}
               onNext={nextSlide}
+              enrolledIds={enrolledTournamentIds}
             />
           </Box>
 
           {/* Mobile */}
           <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-            <MobileCarousel tournaments={filtered} />
+            <MobileCarousel
+              tournaments={filtered}
+              enrolledIds={enrolledTournamentIds}
+            />
           </Box>
         </>
       )}

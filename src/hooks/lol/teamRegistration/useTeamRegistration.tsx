@@ -124,7 +124,8 @@ export const useTeamRegistration = () => {
         setIsCheckingTeamName(true);
         try {
           const nameCheckResult = await checkTeamNameAvailability(
-            registrationData.team.teamName, tournamentId
+            registrationData.team.teamName,
+            tournamentId
           );
           if (!nameCheckResult) {
             showSnackbar({
@@ -394,33 +395,31 @@ export const useTeamRegistration = () => {
   // ─── Cleanup — cancela WebSocket ao desmontar o componente ────────────────
 
   const checkTeamNameAvailability = useCallback(
-  async (name: string, tournamentId: number): Promise<boolean> => {
-    if (!tournamentId) return false;
-    const normalizedName = name.trim();
-    if (!normalizedName) return false;
+    async (name: string, tournamentId: number): Promise<boolean> => {
+      if (!tournamentId) return false;
+      const normalizedName = name.trim();
+      if (!normalizedName) return false;
 
+      const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
+      if (cachedResult && Date.now() - cachedResult.cachedAt < CACHE_TTL_MS) {
+        //libera para tentar novamente com nomes já verificados após expiração do cache
+        return cachedResult.available; // retorna cache sem fazer requisição
+      }
 
-    const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
-    if (cachedResult && (Date.now() - cachedResult.cachedAt < CACHE_TTL_MS)) { //libera para tentar novamente com nomes já verificados após expiração do cache
-      return cachedResult.available;  // retorna cache sem fazer requisição
-    }
+      const response = await apiFetch(
+        `http://localhost:8080/tournaments/${tournamentId}/teams/name-availability?name=${encodeURIComponent(normalizedName)}`,
+        { method: 'GET' }
+      );
 
-
-    const response = await apiFetch(
-      `http://localhost:8080/tournaments/${tournamentId}/teams/name-availability?name=${encodeURIComponent(normalizedName)}`,
-      { method: 'GET' }
-    );
-
-
-    const isAvailable = response.status === 200;
-    teamNameAvailabilityCacheRef.current[normalizedName] = {
-      available: isAvailable,
-      cachedAt: Date.now(),
-    };
-    return isAvailable;
-  },
-  []
-);
+      const isAvailable = response.status === 200;
+      teamNameAvailabilityCacheRef.current[normalizedName] = {
+        available: isAvailable,
+        cachedAt: Date.now(),
+      };
+      return isAvailable;
+    },
+    []
+  );
 
   const checkRegisterStatus = async (tournamentSlug: string) => {
     const response = await apiFetch(
@@ -443,6 +442,7 @@ export const useTeamRegistration = () => {
 
       try {
         registrationStatus = await checkRegisterStatus(slug);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         // Trata exceções HTTP separadamente das lógicas de negócio
         if (err) {
@@ -477,7 +477,6 @@ export const useTeamRegistration = () => {
 
       const { registrationData, paymentData } = registrationStatus;
       setTournamentId(registrationData.tournamentId);
-    
 
       // ── Torneio lotado (sem inscrição prévia) ──────────────────────────────
       if (

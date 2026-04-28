@@ -8,40 +8,40 @@ import {
   TEAM_STATUS_LABELS,
   TournamentDetailData,
 } from '@/types/lol/tournaments/tournament';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import {
   Box,
   Button,
   CircularProgress,
   Divider,
-  IconButton,
   Stack,
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import TournamentStatusBadge from '../explorer/TournamentStatusBadge';
-import TeamAccordionItem from './TeamAccordionItem';
 import Image from 'next/image';
+import { useEffect, useState, type ReactNode } from 'react';
+import TournamentStatusBadge from '@/components/shared/badges/TournamentStatusBadge';
+import TeamAccordionItem from './TeamAccordionItem';
+import StatChip from '../shared/StatChip';
+import {
+  LOL_TOURNAMENT_COLORS as C,
+  LOL_TOURNAMENT_SX,
+  LOL_TOURNAMENT_TYPOGRAPHY as T,
+} from '../tournamentsTheme';
+import {
+  formatDateLong,
+  formatDateMonth,
+  formatPrize,
+} from '@/utils/tournaments/formatters';
 
-function formatDateLong(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatPrize(value: number) {
-  return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
-}
+const RULE_BULLETS = [
+  'Início pontual no horário marcado.',
+  'Respeito mútuo entre participantes.',
+  'Uso de hack/cheat causa banimento.',
+];
 
 interface Props {
   slug: string;
@@ -49,7 +49,7 @@ interface Props {
 
 export default function TournamentDetailPage({ slug }: Props) {
   const router = useRouter();
-  const { isAuthenticated } = useAuthContext();
+  useAuthContext();
   const { getTournamentDetailBySlug } = useTournament();
 
   const [tournament, setTournament] = useState<TournamentDetailData | null>(
@@ -58,59 +58,40 @@ export default function TournamentDetailPage({ slug }: Props) {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  function loadTournament() {
-    return getTournamentDetailBySlug(slug).then((data) => {
+  const loadTournament = () =>
+    getTournamentDetailBySlug(slug).then((data) => {
       if (data) setTournament(data);
       else setNotFound(true);
       setLoading(false);
     });
-  }
 
   useEffect(() => {
     loadTournament();
   }, [slug]);
 
-  // Refresh tournament data (user team status, confirmed teams, etc.)
-  // whenever a payment is approved — covers the case where the user opens
-  // the PaymentModal from this page and completes the PIX.
+  // Atualiza dados (status do usuário, equipes confirmadas) sempre que
+  // um pagamento é aprovado — cobre o caso do usuário abrir o PaymentModal
+  // a partir desta página e completar o PIX.
   useTournamentPaymentApproved(loadTournament);
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          minHeight: '60vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress sx={{ color: '#11B5E4' }} />
+      <Box sx={CENTER_60VH}>
+        <CircularProgress sx={{ color: C.primary }} />
       </Box>
     );
   }
 
   if (notFound || !tournament) {
     return (
-      <Box
-        sx={{
-          minHeight: '60vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 2,
-        }}
-      >
-        <Typography
-          sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.4rem' }}
-        >
+      <Box sx={{ ...CENTER_60VH, flexDirection: 'column', gap: 2 }}>
+        <Typography sx={{ color: C.text, fontWeight: 700, fontSize: '1.4rem' }}>
           Torneio não encontrado
         </Typography>
         <Button
           variant="outlined"
           onClick={() => router.push('/lol/torneios')}
-          sx={{ borderColor: '#11B5E4', color: '#11B5E4' }}
+          sx={{ borderColor: C.primary, color: C.primary }}
         >
           Voltar aos torneios
         </Button>
@@ -121,21 +102,19 @@ export default function TournamentDetailPage({ slug }: Props) {
   const remainingSpots = tournament.maxTeams - tournament.confirmedTeamsCount;
   const userTeam = tournament.userTeam;
 
-  // Teams the user owns that are "active" (show the highlight card)
   const userHasVisibleTeam =
     userTeam?.teamStatus === 'PENDING_PAYMENT' ||
     userTeam?.teamStatus === 'READY' ||
     userTeam?.teamStatus === 'FINISHED' ||
     userTeam?.teamStatus === 'BANNED';
 
-  // Filter user's own team out of the confirmed list to avoid duplication
+  // Filtra a equipe do usuário da lista de confirmadas pra evitar duplicação
   const confirmedTeamsFiltered = userTeam
     ? tournament.confirmedTeams.filter((t) => t.name !== userTeam.teamName)
     : tournament.confirmedTeams;
 
-  // Determine call-to-action button state.
-  // For PENDING_PAYMENT, the button stays enabled and routes to /pagamentos
-  // so the @modal interceptor can show the PaymentModal over this page.
+  // CTA: PENDING_PAYMENT mantém o botão habilitado e roteia pra /pagamentos
+  // (interceptor @modal mostra o PaymentModal sobre esta página)
   let btnDisabled = false;
   let btnLabel = 'Inscreva-se';
   let btnTarget: 'inscricoes' | 'pagamentos' = 'inscricoes';
@@ -152,7 +131,7 @@ export default function TournamentDetailPage({ slug }: Props) {
       btnDisabled = true;
       btnLabel = 'Já Inscrito';
     }
-    // EXPIRED_PAYMENT, EXPIRED_PAYMENT_PROBLEM, CANCELED → can re-register, fall through
+    // EXPIRED_PAYMENT, EXPIRED_PAYMENT_PROBLEM, CANCELED → permite reinscrição
   }
 
   if (!btnDisabled) {
@@ -168,17 +147,14 @@ export default function TournamentDetailPage({ slug }: Props) {
     }
   }
 
-  const canClickRegister = !btnDisabled;
-  const inscricoesPath = `/lol/torneios/${tournament.slug}/inscricoes`;
-  const pagamentosPath = `/lol/torneios/${tournament.slug}/pagamentos`;
   const targetPath =
-    btnTarget === 'pagamentos' ? pagamentosPath : inscricoesPath;
+    btnTarget === 'pagamentos'
+      ? `/lol/torneios/${tournament.slug}/pagamentos`
+      : `/lol/torneios/${tournament.slug}/inscricoes`;
 
   return (
-    <Box sx={{ backgroundColor: '#080d2e', minHeight: '100vh' }}>
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
+    <Box sx={{ backgroundColor: C.bg, minHeight: '100vh' }}>
       <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Image */}
         <Box
           sx={{ height: { xs: 220, md: 420, lg: 500 }, position: 'relative' }}
         >
@@ -188,14 +164,10 @@ export default function TournamentDetailPage({ slug }: Props) {
             fill
             referrerPolicy="no-referrer"
             style={{
-              width: '100%',
-              height: '100%',
               objectFit: 'cover',
               objectPosition: 'top center',
-              display: 'block',
             }}
           />
-          {/* Bottom-to-top fade only */}
           <Box
             sx={{
               position: 'absolute',
@@ -206,7 +178,6 @@ export default function TournamentDetailPage({ slug }: Props) {
           />
         </Box>
 
-        {/* Desktop content overlay */}
         <Box
           sx={{
             display: { xs: 'none', md: 'block' },
@@ -222,12 +193,10 @@ export default function TournamentDetailPage({ slug }: Props) {
         </Box>
       </Box>
 
-      {/* Mobile content (below image) */}
       <Box sx={{ display: { xs: 'block', md: 'none' }, px: 2, pt: 2, pb: 1 }}>
         <HeroContent tournament={tournament} />
       </Box>
 
-      {/* ── Main grid ────────────────────────────────────────────────── */}
       <Box
         sx={{
           maxWidth: 1200,
@@ -245,9 +214,7 @@ export default function TournamentDetailPage({ slug }: Props) {
             alignItems: 'start',
           }}
         >
-          {/* ── LEFT COLUMN ─────────────────────────────────────── */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            {/* Description */}
             {tournament.description && (
               <Box>
                 <SectionTitle>Sobre o Torneio</SectionTitle>
@@ -264,16 +231,10 @@ export default function TournamentDetailPage({ slug }: Props) {
               </Box>
             )}
 
-            {/* Technical Info */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <SectionTitle>Informações Técnicas</SectionTitle>
+              <SectionTitle>Detalhes do Torneio</SectionTitle>
               <Box
-                sx={{
-                  backgroundColor: '#0E1241',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 3,
-                  p: { xs: 2.5, md: 2 },
-                }}
+                sx={{ ...LOL_TOURNAMENT_SX.panelCard, p: { xs: 2.5, md: 2 } }}
               >
                 <Box
                   sx={{
@@ -283,16 +244,7 @@ export default function TournamentDetailPage({ slug }: Props) {
                   }}
                 >
                   <Box>
-                    <Typography
-                      sx={{
-                        color: 'rgba(255,255,255,0.4)',
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        letterSpacing: 1.2,
-                        textTransform: 'uppercase',
-                        mb: 1.5,
-                      }}
-                    >
+                    <Typography sx={{ ...T.microLabel, mb: 1.5 }}>
                       Cronograma
                     </Typography>
                     <Box
@@ -316,16 +268,7 @@ export default function TournamentDetailPage({ slug }: Props) {
                   </Box>
 
                   <Box>
-                    <Typography
-                      sx={{
-                        color: 'rgba(255,255,255,0.4)',
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        letterSpacing: 1.2,
-                        textTransform: 'uppercase',
-                        mb: 1.5,
-                      }}
-                    >
+                    <Typography sx={{ ...T.microLabel, mb: 1.5 }}>
                       Regras Gerais
                     </Typography>
                     <Box
@@ -335,17 +278,11 @@ export default function TournamentDetailPage({ slug }: Props) {
                         gap: 0.8,
                       }}
                     >
-                      {[
-                        'Início pontual no horário marcado.',
-                        'Respeito mútuo entre participantes.',
-                        'Uso de hack/cheat causa banimento.',
-                      ].map((rule) => (
+                      {RULE_BULLETS.map((rule) => (
                         <Typography
                           key={rule}
                           sx={{
-                            color: '#ffffff',
-                            fontFamily:
-                              'family: "Roboto Mono", Roboto Fallback',
+                            color: C.text,
                             lineHeight: 1.5,
                             fontWeight: 700,
                             fontSize: '1rem',
@@ -361,7 +298,6 @@ export default function TournamentDetailPage({ slug }: Props) {
               </Box>
             </Box>
 
-            {/* Teams */}
             <Box>
               <Box
                 sx={{
@@ -372,7 +308,7 @@ export default function TournamentDetailPage({ slug }: Props) {
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <GroupsRoundedIcon sx={{ color: '#11B5E4', fontSize: 22 }} />
+                  <GroupsRoundedIcon sx={{ color: C.primary, fontSize: 22 }} />
                   <SectionTitle>Equipes Confirmadas</SectionTitle>
                 </Box>
                 <Typography
@@ -387,7 +323,6 @@ export default function TournamentDetailPage({ slug }: Props) {
               </Box>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                {/* User's team highlight card */}
                 {userTeam && userHasVisibleTeam && (
                   <TeamAccordionItem
                     team={{
@@ -401,13 +336,12 @@ export default function TournamentDetailPage({ slug }: Props) {
                     highlightLabel="Sua Equipe"
                     statusNote={
                       userTeam.teamStatus === 'PENDING_PAYMENT'
-                        ? `${TEAM_STATUS_LABELS.PENDING_PAYMENT}`
+                        ? TEAM_STATUS_LABELS.PENDING_PAYMENT
                         : undefined
                     }
                   />
                 )}
 
-                {/* Confirmed teams (READY), filtered to exclude user's own */}
                 {confirmedTeamsFiltered.length > 0 ? (
                   confirmedTeamsFiltered.map((team) => (
                     <TeamAccordionItem key={team.id} team={team} />
@@ -442,30 +376,28 @@ export default function TournamentDetailPage({ slug }: Props) {
             </Box>
           </Box>
 
-          {/* ── RIGHT COLUMN: action card ────────────────────────── */}
           <Box>
             <Box
               sx={{
+                ...LOL_TOURNAMENT_SX.panelCard,
                 position: { xs: 'static', lg: 'sticky' },
                 top: 88,
-                backgroundColor: '#0E1241',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 3,
                 p: { xs: 2.5, md: 3 },
               }}
             >
               <Typography
                 sx={{
-                  color: '#ffffff',
+                  color: C.text,
                   fontWeight: 700,
                   fontSize: '1.1rem',
                   mb: 3,
+                  textAlign: 'center',
                 }}
               >
-                Inicie sua Jornada
+                Inscreva-se Agora!
               </Typography>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <FeeRow label="Taxa por Inscrição">
                   R${' '}
                   {PAYMENT_FEE_PER_PLAYER.toLocaleString('pt-BR', {
@@ -480,7 +412,7 @@ export default function TournamentDetailPage({ slug }: Props) {
                     sx={{
                       fontWeight: 700,
                       fontSize: '0.9rem',
-                      color: remainingSpots <= 4 ? '#ff6b6b' : '#37963c',
+                      color: remainingSpots <= 4 ? '#ff6b6b' : C.success,
                     }}
                   >
                     {remainingSpots}
@@ -502,24 +434,13 @@ export default function TournamentDetailPage({ slug }: Props) {
                   fullWidth
                   disabled={btnDisabled}
                   onClick={() => {
-                    if (!canClickRegister) return;
-                    // Auth is handled by the proxy / middleware.
+                    if (btnDisabled) return;
                     router.push(targetPath);
                   }}
                   sx={{
-                    backgroundColor: canClickRegister ? '#11B5E4' : undefined,
-                    color: '#ffffff',
-                    fontWeight: 800,
+                    ...LOL_TOURNAMENT_SX.primaryCta,
                     fontSize: '0.9rem',
-                    letterSpacing: 1,
-                    textTransform: 'uppercase',
-                    fontStyle: 'italic',
                     py: 1.6,
-                    '&:hover': { backgroundColor: '#0b80a0' },
-                    '&.Mui-disabled': {
-                      backgroundColor: 'rgba(255,255,255,0.08)',
-                      color: 'rgba(255,255,255,0.3)',
-                    },
                   }}
                 >
                   {btnLabel}
@@ -533,17 +454,9 @@ export default function TournamentDetailPage({ slug }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
-                    borderColor: 'rgba(255,255,255,0.15)',
-                    color: 'rgba(255,255,255,0.7)',
-                    fontWeight: 600,
+                    ...LOL_TOURNAMENT_SX.outlinedSecondary,
                     fontSize: '0.8rem',
-                    letterSpacing: 0.8,
-                    textTransform: 'uppercase',
                     py: 1.2,
-                    '&:hover': {
-                      borderColor: 'rgba(255,255,255,0.35)',
-                      backgroundColor: 'rgba(255,255,255,0.04)',
-                    },
                   }}
                 >
                   Ler Regras Completas
@@ -557,16 +470,20 @@ export default function TournamentDetailPage({ slug }: Props) {
   );
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────
+const CENTER_60VH = {
+  minHeight: '60vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const;
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <Typography
       sx={{
-        color: '#ffffff',
+        color: C.text,
         fontWeight: 800,
         fontSize: { xs: '1.1rem', md: '1.25rem' },
-        mb: 0,
       }}
     >
       {children}
@@ -577,19 +494,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Box>
+      <Typography sx={T.infoLabel}>{label}</Typography>
       <Typography
-        sx={{
-          color: '#11B5E4',
-          fontSize: '0.6rem',
-          fontWeight: 700,
-          letterSpacing: 1,
-          textTransform: 'uppercase',
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography
-        sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', mt: 0.2 }}
+        sx={{ color: C.text, fontWeight: 700, fontSize: '1rem', mt: 0.2 }}
       >
         {value}
       </Typography>
@@ -597,13 +504,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FeeRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FeeRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Box
       sx={{
@@ -616,9 +517,7 @@ function FeeRow({
       <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
         {label}
       </Typography>
-      <Typography
-        sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9rem' }}
-      >
+      <Typography sx={{ color: C.text, fontWeight: 700, fontSize: '0.9rem' }}>
         {children}
       </Typography>
     </Box>
@@ -634,12 +533,9 @@ function HeroContent({ tournament }: { tournament: TournamentDetailData }) {
 
       <Typography
         sx={{
-          color: '#ffffff',
-          fontWeight: 900,
+          ...T.heroTitle,
           fontSize: { xs: '2rem', md: '3.5rem', lg: '4.5rem' },
           lineHeight: 1,
-          textTransform: 'uppercase',
-          fontStyle: 'italic',
           textShadow: '0 2px 20px rgba(0,0,0,0.6)',
           letterSpacing: -0.5,
         }}
@@ -655,59 +551,24 @@ function HeroContent({ tournament }: { tournament: TournamentDetailData }) {
             />
           }
         >
-          {new Date(tournament.startsAt).toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: 'long',
-          })}
+          {formatDateMonth(tournament.startsAt)}
         </StatChip>
         <StatChip
-          icon={<GroupsRoundedIcon sx={{ fontSize: 16, color: '#11B5E4' }} />}
+          icon={<GroupsRoundedIcon sx={{ fontSize: 16, color: C.primary }} />}
         >
           {tournament.confirmedTeamsCount}/{tournament.maxTeams} Equipes
         </StatChip>
         <StatChip
           icon={
-            <EmojiEventsRoundedIcon sx={{ fontSize: 16, color: '#E07F0A' }} />
+            <EmojiEventsRoundedIcon
+              sx={{ fontSize: 16, color: C.statusFull }}
+            />
           }
+          valueColor={C.statusFull}
         >
-          <Typography
-            component="span"
-            sx={{ color: '#E07F0A', fontWeight: 700 }}
-          >
-            {formatPrize(tournament.prizePool)}
-          </Typography>
+          {formatPrize(tournament.prizePool)}
         </StatChip>
       </Stack>
     </Stack>
-  );
-}
-
-function StatChip({
-  icon,
-  children,
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.7,
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        borderRadius: 2,
-        px: 1.5,
-        py: 0.8,
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      {icon}
-      <Typography
-        sx={{ color: '#ffffff', fontWeight: 600, fontSize: '0.85rem' }}
-      >
-        {children}
-      </Typography>
-    </Box>
   );
 }

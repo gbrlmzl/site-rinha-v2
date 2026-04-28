@@ -6,11 +6,15 @@ import { useTournamentPaymentApproved } from '@/hooks/lol/tournaments/useTournam
 import { MyTournamentsSummaryData } from '@/types/lol/tournaments/tournament';
 import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, useEffect, useMemo, useState } from 'react';
 import ActiveTournamentCard from './cards/ActiveTournamentCard';
 import MyTournamentsCarousel from './MyTournamentsCarousel';
 import PendingPaymentCard from './cards/PendingPaymentCard';
 import TournamentExplorer from './explorer/TournamentExplorer';
+import {
+  LOL_TOURNAMENT_SX,
+  LOL_TOURNAMENT_TYPOGRAPHY,
+} from './tournamentsTheme';
 
 export default function TorneioHome() {
   const { isAuthenticated } = useAuthContext();
@@ -20,11 +24,11 @@ export default function TorneioHome() {
     MyTournamentsSummaryData[]
   >([]);
 
-  function updateMyTournaments() {
+  const updateMyTournaments = () => {
     getMyTournaments('LEAGUE_OF_LEGENDS').then((page) => {
       if (page) setMyTournaments(page.content);
     });
-  }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -33,7 +37,7 @@ export default function TorneioHome() {
 
   useTournamentPaymentApproved(updateMyTournaments);
 
-  function renderCard(tournament: MyTournamentsSummaryData) {
+  const renderCard = (tournament: MyTournamentsSummaryData) => {
     const inscricoesPath = `/lol/torneios/${tournament.slug}/pagamentos`;
     const detailPath = `/lol/torneios/${tournament.slug}`;
 
@@ -56,37 +60,32 @@ export default function TorneioHome() {
       );
     }
     return null;
-  }
+  };
+
+  const enrolledTournamentIds = useMemo(
+    () =>
+      new Map(
+        myTournaments
+          .filter(
+            (t) =>
+              t.teamStatus === 'READY' || t.teamStatus === 'PENDING_PAYMENT'
+          )
+          .map((t) => [t.id, t.teamStatus])
+      ),
+    [myTournaments]
+  );
 
   return (
-    <Box
-      sx={{
-        maxWidth: 1400,
-        mx: 'auto',
-        px: { xs: 2, md: 6 },
-        pt: '13vh',
-        pb: '5vh',
-      }}
-    >
+    <Box sx={LOL_TOURNAMENT_SX.pageContainer}>
       {isAuthenticated && myTournaments.length > 0 && (
         <Box sx={{ mb: 5 }}>
           <Typography
-            sx={{
-              color: '#ffffff',
-              fontWeight: 800,
-              fontSize: { xs: '1.4rem', md: '1.8rem' },
-              letterSpacing: -0.3,
-              mb: 0.5,
-            }}
+            sx={{ ...LOL_TOURNAMENT_TYPOGRAPHY.sectionTitle, mb: 0.5 }}
           >
             Minhas Competições
           </Typography>
           <Typography
-            sx={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.85rem',
-              mb: 2.5,
-            }}
+            sx={{ ...LOL_TOURNAMENT_TYPOGRAPHY.sectionSubtitle, mb: 2.5 }}
           >
             Torneios em que você está inscrito.
           </Typography>
@@ -98,7 +97,10 @@ export default function TorneioHome() {
         </Box>
       )}
 
-      <TournamentExplorer game="LEAGUE_OF_LEGENDS" />
+      <TournamentExplorer
+        game="LEAGUE_OF_LEGENDS"
+        enrolledTournamentIds={enrolledTournamentIds}
+      />
     </Box>
   );
 }

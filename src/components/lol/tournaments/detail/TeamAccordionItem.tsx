@@ -1,6 +1,7 @@
-'use client';
-
-import { TeamPublicData, PLAYER_ROLE_LABELS } from '@/types/lol/tournaments/tournament';
+import {
+  PLAYER_ROLE_LABELS,
+  TeamPublicData,
+} from '@/types/lol/tournaments/tournament';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import {
   Accordion,
@@ -10,6 +11,7 @@ import {
   Chip,
   Typography,
 } from '@mui/material';
+import { LOL_TOURNAMENT_COLORS as C } from '../tournamentsTheme';
 
 interface Props {
   team: TeamPublicData;
@@ -18,16 +20,19 @@ interface Props {
   statusNote?: string;
 }
 
-export default function TeamAccordionItem({ team, highlighted, highlightLabel, statusNote }: Props) {
+export default function TeamAccordionItem({
+  team,
+  highlighted,
+  highlightLabel,
+  statusNote,
+}: Props) {
   return (
     <Accordion
       disableGutters
       elevation={0}
       sx={{
-        backgroundColor: highlighted ? 'rgba(124,58,237,0.07)' : '#0E1241',
-        border: highlighted
-          ? '1px solid rgba(124,58,237,0.4)'
-          : '1px solid rgba(255,255,255,0.07)',
+        backgroundColor: highlighted ? 'rgba(124,58,237,0.07)' : C.surface,
+        border: `1px solid ${highlighted ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.07)'}`,
         borderRadius: '12px !important',
         overflow: 'hidden',
         '&:before': { display: 'none' },
@@ -35,15 +40,20 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
       }}
     >
       <AccordionSummary
-        expandIcon={<ExpandMoreRoundedIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />}
+        expandIcon={
+          <ExpandMoreRoundedIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
+        }
         sx={{
           px: 2,
           py: 1,
           minHeight: 64,
-          '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.5, my: 1 },
+          '& .MuiAccordionSummary-content': {
+            alignItems: 'center',
+            gap: 1.5,
+            my: 1,
+          },
         }}
       >
-        {/* Shield */}
         <Box
           sx={{
             width: 40,
@@ -52,7 +62,7 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
             border: '1px solid rgba(255,255,255,0.12)',
             overflow: 'hidden',
             flexShrink: 0,
-            backgroundColor: '#080d2e',
+            backgroundColor: C.bg,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -66,16 +76,26 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
               style={{ width: 28, height: 28, objectFit: 'contain' }}
             />
           ) : (
-            <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>?</Typography>
+            <Typography
+              sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}
+            >
+              ?
+            </Typography>
           )}
         </Box>
 
-        {/* Name + caption */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexWrap: 'wrap',
+            }}
+          >
             <Typography
               sx={{
-                color: '#ffffff',
+                color: C.text,
                 fontWeight: 700,
                 fontSize: '0.95rem',
                 lineHeight: 1.3,
@@ -88,7 +108,7 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
                 label={highlightLabel}
                 size="small"
                 sx={{
-                  backgroundColor: '#7C3AED',
+                  backgroundColor: C.enrolledAccent,
                   color: '#fff',
                   fontWeight: 700,
                   fontSize: '0.6rem',
@@ -98,11 +118,24 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
               />
             )}
           </Box>
-          <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', mt: 0.2 }}>
+          <Typography
+            sx={{
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '0.72rem',
+              mt: 0.2,
+            }}
+          >
             Capitão: {team.captainNickname}
           </Typography>
           {statusNote && (
-            <Typography sx={{ color: '#E07F0A', fontSize: '0.7rem', fontWeight: 600, mt: 0.3 }}>
+            <Typography
+              sx={{
+                color: C.statusFull,
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                mt: 0.3,
+              }}
+            >
               {statusNote}
             </Typography>
           )}
@@ -131,13 +164,18 @@ export default function TeamAccordionItem({ team, highlighted, highlightLabel, s
           {team.players.map((player, idx) => (
             <Box key={idx}>
               <Typography
-                sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.85rem', lineHeight: 1.3 }}
+                sx={{
+                  color: C.text,
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  lineHeight: 1.3,
+                }}
               >
                 {player.nickname}
               </Typography>
               <Typography
                 sx={{
-                  color: '#11B5E4',
+                  color: C.primary,
                   fontSize: '0.62rem',
                   fontWeight: 700,
                   letterSpacing: 0.8,

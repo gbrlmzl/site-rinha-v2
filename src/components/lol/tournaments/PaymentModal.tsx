@@ -29,12 +29,15 @@ import {
 } from '@/types/teamRegistration';
 import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
 import { TOURNAMENT_PAYMENT_APPROVED_EVENT } from '@/hooks/lol/tournaments/useTournamentPaymentApproved';
-import { TEAM_REGISTRATION_TOKENS } from '@/theme';
+import { LOL_TOURNAMENT_COLORS as C } from './tournamentsTheme';
+import { formatCurrency } from '@/utils/tournaments/formatters';
 
 interface PaymentModalProps {
   torneioId: string;
 }
-const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
+
+const APPROVED_GREEN = '#4caf50';
+const QR_SIZE = 220;
 
 export default function PaymentModal({ torneioId }: PaymentModalProps) {
   const router = useRouter();
@@ -75,58 +78,48 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
     };
 
     load();
-
     return () => {
       unsubscribeRef.current?.();
     };
   }, [torneioId]);
-  // Timer para QR Code
+
+  // Timer do QR code: recalcula via Date.now() a cada segundo
+  // (resiliente a abas em background, ao contrário de decremento simples).
   useEffect(() => {
-    // 1. Condição de saída: Se não tem data ou já está aprovado, zera.
     if (!paymentData?.expiresAt || paymentApproved) {
-      // Usamos setTimeout para não gerar cascata (Cascading Render)
-      const timeout = setTimeout(() => setTimeRemaining(0), 0);
-      return () => clearTimeout(timeout);
+      const t = setTimeout(() => setTimeRemaining(0), 0);
+      return () => clearTimeout(t);
     }
 
     const expiresAtMs = new Date(paymentData.expiresAt).getTime();
-
-    // 2. Sua excelente proteção contra datas inválidas!
     if (Number.isNaN(expiresAtMs)) {
-      const timeout = setTimeout(() => setTimeRemaining(0), 0);
-      return () => clearTimeout(timeout);
+      const t = setTimeout(() => setTimeRemaining(0), 0);
+      return () => clearTimeout(t);
     }
 
-    // 3. Função que sempre calcula o tempo REAL baseado no relógio do sistema
-    const updateTimer = () => {
-      const remaining = Math.max(
-        Math.floor((expiresAtMs - Date.now()) / 1000),
-        0
+    const update = () => {
+      setTimeRemaining(
+        Math.max(Math.floor((expiresAtMs - Date.now()) / 1000), 0)
       );
-      setTimeRemaining(remaining);
     };
 
-    // 4. Inicializa o timer empurrando para a fila de eventos (Resolve o erro do React)
-    const initialTimeout = setTimeout(updateTimer, 0);
-
-    // 5. Atualiza a cada segundo de forma imune a abas minimizadas
-    const interval = setInterval(updateTimer, 1000);
-
-    // Limpa tudo ao desmontar o componente ou mudar as dependências
+    const initial = setTimeout(update, 0);
+    const interval = setInterval(update, 1000);
     return () => {
-      clearTimeout(initialTimeout);
+      clearTimeout(initial);
       clearInterval(interval);
     };
   }, [paymentData?.expiresAt, paymentApproved]);
 
   const handleCopyPix = async () => {
     if (!paymentData?.qrCode) return;
-    const ok = await copyToClipboard(paymentData.qrCode);
-    if (ok) {
+    if (await copyToClipboard(paymentData.qrCode)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const isExpiringSoon = timeRemaining < 60;
 
   return (
     <Dialog
@@ -136,10 +129,10 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: '#0E1241',
-          border: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: C.surface,
+          border: `1px solid ${C.border}`,
           borderRadius: 3,
-          color: '#ffffff',
+          color: C.text,
         },
       }}
     >
@@ -161,24 +154,19 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
         <IconButton
           onClick={() => router.back()}
           size="small"
-          sx={{
-            color: 'rgba(255,255,255,0.5)',
-            '&:hover': { color: '#ffffff' },
-          }}
+          sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: C.text } }}
         >
           <CloseRoundedIcon fontSize="small" />
         </IconButton>
       </Box>
 
       <DialogContent sx={{ px: 3, py: 3 }}>
-        {/* ─── Loading ─────────────────────────────────────────── */}
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress size={36} />
           </Box>
         )}
 
-        {/* ─── Pagamento aprovado ──────────────────────────────── */}
         {!loading && paymentApproved && (
           <Stack
             spacing={2}
@@ -190,33 +178,24 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
             }}
           >
             <CheckCircleIcon
-              sx={{ fontSize: 64, color: '#4caf50', margin: 'auto' }}
+              sx={{ fontSize: 64, color: APPROVED_GREEN, margin: 'auto' }}
             />
-            <Typography
-              variant="h6"
-              sx={{ color: THEME_COLORS.accent, fontWeight: 700 }}
-            >
+            <Typography variant="h6" sx={{ color: C.accent, fontWeight: 700 }}>
               Pagamento Aprovado!
             </Typography>
-            <Typography
-              sx={{ color: THEME_COLORS.textMuted, fontSize: '0.9rem' }}
-            >
+            <Typography sx={{ color: C.textMuted, fontSize: '0.9rem' }}>
               Sua inscrição foi confirmada. Boa sorte!
             </Typography>
             <Button
               variant="outlined"
               onClick={() => router.back()}
-              sx={{
-                borderColor: THEME_COLORS.accent,
-                color: THEME_COLORS.accent,
-              }}
+              sx={{ borderColor: C.accent, color: C.accent }}
             >
               Fechar
             </Button>
           </Stack>
         )}
 
-        {/* ─── QR Code ────────────────────────────────────────── */}
         {!loading && !paymentApproved && paymentData && (
           <Stack
             spacing={2.5}
@@ -226,38 +205,33 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
               alignItems: 'center',
             }}
           >
-            {/* Valor */}
             <Box
               sx={{
                 p: 1.5,
-                backgroundColor: THEME_COLORS.surfaceHigh,
+                backgroundColor: C.surfaceHigh,
                 borderRadius: 2,
-                border: `1px solid ${THEME_COLORS.accent}`,
+                border: `1px solid ${C.accent}`,
                 width: '100%',
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{ color: THEME_COLORS.textMuted }}
-              >
+              <Typography variant="caption" sx={{ color: C.textMuted }}>
                 Valor a Pagar
               </Typography>
               <Typography
                 variant="h5"
-                sx={{ color: THEME_COLORS.accent, fontWeight: 700 }}
+                sx={{ color: C.accent, fontWeight: 700 }}
               >
-                R$ {paymentData.value.toFixed(2).replace('.', ',')}
+                {formatCurrency(paymentData.value)}
               </Typography>
             </Box>
 
-            {/* QR Code */}
             <Card
               sx={{
-                width: 220,
-                height: 220,
+                width: QR_SIZE,
+                height: QR_SIZE,
                 mx: 'auto',
-                backgroundColor: THEME_COLORS.surfaceHigh,
-                border: `2px solid ${THEME_COLORS.border}`,
+                backgroundColor: C.surfaceHigh,
+                border: `2px solid ${C.border}`,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -267,43 +241,36 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
                 <img
                   src={`data:image/png;base64,${paymentData.qrCodeBase64}`}
                   alt="QR Code PIX"
-                  width={220}
-                  height={220}
+                  width={QR_SIZE}
+                  height={QR_SIZE}
                   style={{ objectFit: 'contain', padding: 8 }}
                 />
               ) : (
                 <Image
                   src={qrCodeExpiredImage}
                   alt="QR Code Expirado"
-                  width={220}
-                  height={220}
+                  width={QR_SIZE}
+                  height={QR_SIZE}
                   style={{ objectFit: 'contain', padding: 8 }}
                 />
               )}
             </Card>
 
-            {/* Timer */}
             <Box
               sx={{
                 p: 1.5,
-                backgroundColor:
-                  timeRemaining < 60
-                    ? 'rgba(255,107,107,0.1)'
-                    : THEME_COLORS.surfaceHigh,
-                border: `1px solid ${
-                  timeRemaining < 60 ? THEME_COLORS.danger : THEME_COLORS.border
-                }`,
+                backgroundColor: isExpiringSoon
+                  ? 'rgba(255,107,107,0.1)'
+                  : C.surfaceHigh,
+                border: `1px solid ${isExpiringSoon ? C.danger : C.border}`,
                 borderRadius: 2,
               }}
             >
               <Typography
                 variant="body2"
                 sx={{
-                  color:
-                    timeRemaining < 60
-                      ? THEME_COLORS.danger
-                      : THEME_COLORS.textMuted,
-                  fontWeight: timeRemaining < 60 ? 700 : 500,
+                  color: isExpiringSoon ? C.danger : C.textMuted,
+                  fontWeight: isExpiringSoon ? 700 : 500,
                 }}
               >
                 {timeRemaining > 0 ? (
@@ -317,13 +284,9 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
               </Typography>
             </Box>
 
-            {/* Copia e cola / Fechar */}
             {timeRemaining > 0 ? (
               <>
-                <Typography
-                  variant="body2"
-                  sx={{ color: THEME_COLORS.textMuted }}
-                >
+                <Typography variant="body2" sx={{ color: C.textMuted }}>
                   Ou copie a chave PIX:
                 </Typography>
                 <Button
@@ -331,15 +294,15 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
                   variant="outlined"
                   startIcon={
                     copied ? (
-                      <CheckCircleIcon sx={{ color: '#4caf50' }} />
+                      <CheckCircleIcon sx={{ color: APPROVED_GREEN }} />
                     ) : (
                       <ContentCopyIcon />
                     )
                   }
                   onClick={handleCopyPix}
                   sx={{
-                    borderColor: THEME_COLORS.accent,
-                    color: copied ? '#4caf50' : THEME_COLORS.accent,
+                    borderColor: C.accent,
+                    color: copied ? APPROVED_GREEN : C.accent,
                     py: 1.2,
                   }}
                 >
@@ -359,12 +322,9 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
           </Stack>
         )}
 
-        {/* ─── Sem dados ──────────────────────────────────────── */}
         {!loading && !paymentData && !paymentApproved && (
           <Box sx={{ textAlign: 'center', py: 3 }}>
-            <Typography
-              sx={{ color: THEME_COLORS.textMuted, fontSize: '0.9rem' }}
-            >
+            <Typography sx={{ color: C.textMuted, fontSize: '0.9rem' }}>
               Nenhum pagamento pendente encontrado para este torneio.
             </Typography>
           </Box>

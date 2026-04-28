@@ -3,28 +3,23 @@
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import { Box, IconButton } from '@mui/material';
-import React, { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { LOL_TOURNAMENT_SX } from './tournamentsTheme';
 
 const CARD_WIDTH = 320;
 const GAP = 16;
 const DESKTOP_VISIBLE = 3;
+const FADE_DISTANCE = 60;
 
 const NAV_BTN_SX = {
-  backgroundColor: 'rgba(255,255,255,0.08)',
-  color: '#ffffff',
-  border: '1px solid rgba(255,255,255,0.15)',
-  borderRadius: '50%',
+  ...LOL_TOURNAMENT_SX.navButton,
   width: 36,
   height: 36,
   flexShrink: 0,
-  // Adicionamos um backdrop-filter sutil para o botão se destacar ainda mais sobre o fundo
-  backdropFilter: 'blur(4px)',
-  '&:hover': { backgroundColor: 'rgba(255,255,255,0.18)' },
-  '&.Mui-disabled': { opacity: 0.25, pointerEvents: 'none' },
 };
 
 interface Props {
-  items: React.ReactNode[];
+  items: ReactNode[];
 }
 
 export default function MyTournamentsCarousel({ items }: Props) {
@@ -35,53 +30,35 @@ export default function MyTournamentsCarousel({ items }: Props) {
   const safeIndex = Math.min(index, maxIndex);
   const showArrows = count > DESKTOP_VISIBLE;
 
-  function prev() {
-    setIndex((i) => Math.max(0, i - 1));
-  }
-
-  function next() {
-    setIndex((i) => Math.min(maxIndex, i + 1));
-  }
-
   const showLeftFade = safeIndex > 0;
   const showRightFade = safeIndex < maxIndex;
 
-  // 0.05 = Praticamente invisível na ponta.
-  // 60px = Distância do degradê (cobre a largura do botão + um pequeno respiro).
+  // Máscara translúcida nas pontas que sugere conteúdo cortado
   let fadeMask = 'none';
   if (showLeftFade && showRightFade) {
-    fadeMask =
-      'linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) 60px, rgba(0,0,0,1) calc(100% - 60px), rgba(0,0,0,0.05) 100%)';
+    fadeMask = `linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) ${FADE_DISTANCE}px, rgba(0,0,0,1) calc(100% - ${FADE_DISTANCE}px), rgba(0,0,0,0.05) 100%)`;
   } else if (showLeftFade) {
-    fadeMask =
-      'linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) 60px)';
+    fadeMask = `linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) ${FADE_DISTANCE}px)`;
   } else if (showRightFade) {
-    fadeMask =
-      'linear-gradient(to left, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) 60px)';
+    fadeMask = `linear-gradient(to left, rgba(0,0,0,0.05) 0%, rgba(0,0,0,1) ${FADE_DISTANCE}px)`;
   }
 
   return (
     <>
-      {/* DESKTOP VIEW (900px ou mais) - Navegação por Setas Sobrepostas */}
-      <Box
-        sx={{
-          display: { xs: 'none', md: 'block' }, // Mudou para block para usar relative
-          position: 'relative', // Essencial para ancorar os botões
-        }}
-      >
-        {/* BOTÃO VOLTAR - Absoluto na Esquerda */}
+      {/* Desktop: setas absolutas + máscara nas pontas */}
+      <Box sx={{ display: { xs: 'none', md: 'block' }, position: 'relative' }}>
         {showArrows && (
           <Box
             sx={{
               position: 'absolute',
-              left: -18, // Puxa metade do botão pra fora. Troque por 8 se quiser totalmente dentro
+              left: -18,
               top: '50%',
               transform: 'translateY(-50%)',
-              zIndex: 2, // Garante que a seta fique por cima do fade e dos cards
+              zIndex: 2,
             }}
           >
             <IconButton
-              onClick={prev}
+              onClick={() => setIndex((i) => Math.max(0, i - 1))}
               disabled={safeIndex === 0}
               sx={NAV_BTN_SX}
             >
@@ -90,13 +67,11 @@ export default function MyTournamentsCarousel({ items }: Props) {
           </Box>
         )}
 
-        {/* CONTAINER DOS CARDS (A Máscara vai apenas aqui) */}
         <Box
           sx={{
             overflow: 'hidden',
             maskImage: fadeMask,
-            WebkitMaskImage: fadeMask, // Necessário para Safari e Chrome
-            // Adicionado um pequeno padding horizontal para o card não colar na borda do container caso precise
+            WebkitMaskImage: fadeMask,
             px: 1,
           }}
         >
@@ -125,19 +100,18 @@ export default function MyTournamentsCarousel({ items }: Props) {
           </Box>
         </Box>
 
-        {/* BOTÃO AVANÇAR - Absoluto na Direita */}
         {showArrows && (
           <Box
             sx={{
               position: 'absolute',
-              right: -18, // Puxa metade do botão pra fora. Troque por 8 se quiser totalmente dentro
+              right: -18,
               top: '50%',
               transform: 'translateY(-50%)',
               zIndex: 2,
             }}
           >
             <IconButton
-              onClick={next}
+              onClick={() => setIndex((i) => Math.min(maxIndex, i + 1))}
               disabled={safeIndex >= maxIndex}
               sx={NAV_BTN_SX}
             >
@@ -147,16 +121,13 @@ export default function MyTournamentsCarousel({ items }: Props) {
         )}
       </Box>
 
-      {/* MOBILE & TABLET VIEW (Até 899px) - Navegação por Swipe Nativo */}
+      {/* Mobile/tablet: swipe nativo com scroll-snap */}
       <Box
         sx={{
+          ...LOL_TOURNAMENT_SX.hScrollNoScrollbar,
           display: { xs: 'flex', md: 'none' },
           gap: `${GAP}px`,
-          overflowX: 'auto',
-          scrollSnapType: 'x mandatory',
-          scrollbarWidth: 'none',
           alignItems: 'stretch',
-          '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
         {items.map((item, i) => (

@@ -1,6 +1,9 @@
 'use client';
 
-import { TournamentPublicSummaryData } from '@/types/lol/tournaments/tournament';
+import {
+  TeamStatus,
+  TournamentPublicSummaryData,
+} from '@/types/lol/tournaments/tournament';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
@@ -10,53 +13,39 @@ import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import TournamentStatusBadge from './TournamentStatusBadge';
-
-function formatDateLong(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatPrize(value: number) {
-  return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
-}
+import EnrolledBadge from '@/components/shared/badges/EnrolledBadge';
+import TournamentStatusBadge from '@/components/shared/badges/TournamentStatusBadge';
+import StatChip from '../shared/StatChip';
+import {
+  LOL_TOURNAMENT_COLORS as C,
+  LOL_TOURNAMENT_SX,
+  LOL_TOURNAMENT_TYPOGRAPHY as T,
+} from '../tournamentsTheme';
+import { formatDateShort, formatPrize } from '@/utils/tournaments/formatters';
 
 interface DesktopCarouselProps {
   tournaments: TournamentPublicSummaryData[];
   index: number;
   onPrev: () => void;
   onNext: () => void;
+  enrolledIds: Map<number, TeamStatus>;
 }
-
-const NAV_BTN_SX = {
-  backgroundColor: 'rgba(255,255,255,0.1)',
-  color: '#ffffff',
-  border: '1px solid rgba(255,255,255,0.15)',
-  borderRadius: '50%',
-  width: 40,
-  height: 40,
-  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
-};
 
 export default function DesktopCarousel({
   tournaments,
   index,
   onPrev,
   onNext,
+  enrolledIds,
 }: DesktopCarouselProps) {
   const router = useRouter();
-
   if (tournaments.length === 0) return null;
 
   const t = tournaments[index];
+  const enrolledStatus = enrolledIds.get(t.id);
 
   return (
     <Box>
-      {/* Hero card */}
       <Box
         sx={{
           position: 'relative',
@@ -67,7 +56,6 @@ export default function DesktopCarousel({
           alignItems: 'flex-end',
         }}
       >
-        {/* Background image */}
         <Image
           key={t.id}
           src={t.imageUrl}
@@ -82,11 +70,10 @@ export default function DesktopCarousel({
             height: '100%',
             objectFit: 'cover',
             objectPosition: 'top center',
-            display: 'block',
           }}
         />
 
-        {/* Gradient overlay — dark from left, transparent to right */}
+        {/* Sobreposições para legibilidade do texto sobre a imagem */}
         <Box
           sx={{
             position: 'absolute',
@@ -99,11 +86,11 @@ export default function DesktopCarousel({
           sx={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to top, rgba(8,13,46,0.5) 0%, transparent 40%)',
+            background:
+              'linear-gradient(to top, rgba(8,13,46,0.5) 0%, transparent 40%)',
           }}
         />
 
-        {/* Animated content */}
         <Box
           key={`content-${index}`}
           sx={{
@@ -118,109 +105,70 @@ export default function DesktopCarousel({
             animation: 'slideIn 0.35s ease',
           }}
         >
-          <TournamentStatusBadge status={t.status} />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TournamentStatusBadge status={t.status} />
+            {enrolledStatus && (
+              <EnrolledBadge variant="soft" teamStatus={enrolledStatus} />
+            )}
+          </Stack>
 
           <Typography
             sx={{
-              color: '#ffffff',
-              fontWeight: 900,
+              ...T.heroTitle,
               fontSize: { md: '2.8rem', lg: '3.8rem' },
-              lineHeight: 1.05,
-              textTransform: 'uppercase',
-              fontStyle: 'italic',
               mt: 1.5,
               mb: 2.5,
-              textShadow: '0 2px 16px rgba(0,0,0,0.5)',
             }}
           >
             {t.name}
           </Typography>
 
-          {/* Stats row */}
-          <Stack direction="row" spacing={1.5} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.8,
-                backgroundColor: 'rgba(0,0,0,0.45)',
-                borderRadius: 2,
-                px: 1.5,
-                py: 1,
-              }}
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}
+          >
+            <StatChip
+              icon={
+                <EmojiEventsRoundedIcon
+                  sx={{ fontSize: 18, color: C.statusFull }}
+                />
+              }
+              caption="Premiação Total"
+              valueColor={C.statusFull}
             >
-              <EmojiEventsRoundedIcon sx={{ fontSize: 18, color: '#E07F0A' }} />
-              <Box>
-                <Typography sx={{ color: '#E07F0A', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.1 }}>
-                  {formatPrize(t.prizePool)}
-                </Typography>
-                <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                  Premiação Total
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.8,
-                backgroundColor: 'rgba(0,0,0,0.45)',
-                borderRadius: 2,
-                px: 1.5,
-                py: 1,
-              }}
+              {formatPrize(t.prizePool)}
+            </StatChip>
+            <StatChip
+              icon={
+                <GroupsRoundedIcon sx={{ fontSize: 18, color: C.primary }} />
+              }
+              caption="Equipes Confirmadas"
+              valueColor={C.primary}
             >
-              <GroupsRoundedIcon sx={{ fontSize: 18, color: '#11B5E4' }} />
-              <Box>
-                <Typography sx={{ color: '#11B5E4', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.1 }}>
-                  {t.confirmedTeamsCount}/{t.maxTeams}
-                </Typography>
-                <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                  Equipes Confirmadas
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.8,
-                backgroundColor: 'rgba(0,0,0,0.45)',
-                borderRadius: 2,
-                px: 1.5,
-                py: 1,
-              }}
+              {t.confirmedTeamsCount}/{t.maxTeams}
+            </StatChip>
+            <StatChip
+              icon={
+                <CalendarTodayRoundedIcon
+                  sx={{ fontSize: 18, color: 'rgba(255,255,255,0.7)' }}
+                />
+              }
+              caption="Início da Competição"
             >
-              <CalendarTodayRoundedIcon sx={{ fontSize: 18, color: 'rgba(255,255,255,0.7)' }} />
-              <Box>
-                <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.1 }}>
-                  {formatDateLong(t.startsAt)}
-                </Typography>
-                <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                  Início da Competição
-                </Typography>
-              </Box>
-            </Box>
+              {formatDateShort(t.startsAt)}
+            </StatChip>
           </Stack>
 
-          {/* Action buttons */}
           <Stack direction="row" spacing={1.5}>
             <Button
               variant="contained"
               onClick={() => router.push(`/lol/torneios/${t.slug}`)}
               sx={{
-                backgroundColor: '#11B5E4',
-                color: '#ffffff',
-                fontWeight: 800,
+                ...LOL_TOURNAMENT_SX.primaryCta,
                 fontSize: '0.95rem',
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-                fontStyle: 'italic',
                 px: 3,
                 py: 1.3,
-                '&:hover': { backgroundColor: '#0b80a0' },
               }}
             >
               Participar Agora
@@ -233,13 +181,16 @@ export default function DesktopCarousel({
               rel="noopener noreferrer"
               sx={{
                 borderColor: 'rgba(255,255,255,0.3)',
-                color: '#ffffff',
+                color: C.text,
                 fontWeight: 600,
                 fontSize: '0.9rem',
                 px: 2.5,
                 py: 1.3,
                 backgroundColor: 'rgba(0,0,0,0.35)',
-                '&:hover': { borderColor: 'rgba(255,255,255,0.6)', backgroundColor: 'rgba(0,0,0,0.5)' },
+                '&:hover': {
+                  borderColor: 'rgba(255,255,255,0.6)',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                },
               }}
             >
               Ver Regras
@@ -248,7 +199,6 @@ export default function DesktopCarousel({
         </Box>
       </Box>
 
-      {/* Navigation row */}
       {tournaments.length > 1 && (
         <Box
           sx={{
@@ -259,7 +209,7 @@ export default function DesktopCarousel({
             mt: 2,
           }}
         >
-          <IconButton onClick={onPrev} sx={NAV_BTN_SX}>
+          <IconButton onClick={onPrev} sx={LOL_TOURNAMENT_SX.navButton}>
             <ChevronLeftRoundedIcon />
           </IconButton>
 
@@ -270,7 +220,8 @@ export default function DesktopCarousel({
                 sx={{
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: i === index ? '#11B5E4' : 'rgba(255,255,255,0.25)',
+                  backgroundColor:
+                    i === index ? C.primary : 'rgba(255,255,255,0.25)',
                   width: i === index ? 28 : 8,
                   transition: 'all 0.3s ease',
                 }}
@@ -278,7 +229,7 @@ export default function DesktopCarousel({
             ))}
           </Box>
 
-          <IconButton onClick={onNext} sx={NAV_BTN_SX}>
+          <IconButton onClick={onNext} sx={LOL_TOURNAMENT_SX.navButton}>
             <ChevronRightRoundedIcon />
           </IconButton>
         </Box>
