@@ -401,7 +401,7 @@ export const useTeamRegistration = () => {
 
 
     const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
-    if (cachedResult && (Date.now() - cachedResult.cachedAt < CACHE_TTL_MS)) { //libera para tentar novamente após expiração do cache
+    if (cachedResult && (Date.now() - cachedResult.cachedAt < CACHE_TTL_MS)) { //libera para tentar novamente com nomes já verificados após expiração do cache
       return cachedResult.available;  // retorna cache sem fazer requisição
     }
 

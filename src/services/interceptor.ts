@@ -34,6 +34,9 @@ const PUBLIC_AUTH_PATHS = [
   '/nova-senha',
   '/ativar-conta',
   '/reenviar-ativacao',
+  '/cs/torneios',
+  '/lol/torneios',
+  '/valorant/torneios',
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
