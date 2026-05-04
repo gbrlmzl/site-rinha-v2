@@ -21,7 +21,7 @@ const authState: ClientAuthState = {
 /** Após esse intervalo, uma nova tentativa de refresh é permitida. */
 const REFRESH_RETRY_COOLDOWN_MS = 30_000;
 
-const REFRESH_URL = `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`;
+const REFRESH_URL = '/api/auth/refresh';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rotas públicas de autenticação — não disparam redirect para /login

@@ -1,16 +1,17 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+const BASE_URL = '/api';
 
 export function buildApiUrl(
   path: string,
   params: Record<string, string | undefined> = {}
 ): string {
-  const url = new URL(`${BASE_URL}${path}`);
+  const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') {
-      url.searchParams.set(key, value);
+      search.set(key, value);
     }
   }
-  return url.toString();
+  const qs = search.toString();
+  return qs ? `${BASE_URL}${path}?${qs}` : `${BASE_URL}${path}`;
 }
 
 export async function parseOrThrow<T>(response: Response): Promise<T> {

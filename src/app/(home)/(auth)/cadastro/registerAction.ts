@@ -2,6 +2,7 @@
 
 import { registerSchema } from '@/schemas/users';
 import { RegisterState } from '@/types/auth/authTypes';
+import { internalApiUrl } from '@/lib/internalApi';
 
 type RegisterPayload = {
   username: string;
@@ -30,7 +31,7 @@ export default async function registerAction(
   };
 
   try {
-    const response = await fetch(`${process.env.API_URL}/auth/register`, {
+    const response = await fetch(internalApiUrl('/auth/register'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

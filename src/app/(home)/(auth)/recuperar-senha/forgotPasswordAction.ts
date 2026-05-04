@@ -1,5 +1,6 @@
 'use server';
 import { PasswordRecoveryState } from '@/types/auth/authTypes';
+import { internalApiUrl } from '@/lib/internalApi';
 
 export default async function passwordRecoveryAction(
   _prevState: PasswordRecoveryState,
@@ -13,7 +14,7 @@ export default async function passwordRecoveryAction(
 
   try {
     // não precisa de await
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/password-reset`, {
+    fetch(internalApiUrl('/auth/password-reset'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

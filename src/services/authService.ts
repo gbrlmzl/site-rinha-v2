@@ -5,7 +5,7 @@ import { apiFetch } from '@/services/interceptor';
 export async function getUser(): Promise<User | null> {
   try {
     const response = await apiFetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+      '/api/auth/me',
       {
         method: 'GET',
         credentials: 'include',

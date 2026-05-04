@@ -70,10 +70,6 @@ export const useTournament = () => {
     []
   );
 
-  /**
-   * Fetches full tournament detail by slug (public endpoint, sends cookies
-   * for auth so the backend can include the caller's team status if logged in).
-   */
   const getTournamentDetailBySlug = useCallback(
     async (slug: string): Promise<TournamentDetailData | undefined> => {
       try {

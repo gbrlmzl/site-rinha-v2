@@ -3,20 +3,18 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AdminShell from '@/components/admin/shell/AdminShell';
 import { ReactQueryProvider } from '@/lib/queryClient';
+import { internalApiUrl } from '@/lib/internalApi';
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
 async function fetchAuthenticatedUserRole(): Promise<string | null> {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiBaseUrl) return null;
-
   const cookieHeader = (await cookies()).toString();
   if (!cookieHeader) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/auth/me`, {
+    const response = await fetch(internalApiUrl('/auth/me'), {
       method: 'GET',
       headers: { cookie: cookieHeader },
       cache: 'no-store',
