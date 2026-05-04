@@ -5,6 +5,7 @@ import type { FieldNamesMarkedBoolean } from 'react-hook-form';
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Dialog,
   Grid,
@@ -506,6 +507,14 @@ export default function TournamentFormModal({
         </Box>
 
         <Box sx={formStyles.footer}>
+          <Button
+            type="button"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            sx={formStyles.cancelButton}
+          >
+            Cancelar
+          </Button>
           <LoadingButton
             type="submit"
             loading={isSubmitting}

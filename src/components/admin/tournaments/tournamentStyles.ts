@@ -171,6 +171,17 @@ export const tournamentStyles = {
     },
   },
 
+  iconActionDisabled: {
+    width: 32,
+    height: 32,
+    color: 'rgba(255,255,255,0.18)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    cursor: 'not-allowed',
+    '&.Mui-disabled': {
+      color: 'rgba(255,255,255,0.18)',
+    },
+  },
+
   expandedDetails: {
     backgroundColor: `${c.adminAccent}0F`,
     paddingInline: { xs: 2.5, md: 3.5 },
@@ -246,6 +257,12 @@ export const tournamentStyles = {
       letterSpacing: '0.05em',
       '&:hover': { backgroundColor: `${palette.color}26` },
       '& .MuiSvgIcon-root': { color: palette.icon, fontSize: 28 },
+      '&.Mui-disabled': {
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        color: 'rgba(255,255,255,0.18)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.18)' },
+      },
     };
   },
 

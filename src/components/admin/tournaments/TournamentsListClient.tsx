@@ -147,6 +147,7 @@ export default function TournamentsListClient() {
       <TournamentCancelDialog
         open={cancelTargetId != null}
         tournamentId={cancelTargetId}
+        totalTeamsCount={cancelTarget?.totalTeamsCount ?? 0}
         activeTeamsCount={cancelTarget?.activeTeamsCount ?? 0}
         onClose={handleCancelClose}
         onSuccess={handleCancelSuccess}

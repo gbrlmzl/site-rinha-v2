@@ -33,12 +33,20 @@ export const formStyles = {
     paddingBlock: 2,
     borderTop: `1px solid ${border}`,
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 1.5,
+  },
+
+  cancelButton: {
+    ...ADMIN_TOKENS.sx.secondaryCta,
+    flex: { xs: 1, md: 'unset' },
+    minWidth: { xs: 0, md: 140 },
   },
 
   submitButton: {
     ...ADMIN_TOKENS.sx.primaryCta,
-    minWidth: { xs: '100%', md: 200 },
+    flex: { xs: 1, md: 'unset' },
+    minWidth: { xs: 0, md: 200 },
   },
 
   fieldLabel: {

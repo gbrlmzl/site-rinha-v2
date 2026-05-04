@@ -95,7 +95,8 @@ export default function TournamentTableRow({
 
         <TournamentRowActions
           tournamentId={tournament.id}
-          activeTeamsCount={tournament.activeTeamsCount}
+          totalTeamsCount={tournament.totalTeamsCount}
+          isCanceled={tournament.status === 'CANCELED'}
           onCancelClick={onCancelClick}
         />
       </Box>

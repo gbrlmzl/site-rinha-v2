@@ -21,5 +21,9 @@ export async function parseOrThrow<T>(response: Response): Promise<T> {
     (error as Error & { status?: number }).status = response.status;
     throw error;
   }
-  return response.json() as Promise<T>;
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

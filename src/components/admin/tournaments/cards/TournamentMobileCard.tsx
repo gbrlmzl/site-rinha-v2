@@ -171,9 +171,10 @@ export default function TournamentMobileCard({
             </Button>
             <Button
               onClick={() => onCancelClick(tournament.id)}
+              disabled={tournament.status === 'CANCELED'}
               sx={tournamentStyles.mobileActionButton('cancel')}
             >
-              {tournament.activeTeamsCount === 0 ? (
+              {tournament.totalTeamsCount === 0 ? (
                 <>
                   <DeleteOutlineIcon />
                   EXCLUIR
