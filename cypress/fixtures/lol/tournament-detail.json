@@ -1,0 +1,15 @@
+{
+  "id": 101,
+  "slug": "torneio-demo-e2e",
+  "name": "Torneio Demo E2E",
+  "game": "LEAGUE_OF_LEGENDS",
+  "status": "OPEN",
+  "confirmedTeamsCount": 4,
+  "maxTeams": 16,
+  "startsAt": "2026-08-15T20:00:00-03:00",
+  "endsAt": "2026-08-15T23:00:00-03:00",
+  "prizePool": 2000.00,
+  "imageUrl": "https://i.imgur.com/abc.png",
+  "rulesUrl": "https://docs.rinha/regras",
+  "description": "Torneio para testes E2E."
+}

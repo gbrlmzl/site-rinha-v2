@@ -21,8 +21,8 @@ export async function listAdminTournamentPayments(
 ): Promise<Page<AdminPaymentSummary>> {
   const url = buildApiUrl(`/admin/tournaments/${params.tournamentId}/payments`, {
     status: params.status,
-    page: params.page?.toString(),
-    size: params.size?.toString(),
+    page: params.page,
+    size: params.size,
   });
   const response = await apiFetch(url, { method: 'GET' });
   return parseOrThrow<Page<AdminPaymentSummary>>(response);

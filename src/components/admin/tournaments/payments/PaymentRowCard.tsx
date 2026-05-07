@@ -336,37 +336,30 @@ function MobileLayout({
 
           <Stack
             direction="row"
-            spacing={0.5}
+            spacing={1.25}
+            alignItems="center"
             flexWrap="wrap"
             useFlexGap
-            sx={{ flexShrink: 0 }}
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              justifyContent: 'space-between',
+              mr: 2,
+            }}
           >
             <Box component="span" sx={paymentStyles.badge(statusColor)}>
               {statusLabel}
             </Box>
-            {detailLabel && (
-              <Box
-                component="span"
-                sx={paymentStyles.badge(
-                  GLOBAL_TOKENS.textMuted as unknown as string
-                )}
-              >
-                {detailLabel}
-              </Box>
-            )}
+            <Typography
+              sx={{
+                color: c.adminAccent,
+                fontWeight: 700,
+                fontSize: '0.9rem',
+              }}
+            >
+              {formatPrize(Number(payment.value))}
+            </Typography>
           </Stack>
-
-          <Typography
-            sx={{
-              color: c.adminAccent,
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              flexShrink: 0,
-              ml: 'auto',
-            }}
-          >
-            {formatPrize(Number(payment.value))}
-          </Typography>
         </Box>
 
         {/* Linha 2: capitão */}

@@ -65,14 +65,24 @@ export default function TournamentCard({
               'linear-gradient(to top, rgba(14,18,65,0.85) 0%, transparent 60%)',
           }}
         />
-        <Box sx={{ position: 'absolute', top: 10, left: 10 }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            right: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: 1,
+          }}
+        >
           <TournamentStatusBadge status={tournament.status} variant="solid" />
-        </Box>
-        {showEnrolled && (
-          <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
+          {showEnrolled && (
             <EnrolledBadge variant="solid" teamStatus={teamStatus} />
-          </Box>
-        )}
+          )}
+        </Box>
       </Box>
 
       <Box

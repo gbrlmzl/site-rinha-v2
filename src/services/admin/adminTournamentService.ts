@@ -23,8 +23,8 @@ export async function listAdminTournaments(
 ): Promise<Page<AdminTournamentSummary>> {
   const url = buildApiUrl(BASE, {
     game: params.game,
-    page: params.page?.toString(),
-    size: params.size?.toString(),
+    page: params.page,
+    size: params.size,
     sort: params.sort,
   });
   const response = await apiFetch(url, { method: 'GET' });
@@ -63,7 +63,7 @@ export async function cancelAdminTournament(
   tournamentId: number,
   force: boolean
 ): Promise<void> {
-  const url = buildApiUrl(`${BASE}/${tournamentId}`, { force: String(force) });
+  const url = buildApiUrl(`${BASE}/${tournamentId}`, { force });
   const response = await apiFetch(url, { method: 'PATCH' });
   await parseOrThrow<void>(response);
 }

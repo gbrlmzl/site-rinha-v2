@@ -17,8 +17,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PaymentRowCard from '@/components/admin/tournaments/payments/PaymentRowCard';
-import { useRouter } from 'next/navigation';
 import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
+import { useInterceptedModalClose } from '@/hooks/admin/useInterceptedModalClose';
 import { paymentStyles } from '@/components/admin/tournaments/payments/paymentStyles';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
 import { useAdminTournament } from '@/hooks/admin/useAdminTournaments';
@@ -41,7 +41,7 @@ const FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
 export default function PaymentsReportDialog({
   tournamentId,
 }: PaymentsReportDialogProps) {
-  const router = useRouter();
+  const handleClose = useInterceptedModalClose('/admin/torneios');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -70,14 +70,6 @@ export default function PaymentsReportDialog({
     page,
     size: pageSize,
   });
-
-  const handleClose = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push('/admin/torneios');
-    }
-  };
 
   const payments = paymentsPage?.content ?? [];
 
@@ -181,7 +173,7 @@ export default function PaymentsReportDialog({
         )}
       </Box>
 
-      {!isError && (
+      {!isError && (paymentsPage?.totalElements ?? 0) > 0 && (
         <TablePagination
           component="div"
           count={paymentsPage?.totalElements ?? 0}

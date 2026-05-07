@@ -156,7 +156,14 @@ export default function TournamentDetailPage({ slug }: Props) {
     <Box sx={{ backgroundColor: C.bg, minHeight: '100vh' }}>
       <Box sx={{ position: 'relative', overflow: 'hidden' }}>
         <Box
-          sx={{ height: { xs: 220, md: 420, lg: 500 }, position: 'relative' }}
+          sx={{
+            height: {
+              xs: 220,
+              md: 'clamp(440px, 65vh, 620px)',
+              lg: 'clamp(540px, 75vh, 760px)',
+            },
+            position: 'relative',
+          }}
         >
           <Image
             src={tournament.imageUrl}
@@ -165,7 +172,7 @@ export default function TournamentDetailPage({ slug }: Props) {
             referrerPolicy="no-referrer"
             style={{
               objectFit: 'cover',
-              objectPosition: 'top center',
+              objectPosition: 'center top',
             }}
           />
           <Box

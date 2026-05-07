@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Box,
   Button,
@@ -24,8 +23,9 @@ import {
 } from '@/components/admin/tournaments/formatters';
 import TournamentStatusBadge from '@/components/shared/badges/TournamentStatusBadge';
 import GameBadge from '@/components/shared/badges/GameBadge';
-import { getAdminTournamentById } from '@/services/admin/adminTournamentService';
 import { ADMIN_TOKENS } from '@/components/admin/adminTheme';
+import { useTournamentExpandedDetails } from '@/hooks/admin/useTournamentExpandedDetails';
+import LabeledRow from '@/components/admin/tournaments/shared/LabeledRow';
 import type { AdminTournamentSummary } from '@/types/admin/tournament';
 
 interface TournamentMobileCardProps {
@@ -37,28 +37,12 @@ export default function TournamentMobileCard({
   tournament,
   onCancelClick,
 }: TournamentMobileCardProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [extra, setExtra] = useState<{
-    description: string | null;
-    createdAt: string;
-    rulesUrl: string;
-  } | null>(null);
-
-  const toggleExpanded = async () => {
-    const next = !expanded;
-    setExpanded(next);
-    if (next && !extra) {
-      const detail = await getAdminTournamentById(tournament.id);
-      setExtra({
-        description: detail.description ?? null,
-        createdAt: detail.createdAt,
-        rulesUrl: detail.rulesUrl,
-      });
-    }
-  };
+  const { expanded, extra, toggle } = useTournamentExpandedDetails(
+    tournament.id
+  );
 
   return (
-    <Box sx={tournamentStyles.mobileCard} onClick={toggleExpanded}>
+    <Box sx={tournamentStyles.mobileCard} onClick={toggle}>
       <Box sx={{ position: 'relative' }}>
         {tournament.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -119,10 +103,10 @@ export default function TournamentMobileCard({
               Cronograma do torneio
             </Typography>
             <Stack spacing={0.5} sx={{ fontSize: '0.85rem', mb: 1.5 }}>
-              <Row label="Início:" value={formatDateTime(tournament.startsAt)} />
-              <Row label="Término:" value={formatDateTime(tournament.endsAt)} />
+              <LabeledRow label="Início:" value={formatDateTime(tournament.startsAt)} />
+              <LabeledRow label="Término:" value={formatDateTime(tournament.endsAt)} />
               {extra?.createdAt && (
-                <Row label="Criado em:" value={formatDateTime(extra.createdAt)} />
+                <LabeledRow label="Criado em:" value={formatDateTime(extra.createdAt)} />
               )}
             </Stack>
 
@@ -193,13 +177,3 @@ export default function TournamentMobileCard({
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-      <span style={{ color: 'rgba(255,255,255,0.55)' }}>{label}</span>
-      <span style={{ color: ADMIN_TOKENS.colors.adminAccent, fontWeight: 600 }}>
-        {value}
-      </span>
-    </Box>
-  );
-}

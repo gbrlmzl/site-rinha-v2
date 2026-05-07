@@ -8,6 +8,7 @@ import {
   formatDateTime,
   formatPrize,
 } from '@/components/admin/tournaments/formatters';
+import LabeledRow from '@/components/admin/tournaments/shared/LabeledRow';
 
 interface TournamentExpandedDetailsProps {
   description: string | null;
@@ -42,24 +43,9 @@ export default function TournamentExpandedDetails({
           Prazos e histórico
         </Typography>
         <Stack spacing={0.5} sx={{ fontSize: '0.85rem' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-            <span style={{ color: 'rgba(255,255,255,0.55)' }}>Criado em:</span>
-            <span style={{ color: ADMIN_TOKENS.colors.adminAccent, fontWeight: 600 }}>
-              {formatDateTime(createdAt)}
-            </span>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-            <span style={{ color: 'rgba(255,255,255,0.55)' }}>Início:</span>
-            <span style={{ color: ADMIN_TOKENS.colors.adminAccent, fontWeight: 600 }}>
-              {formatDateTime(startsAt)}
-            </span>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-            <span style={{ color: 'rgba(255,255,255,0.55)' }}>Término:</span>
-            <span style={{ color: ADMIN_TOKENS.colors.adminAccent, fontWeight: 600 }}>
-              {formatDateTime(endsAt)}
-            </span>
-          </Box>
+          <LabeledRow label="Criado em:" value={formatDateTime(createdAt)} />
+          <LabeledRow label="Início:" value={formatDateTime(startsAt)} />
+          <LabeledRow label="Término:" value={formatDateTime(endsAt)} />
         </Stack>
       </Box>
 

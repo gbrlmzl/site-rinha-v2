@@ -28,7 +28,7 @@ import {
   RegisterStatusResponse,
 } from '@/types/teamRegistration';
 import qrCodeExpiredImage from '@/assets/imgs/lol/AmumuSad.jpg';
-import { TOURNAMENT_PAYMENT_APPROVED_EVENT } from '@/hooks/lol/tournaments/useTournamentPaymentApproved';
+import { paymentApprovedNotifier } from '@/lib/paymentApprovedNotifier';
 import { LOL_TOURNAMENT_COLORS as C } from './tournamentsTheme';
 import { formatCurrency } from '@/utils/tournaments/formatters';
 
@@ -65,9 +65,7 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
           setPaymentData(data.paymentData);
           subscribeToPayment(data.paymentData.uuid, () => {
             setPaymentApproved(true);
-            window.dispatchEvent(
-              new CustomEvent(TOURNAMENT_PAYMENT_APPROVED_EVENT)
-            );
+            paymentApprovedNotifier.notify();
           }).then((unsub) => {
             unsubscribeRef.current = unsub;
           });

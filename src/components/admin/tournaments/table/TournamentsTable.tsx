@@ -4,8 +4,6 @@ import { Box, Skeleton, Stack, Typography } from '@mui/material';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
 import TournamentTableRow from './TournamentTableRow';
 import type { AdminTournamentSummary } from '@/types/admin/tournament';
-import { getAdminTournamentById } from '@/services/admin/adminTournamentService';
-import { AlignHorizontalCenter } from '@mui/icons-material';
 
 interface TournamentsTableProps {
   tournaments: AdminTournamentSummary[];
@@ -27,15 +25,6 @@ export default function TournamentsTable({
   isLoading,
   onCancelClick,
 }: TournamentsTableProps) {
-  const detailsLoader = async (id: number) => {
-    const detail = await getAdminTournamentById(id);
-    return {
-      description: detail.description ?? null,
-      createdAt: detail.createdAt,
-      rulesUrl: detail.rulesUrl,
-    };
-  };
-
   if (!isLoading && tournaments.length === 0) {
     return (
       <Box sx={{ py: 6, textAlign: 'center' }}>
@@ -76,7 +65,6 @@ export default function TournamentsTable({
                 <TournamentTableRow
                   key={tournament.id}
                   tournament={tournament}
-                  detailsLoader={detailsLoader}
                   onCancelClick={onCancelClick}
                 />
               ))}

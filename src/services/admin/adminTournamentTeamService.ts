@@ -21,8 +21,8 @@ export async function listAdminTournamentTeams(
     `/admin/tournaments/${params.tournamentId}/teams`,
     {
       statusList: params.statusList?.join(','),
-      page: params.page?.toString(),
-      size: params.size?.toString(),
+      page: params.page,
+      size: params.size,
       sort: params.sort,
     }
   );
@@ -54,8 +54,8 @@ export async function listAdminTeamPayments(
   const url = buildApiUrl(
     `/admin/tournaments/${params.tournamentId}/teams/${params.teamId}/payments`,
     {
-      page: params.page?.toString(),
-      size: params.size?.toString(),
+      page: params.page,
+      size: params.size,
     }
   );
   const response = await apiFetch(url, { method: 'GET' });

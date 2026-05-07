@@ -12,6 +12,7 @@ import {
   listAdminTournamentTeams,
 } from '@/services/admin/adminTournamentTeamService';
 import type { TeamStatus } from '@/types/admin/team';
+import { adminKeys } from './queryKeys';
 
 export interface AdminTournamentTeamsParams {
   tournamentId: number;
@@ -22,7 +23,7 @@ export interface AdminTournamentTeamsParams {
 
 export function useAdminTournamentTeams(params: AdminTournamentTeamsParams) {
   return useQuery({
-    queryKey: ['admin', 'tournament-teams', params],
+    queryKey: adminKeys.tournamentTeamsList(params),
     queryFn: () => listAdminTournamentTeams(params),
     placeholderData: keepPreviousData,
     enabled: Number.isFinite(params.tournamentId),
@@ -41,7 +42,7 @@ export function useAdminTeamPayments(
   enabled = true
 ) {
   return useQuery({
-    queryKey: ['admin', 'team-payments', params],
+    queryKey: adminKeys.teamPaymentsList(params),
     queryFn: () => listAdminTeamPayments(params),
     placeholderData: keepPreviousData,
     enabled:
@@ -62,8 +63,8 @@ export function useBanTeam() {
       teamId: number;
     }) => banAdminTeam(tournamentId, teamId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tournament-teams'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
+      queryClient.invalidateQueries({ queryKey: adminKeys.tournamentTeams });
+      queryClient.invalidateQueries({ queryKey: adminKeys.tournaments });
     },
   });
 }

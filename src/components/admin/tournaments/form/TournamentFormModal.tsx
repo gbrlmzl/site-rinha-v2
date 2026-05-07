@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { FieldNamesMarkedBoolean } from 'react-hook-form';
+import type {
+  ControllerFieldState,
+  ControllerRenderProps,
+  FieldNamesMarkedBoolean,
+} from 'react-hook-form';
 import {
   Alert,
   Box,
@@ -21,7 +25,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
+import { useInterceptedModalClose } from '@/hooks/admin/useInterceptedModalClose';
 import LoadingButton from '@/components/admin/tournaments/form/LoadingButton';
 import ImageUploadField from '@/components/admin/tournaments/form/ImageUploadField';
 import { formStyles } from '@/components/admin/tournaments/form/formStyles';
@@ -77,7 +81,7 @@ export default function TournamentFormModal({
   mode,
   tournamentId,
 }: TournamentFormModalProps) {
-  const router = useRouter();
+  const handleClose = useInterceptedModalClose('/admin/torneios');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -118,16 +122,6 @@ export default function TournamentFormModal({
       });
     }
   }, [mode, tournament, reset]);
-
-  const handleClose = () => {
-    // Em rotas interceptadas, router.back() é o caminho canônico para fechar o modal
-    // (router.push pra mesma rota base não desmonta o slot @modal de forma confiável).
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push('/admin/torneios');
-    }
-  };
 
   const onSubmit = async (values: TournamentFormValues) => {
     if (mode === 'create' && !values.image) {
@@ -253,43 +247,8 @@ export default function TournamentFormModal({
                 <Controller
                   name="maxTeams"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      value={
-                        Number.isFinite(field.value as number)
-                          ? (field.value as number)
-                          : ''
-                      }
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === '' ? NaN : Number(e.target.value)
-                        )
-                      }
-                      onFocus={(e) => e.target.select()}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      inputRef={field.ref}
-                      type="number"
-                      slotProps={{
-                        htmlInput: {
-                          min: 2,
-                        },
-                      }}
-                      fullWidth
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      sx={{
-                        ...formStyles.field,
-                        '& input[type=number]': {
-                          MozAppearance: 'textfield',
-                        },
-                        '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button':
-                          {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                      }}
-                    />
+                  render={(args) => (
+                    <NumberInput {...args} inputProps={{ min: 2 }} />
                   )}
                 />
               </Grid>
@@ -339,43 +298,10 @@ export default function TournamentFormModal({
                 <Controller
                   name="prizePool"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      value={
-                        Number.isFinite(field.value as number)
-                          ? (field.value as number)
-                          : ''
-                      }
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === '' ? NaN : Number(e.target.value)
-                        )
-                      }
-                      onFocus={(e) => e.target.select()}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      inputRef={field.ref}
-                      type="number"
-                      slotProps={{
-                        htmlInput: {
-                          min: 0,
-                          step: '0.01',
-                        },
-                      }}
-                      fullWidth
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      sx={{
-                        ...formStyles.field,
-                        '& input[type=number]': {
-                          MozAppearance: 'textfield',
-                        },
-                        '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button':
-                          {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                      }}
+                  render={(args) => (
+                    <NumberInput
+                      {...args}
+                      inputProps={{ min: 0, step: '0.01' }}
                     />
                   )}
                 />
@@ -388,23 +314,7 @@ export default function TournamentFormModal({
                 <Controller
                   name="startsAt"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <DateTimePicker
-                      value={field.value}
-                      onChange={(v) => field.onChange(v)}
-                      ampm={false}
-                      format="DD/MM/YYYY HH:mm"
-                      sx={{ width: '100%' }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!fieldState.error,
-                          helperText: fieldState.error?.message,
-                          sx: formStyles.field,
-                        },
-                      }}
-                    />
-                  )}
+                  render={(args) => <DateTimeInput {...args} />}
                 />
               </Grid>
 
@@ -415,23 +325,7 @@ export default function TournamentFormModal({
                 <Controller
                   name="endsAt"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <DateTimePicker
-                      value={field.value}
-                      onChange={(v) => field.onChange(v)}
-                      ampm={false}
-                      format="DD/MM/YYYY HH:mm"
-                      sx={{ width: '100%' }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!fieldState.error,
-                          helperText: fieldState.error?.message,
-                          sx: formStyles.field,
-                        },
-                      }}
-                    />
-                  )}
+                  render={(args) => <DateTimeInput {...args} />}
                 />
               </Grid>
 
@@ -525,6 +419,71 @@ export default function TournamentFormModal({
         </Box>
       </Box>
     </Dialog>
+  );
+}
+
+type NumberFieldName = 'maxTeams' | 'prizePool';
+type DateFieldName = 'startsAt' | 'endsAt';
+
+function NumberInput({
+  field,
+  fieldState,
+  inputProps,
+}: {
+  field: ControllerRenderProps<TournamentFormValues, NumberFieldName>;
+  fieldState: ControllerFieldState;
+  inputProps?: { min?: number; step?: string | number };
+}) {
+  return (
+    <TextField
+      value={Number.isFinite(field.value) ? field.value : ''}
+      onChange={(e) =>
+        field.onChange(e.target.value === '' ? NaN : Number(e.target.value))
+      }
+      onKeyDown={(e) => {
+        if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
+      }}
+      onPaste={(e) => {
+        const text = e.clipboardData.getData('text');
+        if (/[-+eE]/.test(text)) e.preventDefault();
+      }}
+      onFocus={(e) => e.target.select()}
+      onBlur={field.onBlur}
+      name={field.name}
+      inputRef={field.ref}
+      type="number"
+      slotProps={{ htmlInput: inputProps }}
+      fullWidth
+      error={!!fieldState.error}
+      helperText={fieldState.error?.message}
+      sx={{ ...formStyles.field, ...formStyles.numberFieldNoSpinner }}
+    />
+  );
+}
+
+function DateTimeInput({
+  field,
+  fieldState,
+}: {
+  field: ControllerRenderProps<TournamentFormValues, DateFieldName>;
+  fieldState: ControllerFieldState;
+}) {
+  return (
+    <DateTimePicker
+      value={field.value}
+      onChange={(v) => field.onChange(v)}
+      ampm={false}
+      format="DD/MM/YYYY HH:mm"
+      sx={{ width: '100%' }}
+      slotProps={{
+        textField: {
+          fullWidth: true,
+          error: !!fieldState.error,
+          helperText: fieldState.error?.message,
+          sx: formStyles.field,
+        },
+      }}
+    />
   );
 }
 

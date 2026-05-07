@@ -66,6 +66,16 @@ export const formStyles = {
     '& .MuiInputLabel-root.Mui-focused': { color: c.adminAccent },
   },
 
+  /** Esconde os spinners nativos de <input type="number"> (Firefox + WebKit). */
+  numberFieldNoSpinner: {
+    '& input[type=number]': { MozAppearance: 'textfield' as const },
+    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button':
+      {
+        WebkitAppearance: 'none' as const,
+        margin: 0,
+      },
+  },
+
   selectMenuPaper: {
     backgroundColor: GLOBAL_TOKENS.surface,
     border: `1px solid ${border}`,
