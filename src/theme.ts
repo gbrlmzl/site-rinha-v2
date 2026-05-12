@@ -1,5 +1,5 @@
+import { Height } from '@mui/icons-material';
 import { createTheme, darkScrollbar, responsiveFontSizes } from '@mui/material';
-import { size } from 'zod';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tipos
@@ -146,6 +146,74 @@ export const SURFACE_CARD_SX = {
   borderRadius: 2,
   border: `1px solid ${border}`,
 } as const;
+
+
+export const ABOUT_SECTION_TOKENS = (() => {
+  return {
+    sx: {
+      pageContainer: {
+        marginTop: '13vh',
+        px: { xs: 2, sm: 3, md: 4 },
+      },
+      topicBox: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: { xs: '4rem', md: '6rem' },
+      },
+      topicTitle: {
+        fontSize: { xs: '1.75rem', md: '2.25rem' },
+        color: 'white',
+        textAlign: 'center',
+        marginBottom: '0.75rem',
+        fontFamily: FONT.russoOne,
+      },
+      titleDivider: {
+        width: '33%',
+        height: '3px',
+        backgroundColor: 'primary.main', // ajuste para a cor de destaque do seu tema
+        borderRadius: '2px',
+        marginBottom: '2rem',
+      },
+      topicText: {
+        fontFamily: FONT.roboto,
+        textAlign: 'start',
+        color: 'white',
+        whiteSpace: 'pre-line',
+        lineHeight: 1.8,
+        fontSize: { xs: '0.95rem', md: '1rem' },
+      },
+      textContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '100%',
+        maxWidth: '720px',
+        marginBottom: '1.5rem',
+        textAlign: { xs: 'left', md: 'center' },
+      },
+      figureContainer: {
+        width: '100%',
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: 0,
+      },
+      imageWrapper: {
+        width: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+      },
+      figureCaption: {
+        mt: 1,
+        color: 'grey.400',
+        textAlign: 'center',
+        fontSize: '0.8rem',
+        fontStyle: 'italic',
+      },
+    },
+  } as const;
+})();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tokens de componente — Auth
