@@ -15,7 +15,7 @@ export default function Sobre() {
 
         <Box sx={ABOUT_SECTION_TOKENS.sx.textContainer}>
           <Typography sx={ABOUT_SECTION_TOKENS.sx.topicText}>
-            Sentindo a falta de um evento competitivo entre os estudantes do Campus IV, um grupo de amigos decidiu mudar esse cenário.{'\n'}A ideia era simples, mas ambiciosa: criar um torneio de League of Legends onde jogadores pudessem competir ao mesmo tempo em que geravam um entretenimento da mais alta qualidade.
+            Sentindo a falta de um evento competitivo entre os estudantes do Campus IV, um grupo de amigos decidiu mudar esse cenário.{'\n'}A ideia era simples, mas ambiciosa: criar um torneio de League of Legends onde jogadores pudessem competir ao mesmo tempo em que geravam um entretenimento da mais alta qualidade para os espectadores.
           </Typography>
           <Typography sx={ABOUT_SECTION_TOKENS.sx.topicText}>
             O primeiro passo foi um email enviado ao mercado interno da faculdade perguntando quem teria interesse em participar desse torneio.

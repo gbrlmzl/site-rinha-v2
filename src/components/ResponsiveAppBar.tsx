@@ -48,7 +48,7 @@ function buildPages(gameRoute: GameRoute): NavPage[] {
   if (gameRoute === 'inicio') {
     return [
       { title: 'INÍCIO', url: '/inicio' },
-      { title: 'NOTÍCIAS', url: '/noticias' },
+      //{ title: 'NOTÍCIAS', url: '/noticias' },
       { title: 'SOBRE', url: '/sobre' },
     ];
   }
@@ -56,7 +56,7 @@ function buildPages(gameRoute: GameRoute): NavPage[] {
   return [
     { title: 'INÍCIO', url: `/${gameRoute}` },
     { title: 'TORNEIOS', url: `/${gameRoute}/torneios` },
-    { title: 'NOTÍCIAS', url: `/noticias?filter=${gameRoute}` },
+    //{ title: 'NOTÍCIAS', url: `/noticias?filter=${gameRoute}` },
     { title: 'SOBRE', url: '/sobre' },
   ];
 }
