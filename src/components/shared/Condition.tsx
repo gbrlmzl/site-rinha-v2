@@ -10,7 +10,13 @@ type ConditionProps = {
   uncheckedColor?: string;
 };
 
-const Condition = ({ ok, text, textColor, checkedColor, uncheckedColor }: ConditionProps) => {
+const Condition = ({
+  ok,
+  text,
+  textColor,
+  checkedColor,
+  uncheckedColor,
+}: ConditionProps) => {
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       {ok ? (

@@ -81,7 +81,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
           onClose={closeSnackbar}
           severity={snackbar.severity}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: '100%', whiteSpace: 'pre-line' }} // Permite quebra de linha nas mensagens
         >
           {snackbar.message}
         </Alert>

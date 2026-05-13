@@ -1,9 +1,9 @@
 import { Box, Container, Paper } from '@mui/material';
-import { THEME_SECTIONS } from '@/theme';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 import TeamInfoStepSkeleton from '@/components/lol/teamRegistration/UI/TeamInfoStepSkeleton';
 
 export default function TeamRegistrationLoadingScreen() {
-  const THEME_COLORS = THEME_SECTIONS.teamRegistration.colors;
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
 
     return (
         <Box
@@ -27,7 +27,6 @@ export default function TeamRegistrationLoadingScreen() {
             }}
           >
             <Box sx={{ p: { xs: 2, md: 4 } }}>
-              {/*<StepIndicator steps={STEPS} activeStep={0} />*/}
               <Box sx={{ mb: 4, minHeight: 400 }}>
                 <TeamInfoStepSkeleton />
               </Box>

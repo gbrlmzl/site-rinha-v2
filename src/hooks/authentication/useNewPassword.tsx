@@ -5,7 +5,30 @@ import { useSnackbarContext } from '@/contexts/SnackbarContext';
 
 type PageState = 'validating' | 'invalid' | 'form' | 'success' | 'error';
 
+type NewPasswordFormEntries = {
+  newPassword: string;
+  confirmPass: string;
+};
+
+type PasswordCriteria = {
+  atLeast8Chars: boolean;
+  hasNumberOrSymbol: boolean;
+  passwordsMatch: boolean;
+};
+
 export default function useNewPassword() {
+  const [formEntries, setFormEntries] = useState<NewPasswordFormEntries>({
+      newPassword: '',
+      confirmPass: '',
+    });
+  
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+  
+    const [passwordCriteria, setPasswordCriteria] = useState<PasswordCriteria>({
+      atLeast8Chars: false,
+      hasNumberOrSymbol: false,
+      passwordsMatch: false,
+    });
   const [pageState, setPageState] = useState<PageState>('validating');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
@@ -66,7 +89,9 @@ export default function useNewPassword() {
   };
 
   return {
-    // Retorne o que for necessário para o componente de nova senha
+    formEntries, setFormEntries,
+    showPassword,    setShowPassword,
+    passwordCriteria, setPasswordCriteria,
     token,
     checkToken,
     loading,

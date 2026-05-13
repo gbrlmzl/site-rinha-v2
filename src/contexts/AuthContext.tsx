@@ -23,7 +23,6 @@ interface AuthContextType {
 
 interface AuthProviderProps {
   children: ReactNode;
-  //hasToken: boolean; // vem do servidor — sem tocar no cookie no cliente
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);

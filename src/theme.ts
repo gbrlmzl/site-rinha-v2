@@ -1,6 +1,9 @@
-import { createTheme, darkScrollbar } from '@mui/material';
-import { info } from 'console';
-import { success } from 'zod';
+import { Height } from '@mui/icons-material';
+import { createTheme, darkScrollbar, responsiveFontSizes } from '@mui/material';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tipos
+// ─────────────────────────────────────────────────────────────────────────────
 
 export type AppPaletteName = 'neutral' | 'leagueOfLegends' | 'valorant' | 'cs';
 
@@ -16,6 +19,19 @@ export type AppPalette = {
   success: string;
   error: string;
 };
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    appPalette: AppPalette;
+  }
+  interface ThemeOptions {
+    appPalette?: AppPalette;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Paletas de cores brutas (design tokens primitivos)
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const APP_PALETTES: Record<AppPaletteName, AppPalette> = {
   neutral: {
@@ -33,7 +49,6 @@ export const APP_PALETTES: Record<AppPaletteName, AppPalette> = {
   leagueOfLegends: {
     pageBackground: '#080d2e',
     cardBackground: '#0E1241',
-    //authPageBackground: '#080d2e',
     border: 'rgba(17, 181, 228, 0.18)',
     textPrimary: '#F5F8FF',
     textSecondary: 'rgba(245, 248, 255, 0.72)',
@@ -45,7 +60,6 @@ export const APP_PALETTES: Record<AppPaletteName, AppPalette> = {
   valorant: {
     pageBackground: '#0D1117',
     cardBackground: '#E5E5E5',
-    //authPageBackground: '#A62D37',
     border: 'rgba(255, 255, 255, 0.18)',
     textPrimary: '#111827',
     textSecondary: '#4b5563',
@@ -68,220 +82,672 @@ export const APP_PALETTES: Record<AppPaletteName, AppPalette> = {
   },
 };
 
-declare module '@mui/material/styles' {
-  interface Theme {
-    appPalette: AppPalette;
-  }
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de fonte
+// Cada variável CSS deve ser registrada no RootLayout via next/font/google.
+// ─────────────────────────────────────────────────────────────────────────────
 
-  interface ThemeOptions {
-    appPalette?: AppPalette;
-  }
-}
+export const FONT = {
+  /** Fonte padrão de textos e UI */
+  roboto: 'var(--font-roboto)',
+  /** Títulos principais das seções LoL */
+  russoOne: 'var(--font-russo-one)',
+  /**
+   * Fonte de botões — adicione no RootLayout:
+   *   const robotoCondensed = Roboto_Condensed({
+   *     subsets: ['latin'], weight: ['400','700'], variable: '--font-roboto-condensed'
+   *   })
+   */
+  robotoCondensed: 'var(--font-roboto-condensed)',
+} as const;
 
-export const MAIN_PALETTE = APP_PALETTES.neutral;
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens semânticos globais
+// ─────────────────────────────────────────────────────────────────────────────
 
-export const AUTH_PALETTE = APP_PALETTES.neutral;
+export const GLOBAL_TOKENS = {
+  bg: '#080d2e',
+  surface: '#0E1241',
+  surfaceHigh: '#151a54',
+  border: 'rgba(255,255,255,0.08)',
+  accent: '#11B5E4',
+  accentHover: '#0b80a0',
+  danger: '#fc2c2c',
+  dangerHover: 'rgba(252, 44, 44, 0.73)',
+  success: '#37963c',
+  successHover: '#2e7d32',
+  text: '#ffffff',
+  textMuted: 'rgba(255,255,255,0.45)',
+} as const;
 
-export const THEME_SECTIONS = {
-  authenticatedProfile: {
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers de sx reutilizáveis
+// ─────────────────────────────────────────────────────────────────────────────
+
+const { accent, accentHover, border, surface, surfaceHigh, text, textMuted } =
+  GLOBAL_TOKENS;
+
+export const INPUT_SX = {
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: surfaceHigh,
+    borderRadius: 1.5,
+    color: text,
+    '& fieldset': { borderColor: border },
+    '&:hover fieldset': { borderColor: accent },
+    '&.Mui-focused fieldset': { borderColor: accent },
+  },
+  '& .MuiInputLabel-root': { color: textMuted },
+  '& .MuiInputLabel-root.Mui-focused': { color: accent },
+  '& .MuiFormHelperText-root': { color: GLOBAL_TOKENS.danger },
+} as const;
+
+export const SURFACE_CARD_SX = {
+  backgroundColor: surface,
+  borderRadius: 2,
+  border: `1px solid ${border}`,
+} as const;
+
+
+export const ABOUT_SECTION_TOKENS = (() => {
+  return {
+    sx: {
+      pageContainer: {
+        marginTop: '13vh',
+        px: { xs: 2, sm: 3, md: 4 },
+      },
+      topicBox: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: { xs: '4rem', md: '6rem' },
+      },
+      topicTitle: {
+        fontSize: { xs: '1.75rem', md: '2.25rem' },
+        color: 'white',
+        textAlign: 'center',
+        marginBottom: '0.75rem',
+        fontFamily: FONT.russoOne,
+      },
+      titleDivider: {
+        width: '33%',
+        height: '3px',
+        backgroundColor: 'primary.main', // ajuste para a cor de destaque do seu tema
+        borderRadius: '2px',
+        marginBottom: '2rem',
+      },
+      topicText: {
+        fontFamily: FONT.roboto,
+        textAlign: 'start',
+        color: 'white',
+        whiteSpace: 'pre-line',
+        lineHeight: 1.8,
+        fontSize: { xs: '0.95rem', md: '1rem' },
+      },
+      textContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '100%',
+        maxWidth: '720px',
+        marginBottom: '1.5rem',
+        textAlign: { xs: 'left', md: 'center' },
+      },
+      figureContainer: {
+        width: '100%',
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: 0,
+      },
+      imageWrapper: {
+        width: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+      },
+      figureCaption: {
+        mt: 1,
+        color: 'grey.400',
+        textAlign: 'center',
+        fontSize: '0.8rem',
+        fontStyle: 'italic',
+      },
+    },
+  } as const;
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Auth
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const AUTH_TOKENS = (() => {
+  const palette = APP_PALETTES.neutral;
+  return {
     colors: {
-      bg: '#080d2e',
-      surface: '#0E1241',
-      surfaceHigh: '#151a54',
-      border: 'rgba(255,255,255,0.08)',
-      accent: '#11B5E4',
-      accentHover: '#0b80a0',
-      danger: '#fc2c2c',
-      dangerHover: '#fc2c2cbb',
-      text: '#ffffff',
-      textMuted: 'rgba(255,255,255,0.45)',
+      bg: palette.authPageBackground ?? palette.pageBackground,
+      card: palette.cardBackground,
+      text: palette.textPrimary,
+      textMuted: palette.textSecondary,
+      primary: palette.primary,
+      primaryHover: palette.primaryHover,
     },
     sx: {
-      input: {
-        '& .MuiOutlinedInput-root': {
-          backgroundColor: '#151a54',
-          borderRadius: 2,
-          color: '#ffffff',
-          '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-          '&:hover fieldset': { borderColor: '#11B5E4' },
-          '&.Mui-focused fieldset': {
-            borderColor: '#11B5E4',
-          },
-        },
-        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.45)' },
-        '& .MuiInputLabel-root.Mui-focused': {
-          color: '#11B5E4',
-        },
-        '& .MuiFormHelperText-root': { color: '#fc2c2c' },
-      },
       pageContainer: {
-        minHeight: '100vh',
-        backgroundColor: '#080d2e',
         display: 'flex',
-        alignItems: 'flex-start',
         justifyContent: 'center',
-        px: 2,
+        minHeight: '100vh',
+        paddingInline: '1rem',
+        backgroundColor: palette.authPageBackground,
+      },
+      pageContainerWithTopSpacing: {
+        display: 'flex',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        paddingTop: '13vh',
+        paddingInline: '1rem',
+        backgroundColor: palette.authPageBackground,
       },
       card: {
-        width: '100%',
-        maxWidth: 480,
-        backgroundColor: '#0E1241',
-        borderRadius: 4,
-        border: '1px solid rgba(255,255,255,0.08)',
-        p: { xs: 3, md: 4 },
-        position: 'relative',
-        overflow: 'hidden',
+        width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '40vw', xl: '30vw' },
+        height: 'fit-content',
+        mx: 'auto',
+        p: 3,
+        paddingInline: { xs: '2rem', md: '4rem', lg: '6rem' },
+        backgroundColor: palette.cardBackground,
       },
-      primaryActionButton: {
-        py: 1.4,
-        backgroundColor: '#11B5E4',
-        borderRadius: 3,
-        borderColor: 'rgba(255,255,255,0.08)',
-        color: '#ffffff',
-        fontWeight: 600,
-        height: { xs: 40, sm: 50, md: 50 },
-        letterSpacing: 0.5,
-
-        '&:hover': {
-          //borderColor: '#11B5E4',
-          backgroundColor: '#0b80a0',
-        },
-        '&:disabled': {
-          borderColor: 'rgba(255,255,255,0.08)',
-          color: 'rgba(255,255,255,0.45)',
-          backgroundColor: 'transparent',
-        },
-        transition: 'all 0.2s',
+      wideCard: {
+        width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '40vw',  },
+        height: 'fit-content',
+        mx: 'auto',
+        p: 3,
+        paddingInline: { xs: '2rem', md: '4rem', lg: '8rem' },
+        backgroundColor: palette.cardBackground,
       },
-      dangerActionButton: {
-        py: 1.4,
-        height: { xs: 40, sm: 50, md: 50 },
-        borderRadius: 3,
-        borderColor: 'rgba(255,255,255,0.08)',
-        color: '#ffffff',
-        fontWeight: 600,
-        letterSpacing: 0.5,
-        backgroundColor: '#fc2c2c',
-        '&:hover': {
-          //borderColor: '#fc2c2c',
-          backgroundColor: '#fc2c2cbb',
-        },
-        transition: 'all 0.2s',
+      title: {
+        typography: 'h4',
+        textAlign: 'center',
+        fontWeight: 500,
+        color: palette.textPrimary,
       },
-    },
-  },
-  teamRegistration: {
-    colors: {
-      bg: '#080d2e',
-      surface: '#0E1241',
-      surfaceHigh: '#151a54',
-      border: 'rgba(255,255,255,0.08)',
-      accent: '#11B5E4',
-      accentHover: '#0b80a0',
-      success: '#37963c',
-      successHover: '#2e7d32',
-      danger: '#ff6b6b',
-      dangerHover: '#ff6b6bbb',
-      text: '#ffffff',
-      textMuted: 'rgba(255,255,255,0.45)',
-    },
-    sx: {
-      input: {
-        '& .MuiOutlinedInput-root': {
-          backgroundColor: '#151a54',
-          borderRadius: 2,
-          color: '#ffffff',
-          '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-          '&:hover fieldset': { borderColor: '#11B5E4' },
-          '&.Mui-focused fieldset': { borderColor: '#11B5E4' },
-        },
-        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.45)' },
-        '& .MuiInputLabel-root.Mui-focused': { color: '#11B5E4' },
-        '& .MuiFormHelperText-root': { color: '#ff6b6b' },
+      submitButton: {
+        mt: 1,
+        height: { xs: 35, sm: 38, md: 40 },
+        backgroundColor: palette.primary,
+        '&:hover': { backgroundColor: palette.primaryHover },
       },
-      expiredPaymentPageContainer: {
-        width: '100%',
-        minHeight: '100vh',
-        px: 2,
-        py: { xs: 3, md: 4 },
+      centeredLinks: {
+        mt: 1,
+        textAlign: 'center',
         display: 'flex',
-        alignItems: { xs: 'center', md: 'flex-start' },
-        justifyContent: 'center',
-      },
-      expiredPaymentCard: {
-        mt: { xs: 0, md: '10vh' },
-        width: '100%',
-        maxWidth: { xs: '100%', md: '30vw', lg: '33vw' },
-        boxShadow: 3,
-        borderRadius: 3,
-        overflow: 'hidden',
+        flexDirection: 'column',
+        gap: 0.5,
       },
     },
-    
+  } as const;
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Perfil autenticado
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const AUTHENTICATED_PROFILE_TOKENS = {
+  colors: GLOBAL_TOKENS,
+  sx: {
+    input: INPUT_SX,
+    pageContainer: {
+      minHeight: '100vh',
+      backgroundColor: GLOBAL_TOKENS.bg,
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      px: 2,
+    },
+    card: {
+      width: '100%',
+      maxWidth: 480,
+      ...SURFACE_CARD_SX,
+      borderRadius: 4,
+      p: { xs: 3, md: 4 },
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    primaryActionButton: {
+      py: 1.4,
+      backgroundColor: accent,
+      borderRadius: 3,
+      borderColor: border,
+      color: text,
+      fontWeight: 600,
+      height: { xs: 40, sm: 50, md: 50 },
+      letterSpacing: 0.5,
+      '&:hover': { backgroundColor: accentHover },
+      '&:disabled': {
+        borderColor: border,
+        color: textMuted,
+        backgroundColor: 'transparent',
+      },
+      transition: 'all 0.2s',
+    },
+    dangerActionButton: {
+      py: 1.4,
+      height: { xs: 40, sm: 50, md: 50 },
+      borderRadius: 3,
+      borderColor: border,
+      color: text,
+      fontWeight: 600,
+      letterSpacing: 0.5,
+      backgroundColor: GLOBAL_TOKENS.danger,
+      '&:hover': { backgroundColor: GLOBAL_TOKENS.dangerHover },
+      transition: 'all 0.2s',
+    },
   },
 } as const;
 
-export const AUTHENTICATED_PROFILE_COLORS = THEME_SECTIONS.authenticatedProfile.colors;
-export const AUTHENTICATED_PROFILE_SX = THEME_SECTIONS.authenticatedProfile.sx;
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Cadastro de equipe
+// ─────────────────────────────────────────────────────────────────────────────
 
-export const TEAM_REGISTRATION_COLORS = THEME_SECTIONS.teamRegistration.colors;
-export const TEAM_REGISTRATION_SX = THEME_SECTIONS.teamRegistration.sx;
-
-export const THEME_COLORS = AUTHENTICATED_PROFILE_COLORS;
-export const inputSx = AUTHENTICATED_PROFILE_SX.input;
-
-export const AUTH_SX = {
-  pageContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    paddingInline: '1rem',
-    backgroundColor: AUTH_PALETTE.authPageBackground,
-  },
-  pageContainerWithTopSpacing: {
-    display: 'flex',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    paddingTop: '13vh',
-    paddingInline: '1rem',
-    backgroundColor: AUTH_PALETTE.authPageBackground,
-  },
-  card: {
-    width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '40vw', xl: '30vw' },
-    height: 'fit-content',
-    mx: 'auto',
-    p: 3,
-    paddingInline: { xs: '2rem', md: '4rem', lg: '6rem' },
-    backgroundColor: AUTH_PALETTE.cardBackground,
-  },
-  wideCard: {
-    width: '100%',
-    maxWidth: 600,
-    mx: 'auto',
-    p: 3,
-    paddingInline: { xs: '2rem', md: '4rem', lg: '8rem' },
-    backgroundColor: AUTH_PALETTE.cardBackground,
-  },
-  title: {
-    typography: 'h4',
-    textAlign: 'center',
-    fontWeight: 500,
-    color: AUTH_PALETTE.textPrimary,
-  },
-  submitButton: {
-    mt: 1,
-    height: { xs: 35, sm: 38, md: 40 },
-    backgroundColor: AUTH_PALETTE.primary,
-    '&:hover': { backgroundColor: AUTH_PALETTE.primaryHover },
-  },
-  centeredLinks: {
-    mt: 1,
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 0.5,
+export const TEAM_REGISTRATION_TOKENS = {
+  colors: GLOBAL_TOKENS,
+  sx: {
+    input: INPUT_SX,
+    expiredPaymentPageContainer: {
+      width: '100%',
+      minHeight: '100vh',
+      px: 2,
+      py: { xs: 3, md: 4 },
+      display: 'flex',
+      alignItems: { xs: 'center', md: 'flex-start' },
+      justifyContent: 'center',
+    },
+    expiredPaymentCard: {
+      mt: { xs: 0, md: '10vh' },
+      width: '100%',
+      maxWidth: { xs: '100%', md: '30vw', lg: '33vw' },
+      boxShadow: 3,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
   },
 } as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Formulário de jogador
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PLAYER_FORM_TOKENS = {
+  colors: GLOBAL_TOKENS,
+  sx: {
+    formContainer: { p: 2, ...SURFACE_CARD_SX },
+    input: INPUT_SX,
+    schoolIdRow: {
+      width: '100%',
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 1.5,
+      flexDirection: { xs: 'column', md: 'row' },
+    },
+    schoolIdField: { width: { xs: '100%', md: '66%' } },
+    externalCheckboxWrapper: {
+      width: { xs: '100%', md: '34%' },
+      minHeight: 56,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: { xs: 'flex-start', md: 'flex-end' },
+    },
+    positionRow: { width: '100%', display: 'flex', justifyContent: 'center' },
+    checkbox: {
+      color: '#d0d3d3',
+      '&.Mui-checked': { color: 'primary.main' },
+    },
+    stepContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    stepStack: { width: '100%', maxWidth: 600, p: { xs: 2, md: 3 } },
+    stepTitleRow: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 2,
+      flexDirection: { xs: 'column', md: 'row' },
+    },
+    stepTitle: {
+      color: accent,
+      fontWeight: 700,
+      textAlign: 'center',
+      fontSize: '1.4rem',
+    },
+    positionTriggerButton: {
+      backgroundColor: surfaceHigh,
+      borderRadius: '50%',
+      padding: '10px',
+      border: `2px solid ${border}`,
+      transition: 'all 0.2s',
+      '&:hover:not(:disabled)': { backgroundColor: accent, borderColor: accent },
+      '&:disabled': { opacity: 0.5 },
+    },
+    positionMenuPaper: {
+      backgroundColor: surface,
+      border: `1px solid ${border}`,
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    positionMenuItem: (isSelected: boolean) => ({
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 60,
+      height: 60,
+      padding: '8px !important',
+      borderRadius: 2,
+      backgroundColor: isSelected ? accent : 'transparent',
+      border: `2px solid ${isSelected ? accent : border}`,
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      '&.Mui-focusVisible': { outline: `2px solid ${text}`, outlineOffset: 2 },
+      '&:hover': { backgroundColor: accent, borderColor: accent },
+    }),
+  },
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — LoL Home Page
+//
+// Tipografia:
+//   Títulos principais → Russo One        (var(--font-russo-one))
+//   Textos secundários → Roboto           (var(--font-roboto))
+//   Botões             → Roboto Condensed (var(--font-roboto-condensed))
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LOL = APP_PALETTES.leagueOfLegends;
+
+export const LOL_HOME_TOKENS = {
+  colors: {
+    ...GLOBAL_TOKENS,
+    primary: LOL.primary,
+    primaryHover: LOL.primaryHover,
+    /** Usado em datas e palavras de destaque inline */
+    highlight: '#00e5ff',
+  },
+
+  /**
+   * Objetos de tipografia prontos para usar como prop `sx` em <Typography>.
+   * Não são sx completos — combinam com outras props conforme necessário.
+   */
+  typography: {
+    /** Título principal da seção (ex: "A SEGUNDA EDIÇÃO VEM AÍ!") */
+    heroTitle: {
+      fontFamily: FONT.russoOne,
+      fontWeight: 400, // Russo One só tem weight regular
+      color: '#ffffff',
+      lineHeight: 1.15,
+      letterSpacing: '0.02em',
+    },
+    /** Subtítulo / lead */
+    subtitle: {
+      fontFamily: FONT.roboto,
+      fontWeight: 400,
+      color: '#ffffff',
+    },
+    /** Corpo de texto padrão */
+    body: {
+      fontFamily: FONT.roboto,
+      color: '#ffffff',
+    },
+    /** Textos de apoio com menor destaque */
+    caption: {
+      fontFamily: FONT.roboto,
+      color: 'rgba(255,255,255,0.65)',
+    },
+    /** Palavra/frase de destaque inline (datas, nomes, etc.) */
+    highlight: {
+      fontFamily: FONT.roboto,
+      fontWeight: 700,
+      color: '#00e5ff',
+    },
+  },
+
+  sx: {
+    /** Wrapper externo da seção — ocupa o viewport inteiro */
+    heroSection: {
+      position: 'relative',
+      width: '100vw',
+      height: { xs: '100dvh', md: '100vh' },
+      overflowX: 'hidden',
+      overflowY: { xs: 'hidden', md: 'visible' },
+    },
+
+    /**
+     * Overlay de conteúdo sobre a imagem.
+     * O mesmo Box usa display responsivo para cobrir os dois breakpoints —
+     * elimina a duplicação mobile/desktop do componente original.
+     */
+    heroContent: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      // Desktop: ocupa metade da tela; mobile: largura total
+      width: { xs: '100vw', md: '55vw', lg: '50vw' },
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      // Desktop: alinha à esquerda; mobile: centraliza
+      alignItems: { xs: 'center', md: 'flex-start' },
+      justifyContent: 'flex-start',
+      pt: { xs: 14, sm: 16, md: 12, lg: 16, xl: 18 },
+      px: { xs: 3, sm: 5, md: 6, lg: 8 },
+      color: 'white',
+      textAlign: { xs: 'center', md: 'left' },
+    },
+
+    /** Bloco de regras (bullet points) */
+    rulesList: {
+      display: 'flex',
+      flexDirection: 'column',
+      textAlign: 'left',
+      gap: 0.5,
+    },
+
+    /** Botão CTA principal */
+    ctaButton: {
+      borderRadius: 5,
+      mt: { xs: 2, md: 0 },
+      px: { xs: 4, md: 5 },
+      py: { xs: 1, md: 1.25 },
+      fontSize: { xs: '1rem', md: '1.2rem' },
+      fontFamily: FONT.robotoCondensed,
+      fontWeight: 700,
+      letterSpacing: '0.06em',
+      backgroundColor: LOL.primary,
+      color: '#ffffff',
+      textTransform: 'uppercase',
+      '&:hover': {
+        backgroundColor: LOL.primaryHover,
+        color: '#ffffff',
+      },
+    },
+  },
+} as const;
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Painel Administrativo
+//
+// Mantém a paleta visual do site (mesmo `surface` e `accent` da navbar
+// principal), mas com identidade própria via `adminAccent` (roxo) para
+// diferenciar contexto sem destoar do resto. Inspirado no doc do admin.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ADMIN_TOKENS = {
+  colors: {
+    ...GLOBAL_TOKENS,
+    /** Roxo de destaque do painel — usado em CTAs e ícones de ações */
+    adminAccent: '#8B5CF6',
+    adminAccentHover: '#7C3AED',
+    /** Cinza levemente mais escuro pra cards do painel */
+    panelBg: '#0a0f33',
+    panelHeaderBg: 'rgba(14, 18, 65, 0.97)',
+    /** Cores semânticas dos badges de status do torneio */
+    statusOpen: '#3B82F6',
+    statusFull: '#8B5CF6',
+    statusOngoing: '#22C55E',
+    statusFinished: '#94A3B8',
+    statusCanceled: '#EF4444',
+    /** Cores semânticas dos status de pagamento */
+    paymentApproved: '#22C55E',
+    paymentPending: '#F59E0B',
+    paymentCanceled: '#EF4444',
+  },
+
+  /** Tipografia do painel */
+  typography: {
+    pageTitle: {
+      fontFamily: FONT.roboto,
+      fontWeight: 700,
+      fontSize: { xs: '1.75rem', md: '2.25rem' },
+      color: text,
+      letterSpacing: '-0.01em',
+    },
+    pageSubtitle: {
+      fontFamily: FONT.roboto,
+      fontSize: '0.95rem',
+      color: textMuted,
+    },
+    sectionLabel: {
+      fontFamily: FONT.roboto,
+      fontSize: '0.7rem',
+      fontWeight: 600,
+      color: textMuted,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase' as const,
+    },
+  },
+
+  sx: {
+    /** Wrapper centralizado da página do painel */
+    pageContainer: {
+      minHeight: '100vh',
+      backgroundColor: GLOBAL_TOKENS.bg,
+      pt: { xs: 9, md: 11 },
+      pb: { xs: 4, md: 6 },
+      px: { xs: 2, md: 3 },
+      maxWidth: 1280,
+      mx: 'auto',
+    },
+
+    /** Card que envolve a lista (visual de painel centralizado) */
+    panelSection: {
+      backgroundColor: GLOBAL_TOKENS.surface,
+      border: `1px solid ${GLOBAL_TOKENS.border}`,
+      borderRadius: 3,
+      p: { xs: 2, md: 3 },
+    },
+
+    /** Header fixo do painel — substitui a navbar do site */
+    shellAppBar: {
+      backgroundColor: 'rgba(14, 18, 65, 0.97)',
+      backdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
+      boxShadow: '0 2px 20px rgba(0,0,0,0.4)',
+    },
+
+    /** Bloco com ícone gear + textos do header */
+    shellBrand: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5,
+    },
+
+    /** Avatar quadrado roxo com o ícone gear */
+    shellBrandIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 1.5,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#8B5CF6',
+      color: '#fff',
+    },
+
+    /** Botão "Sair do Painel" */
+    shellExitButton: {
+      borderRadius: 2,
+      paddingInline: 2,
+      backgroundColor: 'rgba(255,255,255,0.06)',
+      color: text,
+      fontWeight: 500,
+      '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+    },
+
+    /** Card padrão do painel (lista de torneios, etc.) */
+    panelCard: {
+      backgroundColor: surface,
+      borderRadius: 2,
+      border: `1px solid ${border}`,
+    },
+
+    /** Toolbar com filtros + botão "Criar Novo Torneio" */
+    toolbar: {
+      display: 'flex',
+      flexDirection: { xs: 'column', md: 'row' },
+      gap: 1.5,
+      alignItems: { xs: 'stretch', md: 'center' },
+      mb: 3,
+    },
+
+    /** Botão CTA primário do painel (roxo) */
+    primaryCta: {
+      backgroundColor: '#8B5CF6',
+      color: '#fff',
+      fontWeight: 600,
+      borderRadius: 2,
+      paddingInline: 3,
+      height: 44,
+      '&:hover': { backgroundColor: '#7C3AED' },
+    },
+
+    /** Modal padrão do painel — Dialog com header próprio */
+    modalPaper: {
+      backgroundColor: surface,
+      borderRadius: 3,
+      border: `1px solid ${border}`,
+      backgroundImage: 'none',
+    },
+
+    modalHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      px: 3,
+      py: 2,
+      borderBottom: `1px solid ${border}`,
+    },
+
+    /** Inputs do painel — variante escura */
+    input: INPUT_SX,
+
+    /** Esconde scrollbar visual (mobile usa toque) */
+    scrollableNoScrollbar: {
+      overflowY: 'auto' as const,
+      scrollbarWidth: 'none' as const,
+      '&::-webkit-scrollbar': { display: 'none' },
+    },
+  },
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Aliases de retrocompatibilidade
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** @deprecated Use AUTHENTICATED_PROFILE_TOKENS.colors */
+export const THEME_COLORS = AUTHENTICATED_PROFILE_TOKENS.colors;
+/** @deprecated Use INPUT_SX */
+export const inputSx = INPUT_SX;
+/** @deprecated Use AUTH_TOKENS.sx */
+export const AUTH_SX = AUTH_TOKENS.sx;
 
 export const AUTH_BUTTON_CLASSES = {
   primary: 'auth-btn-primary',
@@ -289,22 +755,19 @@ export const AUTH_BUTTON_CLASSES = {
   ghost: 'auth-btn-ghost',
 } as const;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Criação do tema MUI
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
   const appPalette = APP_PALETTES[paletteName];
 
   return createTheme({
     appPalette,
     palette: {
-      primary: {
-        main: appPalette.primary,
-        dark: appPalette.primaryHover,
-      },
-      success: {
-        main: appPalette.success,
-      },
-      error: {
-        main: appPalette.error,
-      },
+      primary: { main: appPalette.primary, dark: appPalette.primaryHover },
+      success: { main: appPalette.success },
+      error: { main: appPalette.error },
       background: {
         default: appPalette.pageBackground,
         paper: appPalette.cardBackground,
@@ -316,7 +779,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
       divider: appPalette.border,
     },
     typography: {
-      fontFamily: 'var(--font-roboto)',
+      fontFamily: FONT.roboto,
     },
     components: {
       MuiCssBaseline: {
@@ -339,31 +802,22 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
             transition: 'background-color 0.2s ease, color 0.2s ease',
             ...(themeParam.palette.mode === 'dark' ? darkScrollbar() : {}),
           },
-          '*': {
-            boxSizing: 'border-box',
-          },
+          '*': { boxSizing: 'border-box' },
           a: {
             textDecoration: 'none',
             color: 'inherit',
             transition: 'all 0.2s ease-in-out',
           },
           'a:hover': {
-            textDecoration: 'underline',
-            color: 'var(--mui-palette-primary-main, #1976d2)',
+            textDecoration: 'none'
           },
           'body[style*="overflow: hidden"]': {
             backgroundColor: themeParam.appPalette.pageBackground,
           },
-          'body[style*="padding-right"]': {
-            paddingRight: '0px !important',
-          },
-          'header[style*="padding-right"]': {
-            paddingRight: '0px !important',
-          },
+          'body[style*="padding-right"]': { paddingRight: '0px !important' },
+          'header[style*="padding-right"]': { paddingRight: '0px !important' },
           '@media (prefers-color-scheme: dark)': {
-            html: {
-              colorScheme: 'dark',
-            },
+            html: { colorScheme: 'dark' },
           },
         }),
       },
@@ -376,24 +830,23 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
             fontSize: '1rem',
             color: 'white',
             minHeight: 40,
+            paddingInline: 20,
             '&.auth-btn-primary': {
-              backgroundColor: AUTH_PALETTE.primary,
+              backgroundColor: AUTH_TOKENS.colors.primary,
               color: '#fff',
-              '&:hover': {
-                backgroundColor: AUTH_PALETTE.primaryHover,
-              },
+              '&:hover': { backgroundColor: AUTH_TOKENS.colors.primaryHover },
               '&.Mui-disabled': {
                 backgroundColor: '#d3d3d3',
                 color: '#f5f5f5',
               },
             },
             '&.auth-btn-secondary': {
-              borderColor: AUTH_PALETTE.primary,
+              borderColor: AUTH_TOKENS.colors.primary,
               backgroundColor: 'transparent',
-              color: AUTH_PALETTE.primary,
+              color: AUTH_TOKENS.colors.primary,
               '&:hover': {
-                borderColor: AUTH_PALETTE.primaryHover,
-                color: AUTH_PALETTE.primaryHover,
+                borderColor: AUTH_TOKENS.colors.primaryHover,
+                color: AUTH_TOKENS.colors.primaryHover,
                 backgroundColor: 'rgba(25, 118, 210, 0.06)',
               },
             },
@@ -404,6 +857,7 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
                 backgroundColor: 'transparent',
               },
             },
+            
           }),
         },
       },
@@ -411,8 +865,26 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
         styleOverrides: {
           root: {
             backgroundColor: APP_PALETTES[paletteName].cardBackground,
-            borderRadius: 4
+            borderRadius: 4,
           },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            '&.auth-primary-title': {
+              ...theme.typography.h4,
+              fontWeight: 700,
+              color: AUTH_TOKENS.colors.text,
+            },
+            '&.auth-secondary-text': {
+              ...theme.typography.body1,
+              color: AUTH_TOKENS.colors.textMuted,
+              fontSize: '0.9rem',
+              whiteSpace: 'pre-line',
+              lineHeight: 1.4
+            },
+          }),
         },
       },
     },
@@ -420,5 +892,4 @@ export function createAppTheme(paletteName: AppPaletteName = 'neutral') {
 }
 
 const theme = createAppTheme();
-
 export default theme;

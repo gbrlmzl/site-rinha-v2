@@ -26,9 +26,12 @@ import Image from 'next/image';
 import { Team, Player } from '@/types/teamRegistration';
 import {
   PLAYER_POSITIONS,
-  THEME_COLORS,
   getPositionIcon,
-} from '@/hooks/lol/teamRegistration/constants';
+} from '@/hooks/lol/teamRegistration/teamRegistrationConstants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
+import { useEffect } from 'react';
+
+import {useSnackbarContext} from '@/contexts/SnackbarContext';
 
 interface ConfirmationStepProps {
   team: Team;
@@ -47,8 +50,18 @@ export function ConfirmationStep({
   onTermsChange,
   error = null,
 }: ConfirmationStepProps) {
+
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const activePlayers = players.filter((p) => !p.disabledPlayer);
   const shieldSrc = shieldPreview;
+  
+  const { showSnackbar } = useSnackbarContext();
+
+  useEffect(() => {
+    if (error) {
+      showSnackbar({ message: error, severity: 'error' });
+    }
+  }, [error]);
 
   return (
     <Box
@@ -325,7 +338,7 @@ export function ConfirmationStep({
               <Typography variant="body2" sx={{ color: THEME_COLORS.text }}>
                 Concordo com as{' '}
                 <Link
-                  href="/regulamento"
+                  href="https://youtu.be/u1s_ZajO_h0"
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -343,17 +356,10 @@ export function ConfirmationStep({
           />
         </Box>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert severity="error" sx={{ borderRadius: 2 }}>
-            {error}
-          </Alert>
-        )}
-
         {/* Final Note */}
-        <Alert severity="info" sx={{ borderRadius: 2 }}>
-          Revise todos os dados acima. Uma vez confirmado, você será
-          redirecionado para o pagamento.
+        <Alert severity="info" sx={{ borderRadius: 2, whiteSpace: 'pre-line', lineHeight: 1.2, width: 'fit-content', alignSelf: 'center', paddingInline: 2 }}>
+          {`Revise todos os dados acima.\nUma vez confirmado, você será
+          redirecionado para o pagamento.`}
         </Alert>
       </Stack>
     </Box>

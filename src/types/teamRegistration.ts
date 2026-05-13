@@ -108,6 +108,7 @@ type TournamentStatus =
 
 
 export type RegistrationData = {
+  tournamentId: number;
   registered: boolean;
   teamStatus?: TeamStatus;
   teamPlayersAmount?: number;

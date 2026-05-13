@@ -14,7 +14,7 @@ import DialogActions from '@mui/material/DialogActions';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import BlitzcrankImage from '@/assets/imgs/lol/BlitzcrankExpiredPayment.jpg';
-import  {THEME_SECTIONS}  from '@/theme';
+import  {TEAM_REGISTRATION_TOKENS}  from '@/theme';
 
 type ExpiredPaymentProps = {
   loading: boolean;
@@ -25,8 +25,7 @@ type ExpiredPaymentProps = {
 export default function ExpiredPayment({ loading, onCancel, onRetryPayment }: ExpiredPaymentProps) {
   const theme = useTheme();
   const appPalette = theme.appPalette;
-  
-  const themeTeamRegistration = THEME_SECTIONS.teamRegistration;
+  const themeTeamRegistration = TEAM_REGISTRATION_TOKENS;
 
   
 

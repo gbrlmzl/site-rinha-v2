@@ -1,33 +1,16 @@
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+
+type PageState = 'validating' | 'activating' | 'success' | 'invalid' | 'expired';
 
 export default function useActiveAccount() {
   const searchParams = useSearchParams();
   const token: string = searchParams.get('token') ?? '';
-  const apiUrl: string | undefined = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const [pageState, setPageState] = useState<PageState>('validating');
 
-  const C = {
-    bg: '#080d2e',
-    surface: '#0E1241',
-    surfaceHigh: '#151a54',
-    border: 'rgba(255,255,255,0.08)',
-    accent: '#11B5E4',
-    accentHover: '#0b80a0',
-    danger: '#ff6b6b',
-    text: '#ffffff',
-    textMuted: 'rgba(255,255,255,0.45)',
-  };
-
-  type PageState =
-    | 'validating'
-    | 'activating'
-    | 'success'
-    | 'invalid'
-    | 'expired';
-
-  const validateAndActivate = async (): Promise<void> => {
+  const validateAndActivate = useCallback(async (): Promise<void> => {
     if (!token || !apiUrl) {
       setPageState('invalid');
       return;
@@ -64,12 +47,11 @@ export default function useActiveAccount() {
     } catch {
       setPageState('invalid');
     }
-  };
+  }, [apiUrl, token]);
 
   return {
     token,
     pageState,
-    C,
     validateAndActivate,
   };
 }

@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Player } from '@/types/teamRegistration';
 import { PositionSelector } from '../shared/PositionSelector';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PlayerInfoFormProps {
   data: Player;
@@ -36,6 +36,7 @@ export function PlayerInfoForm({
   error = null,
   disabled = false,
 }: PlayerInfoFormProps) {
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const isReserva = playerIndex === 5;
   const isFormDisabled = disabled || (isReserva && data.disabledPlayer);
   const playerNameInputRef = useRef<HTMLInputElement | null>(null);

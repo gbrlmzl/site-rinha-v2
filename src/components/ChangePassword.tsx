@@ -14,7 +14,7 @@ import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import Condition from '@/components/shared/Condition';
-import { THEME_SECTIONS } from '@/theme';
+import { AUTHENTICATED_PROFILE_TOKENS } from '@/theme';
 import { PasswordVisibility } from '@/hooks/useProfile';
 
 type ChangePasswordProps = {
@@ -54,9 +54,9 @@ export default function ChangePassword({
   handlePasswordSubmit,
   passwordSuccess,
 }: ChangePasswordProps) {
-  const PROFILE_THEME = THEME_SECTIONS.authenticatedProfile;
-  const THEME_COLORS = PROFILE_THEME.colors;
-  const inputSx = PROFILE_THEME.sx.input;
+  
+  const THEME_COLORS = AUTHENTICATED_PROFILE_TOKENS.colors;
+  const inputSx = AUTHENTICATED_PROFILE_TOKENS.sx.input;
 
   return (
     <Box>

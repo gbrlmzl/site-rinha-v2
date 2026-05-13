@@ -1,9 +1,11 @@
 'use client';
 
 import { Box, Skeleton, Stack } from '@mui/material';
-import { THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 export default function TeamInfoStepSkeleton() {
+
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   return (
     <Box
       sx={{
