@@ -156,6 +156,9 @@ export const REGEX = {
 // ─── API Endpoints ───────────────────────────────────────────────────────
 
 export const API_ENDPOINTS = {
-  WEBSOCKET_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+  // WebSocket nao passa por Next rewrites/CF Tunnel facilmente. Mantemos um
+  // var dedicado: aponta direto pro back. Em dev: http://localhost:8080.
+  // Em prod: configurar no Cloudflare uma rota WS dedicada.
+  WEBSOCKET_URL: process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080',
 };
 

@@ -6,20 +6,18 @@ type PageState = 'validating' | 'activating' | 'success' | 'invalid' | 'expired'
 export default function useActiveAccount() {
   const searchParams = useSearchParams();
   const token: string = searchParams.get('token') ?? '';
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const [pageState, setPageState] = useState<PageState>('validating');
 
   const validateAndActivate = useCallback(async (): Promise<void> => {
-    if (!token || !apiUrl) {
+    if (!token) {
       setPageState('invalid');
       return;
     }
 
     try {
-      // 1. Valida o token
       const validateResponse = await fetch(
-        `${apiUrl}/auth/activate/validate?token=${encodeURIComponent(token)}`,
+        `/api/auth/activate/validate?token=${encodeURIComponent(token)}`,
         {
           method: 'GET',
           cache: 'no-store',
@@ -32,11 +30,10 @@ export default function useActiveAccount() {
         return;
       }
 
-      // 2. Token válido — ativa a conta automaticamente
       setPageState('activating');
 
       const activateResponse = await fetch(
-        `${apiUrl}/auth/activate?token=${encodeURIComponent(token)}`,
+        `/api/auth/activate?token=${encodeURIComponent(token)}`,
         {
           method: 'POST',
           cache: 'no-store',
@@ -47,7 +44,7 @@ export default function useActiveAccount() {
     } catch {
       setPageState('invalid');
     }
-  }, [apiUrl, token]);
+  }, [token]);
 
   return {
     token,

@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import {
   Tooltip, MenuItem, Button, ListItemIcon,
   AppBar, Box, Toolbar, IconButton, Typography,
@@ -563,7 +563,9 @@ function ResponsiveAppBar({ gameRoute }: ResponsiveAppBarProps) {
         </Toolbar>
       </Box>
 
-      <RouteProgressBar isScrolled={isScrolled} />
+      <Suspense fallback={null}>
+        <RouteProgressBar isScrolled={isScrolled} />
+      </Suspense>
     </AppBar>
   );
 }

@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { internalApiUrl } from '@/lib/internalApi';
 
 /**
  * Fetch helper para Server Components que precisam consumir a API autenticada.
@@ -10,17 +11,12 @@ export async function serverFetch(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiBaseUrl) {
-    throw new Error('NEXT_PUBLIC_API_URL não configurada');
-  }
-
   const cookieHeader = (await cookies()).toString();
 
   const headers = new Headers(init.headers);
   if (cookieHeader) headers.set('cookie', cookieHeader);
 
-  return fetch(`${apiBaseUrl}${path}`, {
+  return fetch(internalApiUrl(path), {
     ...init,
     headers,
     cache: 'no-store',

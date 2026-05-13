@@ -134,7 +134,7 @@ export function useProfile() {
 
      
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
+        '/api/users/me',
         {
           method: 'PATCH',
           body: formData,
@@ -275,7 +275,7 @@ export function useProfile() {
 
 
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
+        '/api/users/me',
         {
           method: 'PATCH',
           body: formData,
