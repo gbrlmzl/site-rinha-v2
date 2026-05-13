@@ -506,10 +506,6 @@ export const LOL_HOME_TOKENS = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tokens de componente — Painel Administrativo
-//
-// Mantém a paleta visual do site (mesmo `surface` e `accent` da navbar
-// principal), mas com identidade própria via `adminAccent` (roxo) para
-// diferenciar contexto sem destoar do resto. Inspirado no doc do admin.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const ADMIN_TOKENS = {

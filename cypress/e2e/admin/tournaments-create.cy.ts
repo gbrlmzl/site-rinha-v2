@@ -72,8 +72,24 @@ describe('Admin · Criar torneio', () => {
     cy.contains('button', 'Criar Torneio').click();
 
     cy.wait('@createTournament').then((interception) => {
-      // O front envia FormData multipart; o body chega como objeto/string dependendo do parser
+      // O front envia FormData multipart; o body chega como string/Buffer.
+      // Validamos: (1) header é multipart, (2) o boundary contem a parte `data` (payload JSON)
+      // e (3) a parte `image` com o filename, garantindo que a imagem foi anexada de verdade.
       expect(interception.request.headers['content-type']).to.match(/multipart\/form-data/);
+
+      const rawBody = interception.request.body;
+      const bodyAsString =
+        typeof rawBody === 'string'
+          ? rawBody
+          : new TextDecoder().decode(rawBody as ArrayBuffer);
+
+      expect(bodyAsString, 'parte data do FormData').to.match(
+        /name="data"[\s\S]+Torneio Teste E2E/
+      );
+      expect(bodyAsString, 'parte image do FormData').to.match(
+        /name="image"[\s\S]+filename="banner\.png"/
+      );
+      expect(bodyAsString, 'content-type da imagem').to.include('image/png');
     });
 
     // Modal deve fechar após sucesso (volta pra rota /admin/torneios)
