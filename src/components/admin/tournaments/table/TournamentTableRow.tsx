@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Box, Collapse, Stack, Typography } from '@mui/material';
 import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyles';
 import { formatDateOnly } from '@/components/admin/tournaments/formatters';
@@ -8,43 +7,26 @@ import TournamentStatusBadge from '@/components/shared/badges/TournamentStatusBa
 import GameBadge from '@/components/shared/badges/GameBadge';
 import TournamentRowActions from '@/components/admin/tournaments/actions/TournamentRowActions';
 import TournamentExpandedDetails from '@/components/admin/tournaments/TournamentExpandedDetails';
+import { useTournamentExpandedDetails } from '@/hooks/admin/useTournamentExpandedDetails';
 import type { AdminTournamentSummary } from '@/types/admin/tournament';
 
 interface TournamentTableRowProps {
   tournament: AdminTournamentSummary;
-  detailsLoader?: (id: number) => Promise<{
-    description: string | null;
-    createdAt: string;
-    rulesUrl: string;
-  } | null>;
   onCancelClick: (tournamentId: number) => void;
 }
 
 export default function TournamentTableRow({
   tournament,
-  detailsLoader,
   onCancelClick,
 }: TournamentTableRowProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [extra, setExtra] = useState<{
-    description: string | null;
-    createdAt: string;
-    rulesUrl: string;
-  } | null>(null);
-
-  const toggleExpanded = async () => {
-    const next = !expanded;
-    setExpanded(next);
-    if (next && !extra && detailsLoader) {
-      const result = await detailsLoader(tournament.id);
-      if (result) setExtra(result);
-    }
-  };
+  const { expanded, extra, toggle } = useTournamentExpandedDetails(
+    tournament.id
+  );
 
   return (
     <Box
       sx={{ ...tournamentStyles.rowCard, ...tournamentStyles.rowCardClickable }}
-      onClick={toggleExpanded}
+      onClick={toggle}
     >
       <Box
         sx={{ ...tournamentStyles.gridColumns, ...tournamentStyles.rowMain }}
@@ -95,7 +77,8 @@ export default function TournamentTableRow({
 
         <TournamentRowActions
           tournamentId={tournament.id}
-          activeTeamsCount={tournament.activeTeamsCount}
+          totalTeamsCount={tournament.totalTeamsCount}
+          isCanceled={tournament.status === 'CANCELED'}
           onCancelClick={onCancelClick}
         />
       </Box>

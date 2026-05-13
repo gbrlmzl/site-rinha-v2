@@ -33,12 +33,20 @@ export const formStyles = {
     paddingBlock: 2,
     borderTop: `1px solid ${border}`,
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 1.5,
+  },
+
+  cancelButton: {
+    ...ADMIN_TOKENS.sx.secondaryCta,
+    flex: { xs: 1, md: 'unset' },
+    minWidth: { xs: 0, md: 140 },
   },
 
   submitButton: {
     ...ADMIN_TOKENS.sx.primaryCta,
-    minWidth: { xs: '100%', md: 200 },
+    flex: { xs: 1, md: 'unset' },
+    minWidth: { xs: 0, md: 200 },
   },
 
   fieldLabel: {
@@ -56,6 +64,16 @@ export const formStyles = {
       '&.Mui-focused fieldset': { borderColor: c.adminAccent },
     },
     '& .MuiInputLabel-root.Mui-focused': { color: c.adminAccent },
+  },
+
+  /** Esconde os spinners nativos de <input type="number"> (Firefox + WebKit). */
+  numberFieldNoSpinner: {
+    '& input[type=number]': { MozAppearance: 'textfield' as const },
+    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button':
+      {
+        WebkitAppearance: 'none' as const,
+        margin: 0,
+      },
   },
 
   selectMenuPaper: {

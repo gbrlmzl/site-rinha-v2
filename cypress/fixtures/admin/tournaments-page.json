@@ -1,0 +1,56 @@
+{
+  "content": [
+    {
+      "id": 1,
+      "slug": "torneio-inter-cursos-lol",
+      "name": "Torneio Inter Cursos LoL",
+      "game": "LEAGUE_OF_LEGENDS",
+      "status": "OPEN",
+      "confirmedTeamsCount": 5,
+      "activeTeamsCount": 8,
+      "totalTeamsCount": 10,
+      "maxTeams": 16,
+      "prizePool": 1500.00,
+      "startsAt": "2026-06-15T19:00:00-03:00",
+      "endsAt": "2026-06-15T23:00:00-03:00",
+      "imageUrl": "https://i.imgur.com/abc.png"
+    },
+    {
+      "id": 2,
+      "slug": "copa-valorant-2026",
+      "name": "Copa Valorant 2026",
+      "game": "VALORANT",
+      "status": "FULL",
+      "confirmedTeamsCount": 16,
+      "activeTeamsCount": 16,
+      "totalTeamsCount": 16,
+      "maxTeams": 16,
+      "prizePool": 3000.00,
+      "startsAt": "2026-07-01T20:00:00-03:00",
+      "endsAt": "2026-07-02T22:00:00-03:00",
+      "imageUrl": "https://i.imgur.com/def.png"
+    },
+    {
+      "id": 3,
+      "slug": "campeonato-cs2-ufpb",
+      "name": "Campeonato CS2 UFPB",
+      "game": "COUNTER_STRIKE",
+      "status": "CANCELED",
+      "confirmedTeamsCount": 0,
+      "activeTeamsCount": 0,
+      "totalTeamsCount": 4,
+      "maxTeams": 8,
+      "prizePool": 500.00,
+      "startsAt": "2026-05-10T18:00:00-03:00",
+      "endsAt": "2026-05-10T22:00:00-03:00",
+      "imageUrl": "https://i.imgur.com/ghi.png"
+    }
+  ],
+  "totalElements": 3,
+  "totalPages": 1,
+  "size": 10,
+  "number": 0,
+  "first": true,
+  "last": true,
+  "empty": false
+}

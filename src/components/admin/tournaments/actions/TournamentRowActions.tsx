@@ -11,18 +11,21 @@ import { tournamentStyles } from '@/components/admin/tournaments/tournamentStyle
 
 interface TournamentRowActionsProps {
   tournamentId: number;
-  /** PENDING_PAYMENT + READY. 0 → ícone lixeira (delete); >0 → ícone bloquear (cancel). */
-  activeTeamsCount: number;
+  /** Total histórico. 0 → ícone lixeira (delete); >0 → ícone bloquear (cancel). */
+  totalTeamsCount: number;
+  /** Se já está cancelado, desabilita o botão. */
+  isCanceled?: boolean;
   onCancelClick: (tournamentId: number) => void;
 }
 
 export default function TournamentRowActions({
   tournamentId,
-  activeTeamsCount,
+  totalTeamsCount,
+  isCanceled = false,
   onCancelClick,
 }: TournamentRowActionsProps) {
   const stop = (e: React.MouseEvent) => e.stopPropagation();
-  const isDeleteFlow = activeTeamsCount === 0;
+  const isDeleteFlow = totalTeamsCount === 0;
 
   return (
     <Box sx={tournamentStyles.rowActionsContainer} onClick={stop}>
@@ -59,18 +62,33 @@ export default function TournamentRowActions({
         </IconButton>
       </Tooltip>
 
-      <Tooltip title={isDeleteFlow ? 'Excluir torneio' : 'Cancelar torneio'}>
-        <IconButton
-          size="small"
-          onClick={() => onCancelClick(tournamentId)}
-          sx={tournamentStyles.iconActionDanger}
-        >
-          {isDeleteFlow ? (
-            <DeleteOutlineIcon fontSize="small" />
-          ) : (
-            <BlockIcon fontSize="small" />
-          )}
-        </IconButton>
+      <Tooltip
+        title={
+          isCanceled
+            ? 'Torneio já cancelado'
+            : isDeleteFlow
+            ? 'Excluir torneio'
+            : 'Cancelar torneio'
+        }
+      >
+        <span>
+          <IconButton
+            size="small"
+            disabled={isCanceled}
+            onClick={() => onCancelClick(tournamentId)}
+            sx={
+              isCanceled
+                ? tournamentStyles.iconActionDisabled
+                : tournamentStyles.iconActionDanger
+            }
+          >
+            {isDeleteFlow ? (
+              <DeleteOutlineIcon fontSize="small" />
+            ) : (
+              <BlockIcon fontSize="small" />
+            )}
+          </IconButton>
+        </span>
       </Tooltip>
     </Box>
   );

@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "e2e:stub": "cypress run --spec \"cypress/e2e/admin/tournaments-list.cy.ts,cypress/e2e/admin/tournaments-create.cy.ts,cypress/e2e/admin/tournaments-cancel.cy.ts,cypress/e2e/lol/my-tournaments-payment-status.cy.ts\"",
+    "e2e:real": "cypress run --spec \"cypress/e2e/auth/admin-login.cy.ts,cypress/e2e/admin/tournaments-flow-real.cy.ts\""
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -35,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/sockjs-client": "^1.5.4",
+    "cypress": "^15.14.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "typescript": "^5"

@@ -1,14 +1,15 @@
 const BASE_URL = '/api';
 
+export type QueryParamValue = string | number | boolean | undefined | null;
+
 export function buildApiUrl(
   path: string,
-  params: Record<string, string | undefined> = {}
+  params: Record<string, QueryParamValue> = {}
 ): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== '') {
-      search.set(key, value);
-    }
+    if (value === undefined || value === null || value === '') continue;
+    search.set(key, String(value));
   }
   const qs = search.toString();
   return qs ? `${BASE_URL}${path}?${qs}` : `${BASE_URL}${path}`;
@@ -21,5 +22,9 @@ export async function parseOrThrow<T>(response: Response): Promise<T> {
     (error as Error & { status?: number }).status = response.status;
     throw error;
   }
-  return response.json() as Promise<T>;
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

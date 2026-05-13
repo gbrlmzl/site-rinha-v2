@@ -14,10 +14,11 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import DesktopCarousel from './DesktopCarousel';
 import MobileCarousel from './MobileCarousel';
 import EnrolledBadge from '@/components/shared/badges/EnrolledBadge';
+import { useTournamentPaymentApproved } from '@/hooks/lol/tournaments/useTournamentPaymentApproved';
 
 type TournamentFilterLabel = 'ABERTO' | 'EM ANDAMENTO' | 'CHEIO';
 type TournamentFilterStatus = Extract<
@@ -59,32 +60,25 @@ export default function TournamentExplorer({
   ]);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchTournaments = async () => {
-      setLoading(true);
-
-      try {
-        const page = await getPublicTournaments(game);
-
-        if (!ignore) {
-          if (page) setTournaments(page.content);
-          setLoading(false);
-        }
-      } catch (error) {
-        if (!ignore) {
-          setLoading(false);
-          console.error(error);
-        }
-      }
-    };
-
-    fetchTournaments();
-    return () => {
-      ignore = true;
-    };
+  const fetchTournaments = useCallback(async () => {
+    try {
+      const page = await getPublicTournaments(game);
+      if (page) setTournaments(page.content);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }, [game, getPublicTournaments]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchTournaments();
+  }, [fetchTournaments]);
+
+  // Re-busca a lista quando um pagamento é aprovado, para manter o contador
+  // "X/N equipes confirmadas" sincronizado sem precisar de F5.
+  useTournamentPaymentApproved(fetchTournaments);
 
   const filtered = useMemo(
     () => tournaments.filter((t) => activeStatuses.includes(t.status)),

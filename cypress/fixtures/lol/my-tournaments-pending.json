@@ -1,0 +1,23 @@
+{
+  "content": [
+    {
+      "id": 101,
+      "slug": "torneio-demo-e2e",
+      "tournamentName": "Torneio Demo E2E",
+      "teamName": "Cypress Squad",
+      "game": "LEAGUE_OF_LEGENDS",
+      "status": "OPEN",
+      "teamStatus": "PENDING_PAYMENT",
+      "startsAt": "2026-08-15T20:00:00-03:00",
+      "endsAt": "2026-08-15T23:00:00-03:00",
+      "expiresAtPayment": "2099-12-31T23:59:59-03:00"
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1,
+  "size": 20,
+  "number": 0,
+  "first": true,
+  "last": true,
+  "empty": false
+}

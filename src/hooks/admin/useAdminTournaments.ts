@@ -6,6 +6,7 @@ import {
   listAdminTournaments,
 } from '@/services/admin/adminTournamentService';
 import type { GameType } from '@/types/admin/tournament';
+import { adminKeys } from './queryKeys';
 
 export interface AdminTournamentsQueryParams {
   game?: GameType;
@@ -14,12 +15,9 @@ export interface AdminTournamentsQueryParams {
   sort: string;
 }
 
-export const adminTournamentsQueryKey = (params: AdminTournamentsQueryParams) =>
-  ['admin', 'tournaments', params] as const;
-
 export function useAdminTournaments(params: AdminTournamentsQueryParams) {
   return useQuery({
-    queryKey: adminTournamentsQueryKey(params),
+    queryKey: adminKeys.tournamentsList(params),
     queryFn: () => listAdminTournaments(params),
     placeholderData: keepPreviousData,
   });
@@ -27,7 +25,7 @@ export function useAdminTournaments(params: AdminTournamentsQueryParams) {
 
 export function useAdminTournament(tournamentId: number | null) {
   return useQuery({
-    queryKey: ['admin', 'tournament', tournamentId],
+    queryKey: adminKeys.tournamentDetail(tournamentId),
     queryFn: () => getAdminTournamentById(tournamentId as number),
     enabled: tournamentId != null,
   });

@@ -117,6 +117,16 @@ export const ADMIN_TOKENS = {
       '&:hover': { backgroundColor: '#7C3AED' },
     },
 
+    secondaryCta: {
+      backgroundColor: 'rgba(255,255,255,0.06)',
+      color: '#fff',
+      fontWeight: 600,
+      borderRadius: 2,
+      paddingInline: 3,
+      height: 44,
+      '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+    },
+
     modalPaper: {
       backgroundColor: surface,
       borderRadius: 3,

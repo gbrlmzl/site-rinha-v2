@@ -128,25 +128,30 @@ export default function TournamentsListClient() {
         />
       )}
 
-      <TablePagination
-        component="div"
-        count={data?.totalElements ?? 0}
-        page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
-        rowsPerPage={pageSize}
-        onRowsPerPageChange={(e) => {
-          setPageSize(parseInt(e.target.value, 10));
-          setPage(0);
-        }}
-        rowsPerPageOptions={[10, 20, 50]}
-        labelRowsPerPage="Por página:"
-        labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
-        sx={tournamentStyles.paginationContainer}
-      />
+      {(data?.totalElements ?? 0) > 0 && (
+        <TablePagination
+          component="div"
+          count={data?.totalElements ?? 0}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          rowsPerPage={pageSize}
+          onRowsPerPageChange={(e) => {
+            setPageSize(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          rowsPerPageOptions={[10, 20, 50]}
+          labelRowsPerPage="Por página:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} de ${count}`
+          }
+          sx={tournamentStyles.paginationContainer}
+        />
+      )}
 
       <TournamentCancelDialog
         open={cancelTargetId != null}
         tournamentId={cancelTargetId}
+        totalTeamsCount={cancelTarget?.totalTeamsCount ?? 0}
         activeTeamsCount={cancelTarget?.activeTeamsCount ?? 0}
         onClose={handleCancelClose}
         onSuccess={handleCancelSuccess}

@@ -21,7 +21,9 @@ import { useCancelTournament } from '@/hooks/admin/useTournamentMutations';
 interface TournamentCancelDialogProps {
   open: boolean;
   tournamentId: number | null;
-  /** activeTeamsCount = PENDING_PAYMENT + READY. Se 0, mostra fluxo de exclusão; senão, fluxo de cancelamento. */
+  /** Histórico total de equipes. 0 = pode excluir definitivamente; >0 = só pode cancelar. */
+  totalTeamsCount: number;
+  /** Equipes ativas (PENDING_PAYMENT + READY). Usado só pra mensagem. */
   activeTeamsCount: number;
   onClose: () => void;
   onSuccess?: (mode: 'deleted' | 'canceled') => void;
@@ -30,11 +32,12 @@ interface TournamentCancelDialogProps {
 export default function TournamentCancelDialog({
   open,
   tournamentId,
+  totalTeamsCount,
   activeTeamsCount,
   onClose,
   onSuccess,
 }: TournamentCancelDialogProps) {
-  const isDeleteFlow = activeTeamsCount === 0;
+  const isDeleteFlow = totalTeamsCount === 0;
   const cancelMutation = useCancelTournament();
   const { reset: resetMutation } = cancelMutation;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -44,19 +47,14 @@ export default function TournamentCancelDialog({
       setErrorMessage(null);
       resetMutation();
     }
-    // `resetMutation` é estável entre renders (referência da mutation),
-    // mas o objeto `cancelMutation` inteiro NÃO é — por isso só listamos `open`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleConfirm = async () => {
     if (tournamentId == null) return;
+    const force = !isDeleteFlow;
     try {
-      // No fluxo delete (sem equipes), o back deleta; no fluxo cancel, força cascade.
-      await cancelMutation.mutateAsync({
-        id: tournamentId,
-        force: !isDeleteFlow,
-      });
+      await cancelMutation.mutateAsync({ id: tournamentId, force });
       onSuccess?.(isDeleteFlow ? 'deleted' : 'canceled');
       onClose();
     } catch (err) {
@@ -110,7 +108,7 @@ export default function TournamentCancelDialog({
             Esse torneio <strong>não tem equipes inscritas</strong> e será
             removido permanentemente.
           </Typography>
-        ) : (
+        ) : activeTeamsCount > 0 ? (
           <>
             <Typography sx={{ color: 'rgba(255,255,255,0.85)', mb: 1 }}>
               Este torneio possui{' '}
@@ -119,6 +117,16 @@ export default function TournamentCancelDialog({
               </strong>{' '}
               inscrita{activeTeamsCount > 1 ? 's' : ''}. Todos os pagamentos
               pendentes serão cancelados no Mercado Pago.
+            </Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem' }}>
+              Deseja realmente cancelar este torneio definitivamente?
+            </Typography>
+          </>
+        ) : (
+          <>
+            <Typography sx={{ color: 'rgba(255,255,255,0.85)', mb: 1 }}>
+              Este torneio possui <strong>histórico de inscrições</strong> e
+              não pode ser excluído — apenas cancelado.
             </Typography>
             <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem' }}>
               Deseja realmente cancelar este torneio definitivamente?

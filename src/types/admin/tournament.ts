@@ -11,8 +11,10 @@ export interface AdminTournamentSummary {
   status: TournamentStatus;
   /** Equipes em READY — contador "X/16" exibido na lista. */
   confirmedTeamsCount: number;
-  /** Equipes ativas (PENDING_PAYMENT + READY) — usado para decidir delete vs cancel. */
+  /** Equipes ativas (PENDING_PAYMENT + READY) — usado pra mensagem do dialog. */
   activeTeamsCount: number;
+  /** Total histórico de equipes (qualquer status). 0 = pode excluir; >0 = só pode cancelar. */
+  totalTeamsCount: number;
   maxTeams: number;
   prizePool: number;
   startsAt: string;

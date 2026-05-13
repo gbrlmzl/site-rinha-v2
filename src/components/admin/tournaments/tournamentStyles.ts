@@ -83,12 +83,6 @@ export const tournamentStyles = {
   /** Layout de 6 colunas — usado tanto no header quanto em cada row */
   gridColumns: {
     display: 'grid',
-    // 1. Torneio: Leva a maior parte (3fr)
-    // 2. Jogo: 1fr
-    // 3. Status: 1.5fr (um pouco maior pois a badge é larga)
-    // 4. Início: 1fr
-    // 5. Equipes: 1fr
-    // 6. Ações: 160px fixos (para os ícones não encolherem/quebrarem)
     gridTemplateColumns: 'minmax(220px, 3fr) minmax(100px, 1fr) minmax(130px, 1.5fr) minmax(100px, 1fr) minmax(90px, 1fr) 160px',
     alignItems: 'center',
     gap: 2,
@@ -171,6 +165,17 @@ export const tournamentStyles = {
     },
   },
 
+  iconActionDisabled: {
+    width: 32,
+    height: 32,
+    color: 'rgba(255,255,255,0.18)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    cursor: 'not-allowed',
+    '&.Mui-disabled': {
+      color: 'rgba(255,255,255,0.18)',
+    },
+  },
+
   expandedDetails: {
     backgroundColor: `${c.adminAccent}0F`,
     paddingInline: { xs: 2.5, md: 3.5 },
@@ -246,6 +251,12 @@ export const tournamentStyles = {
       letterSpacing: '0.05em',
       '&:hover': { backgroundColor: `${palette.color}26` },
       '& .MuiSvgIcon-root': { color: palette.icon, fontSize: 28 },
+      '&.Mui-disabled': {
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        color: 'rgba(255,255,255,0.18)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.18)' },
+      },
     };
   },
 
