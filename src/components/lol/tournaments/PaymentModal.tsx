@@ -54,7 +54,7 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
     const load = async () => {
       try {
         const response = await apiFetch(
-          `http://localhost:8080/tournaments/${torneioId}/registrations`,
+          `/api/tournaments/${torneioId}/registrations`,
           { method: 'GET' }
         );
         if (!response.ok) return;

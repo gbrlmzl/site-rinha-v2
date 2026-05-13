@@ -407,7 +407,7 @@ export const useTeamRegistration = () => {
       }
 
       const response = await apiFetch(
-        `http://localhost:8080/tournaments/${tournamentId}/teams/name-availability?name=${encodeURIComponent(normalizedName)}`,
+        `/api/tournaments/${tournamentId}/teams/name-availability?name=${encodeURIComponent(normalizedName)}`,
         { method: 'GET' }
       );
 
@@ -423,7 +423,7 @@ export const useTeamRegistration = () => {
 
   const checkRegisterStatus = async (tournamentSlug: string) => {
     const response = await apiFetch(
-      `http://localhost:8080/tournaments/${tournamentSlug}/registrations`,
+      `/api/tournaments/${tournamentSlug}/registrations`,
       { method: 'GET' }
     );
     if (!response.ok) {
@@ -565,7 +565,7 @@ export const useTeamRegistration = () => {
       try {
         setCancelingRegistration(true);
         const response = await apiFetch(
-          `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+          `/api/tournaments/${tournamentId}/registrations`,
           { method: 'PUT', body: JSON.stringify({ cancelRegistration: true }) }
         );
         if (!response.ok) {
@@ -645,7 +645,7 @@ export const useTeamRegistration = () => {
       );
 
       const response = await apiFetch(
-        `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+        `/api/tournaments/${tournamentId}/registrations`,
         {
           method: 'POST',
           body: payload,

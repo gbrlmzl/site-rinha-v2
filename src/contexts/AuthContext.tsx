@@ -53,7 +53,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8080/auth/logout', {
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

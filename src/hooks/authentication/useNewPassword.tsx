@@ -42,7 +42,7 @@ export default function useNewPassword() {
   const checkToken = async (): Promise<void> => {
     try {
       const response = await fetch(
-        `http://localhost:8080/auth/password-reset/${token}`,
+        `/api/auth/password-reset/${token}`,
         {
           method: 'GET',
           cache: 'no-store',
@@ -63,7 +63,7 @@ export default function useNewPassword() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/auth/password-reset/${token}`,
+        `/api/auth/password-reset/${token}`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },

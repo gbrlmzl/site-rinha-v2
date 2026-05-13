@@ -17,7 +17,7 @@ export default function useResendActivation() {
     setError(null);
 
     try {
-      await fetch('http://localhost:8080/auth/activate/resend', {
+      await fetch('/api/auth/activate/resend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username }),

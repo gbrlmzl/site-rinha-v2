@@ -2,7 +2,10 @@
 import SockJS from 'sockjs-client';
 import { Client, IMessage } from '@stomp/stompjs';
 
-const WS_URL = 'http://localhost:8080/ws'; //Dominio da aplicação backend + endpoint do websocket
+// SockJS usa HTTP(S) para handshake; o protocolo ws:// e gerenciado internamente.
+// Em prod: NEXT_PUBLIC_WS_URL=https://rinhaufpb.com (Cloudflare encaminha /ws pro back).
+const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080';
+const WS_URL = `${WS_BASE}/ws`;
 
 let stompClient: Client | null = null;
 

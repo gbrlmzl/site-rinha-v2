@@ -14,7 +14,7 @@ export const useTournament = () => {
     ): Promise<Page<MyTournamentsSummaryData> | undefined> => {
       try {
         const response = await apiFetch(
-          `http://localhost:8080/tournaments/me?game=${game}`,
+          `/api/tournaments/me?game=${game}`,
           { method: 'GET' }
         );
 
@@ -36,7 +36,7 @@ export const useTournament = () => {
     ): Promise<Page<TournamentPublicSummaryData> | undefined> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/tournaments?game=${game}&status=OPEN,FULL,ONGOING&size=50`,
+          `/api/tournaments?game=${game}&status=OPEN,FULL,ONGOING&size=50`,
           { method: 'GET' }
         );
         if (!response.ok) throw new Error();
@@ -55,7 +55,7 @@ export const useTournament = () => {
     async (id: number): Promise<TournamentDetailData | undefined> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/tournaments/${id}`,
+          `/api/tournaments/${id}`,
           {
             method: 'GET',
             credentials: 'include',
@@ -74,7 +74,7 @@ export const useTournament = () => {
     async (slug: string): Promise<TournamentDetailData | undefined> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/tournaments/slug/${slug}`,
+          `/api/tournaments/slug/${slug}`,
           { method: 'GET', credentials: 'include' }
         );
         if (!response.ok) throw new Error();
