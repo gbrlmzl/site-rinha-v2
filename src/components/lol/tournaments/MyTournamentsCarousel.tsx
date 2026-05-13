@@ -5,6 +5,7 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import { Box, IconButton } from '@mui/material';
 import { useState, type ReactNode } from 'react';
 import { LOL_TOURNAMENT_SX } from './tournamentsTheme';
+import HScrollSnap from '@/components/shared/HScrollSnap';
 
 const CARD_WIDTH = 320;
 const GAP = 16;
@@ -122,9 +123,8 @@ export default function MyTournamentsCarousel({ items }: Props) {
       </Box>
 
       {/* Mobile/tablet: swipe nativo com scroll-snap */}
-      <Box
+      <HScrollSnap
         sx={{
-          ...LOL_TOURNAMENT_SX.hScrollNoScrollbar,
           display: { xs: 'flex', md: 'none' },
           gap: `${GAP}px`,
           alignItems: 'stretch',
@@ -144,7 +144,7 @@ export default function MyTournamentsCarousel({ items }: Props) {
             {item}
           </Box>
         ))}
-      </Box>
+      </HScrollSnap>
     </>
   );
 }

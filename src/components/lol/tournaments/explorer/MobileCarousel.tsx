@@ -6,7 +6,7 @@ import {
 } from '@/types/lol/tournaments/tournament';
 import { Box } from '@mui/material';
 import TournamentCard from './TournamentCard';
-import { LOL_TOURNAMENT_SX } from '../tournamentsTheme';
+import HScrollSnap from '@/components/shared/HScrollSnap';
 
 interface MobileCarouselProps {
   tournaments: TournamentPublicSummaryData[];
@@ -20,12 +20,12 @@ export default function MobileCarousel({
   if (tournaments.length === 0) return null;
 
   return (
-    <Box sx={{ ...LOL_TOURNAMENT_SX.hScrollNoScrollbar, gap: 2 }}>
+    <HScrollSnap sx={{ gap: 2 }}>
       {tournaments.map((t) => (
-        <Box key={t.id} sx={{ scrollSnapAlign: 'start' }}>
+        <Box key={t.id} sx={{ scrollSnapAlign: 'start', flex: '0 0 auto' }}>
           <TournamentCard tournament={t} teamStatus={enrolledIds.get(t.id)} />
         </Box>
       ))}
-    </Box>
+    </HScrollSnap>
   );
 }

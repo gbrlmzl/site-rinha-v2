@@ -1,4 +1,3 @@
-import { Height } from '@mui/icons-material';
 import { createTheme, darkScrollbar, responsiveFontSizes } from '@mui/material';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -155,6 +154,63 @@ export const ABOUT_SECTION_TOKENS = (() => {
         marginTop: '13vh',
         px: { xs: 2, sm: 3, md: 4 },
       },
+      hero: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        mb: { xs: '4rem', md: '6rem' },
+      },
+      heroEyebrow: {
+        fontFamily: FONT.robotoCondensed,
+        fontSize: '0.78rem',
+        letterSpacing: '0.32em',
+        textTransform: 'uppercase' as const,
+        color: GLOBAL_TOKENS.accent,
+        mb: 1.5,
+      },
+      heroTitle: {
+        fontFamily: FONT.russoOne,
+        fontSize: { xs: '2.4rem', md: '3.6rem' },
+        lineHeight: 1.05,
+        color: 'white',
+        letterSpacing: '0.01em',
+        textShadow: '0 4px 24px rgba(17,181,228,0.2)',
+      },
+      heroSubtitle: {
+        fontFamily: FONT.roboto,
+        fontSize: { xs: '0.95rem', md: '1.05rem' },
+        color: 'rgba(255,255,255,0.72)',
+        maxWidth: 640,
+        mt: 2,
+        lineHeight: 1.6,
+      },
+      heroStatsRow: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: { xs: 1, md: 1.5 },
+        mt: 3,
+        justifyContent: 'center',
+      },
+      heroStatChip: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 1,
+        px: 2,
+        py: 1,
+        borderRadius: 999,
+        border: `1px solid ${GLOBAL_TOKENS.border}`,
+        backgroundColor: 'rgba(17,181,228,0.05)',
+        fontFamily: FONT.robotoCondensed,
+        fontSize: '0.82rem',
+        letterSpacing: '0.08em',
+        color: 'rgba(255,255,255,0.85)',
+        textTransform: 'uppercase' as const,
+      },
+      heroStatValue: {
+        color: GLOBAL_TOKENS.accent,
+        fontWeight: 700,
+      },
       topicBox: {
         display: 'flex',
         flexDirection: 'column',
@@ -183,6 +239,10 @@ export const ABOUT_SECTION_TOKENS = (() => {
         lineHeight: 1.8,
         fontSize: { xs: '0.95rem', md: '1rem' },
       },
+      topicTextEmphasis: {
+        fontFamily: FONT.russoOne,
+        display: 'block' as const,
+      },
       textContainer: {
         display: 'flex',
         flexDirection: 'column',
@@ -210,6 +270,335 @@ export const ABOUT_SECTION_TOKENS = (() => {
         textAlign: 'center',
         fontSize: '0.8rem',
         fontStyle: 'italic',
+      },
+
+      // ── Timeline da história (3 marcos)
+      timelineWrapper: {
+        mb: { xs: '2rem', md: '4rem' },
+      },
+      timelineConnector: {
+        display: 'flex',
+        justifyContent: 'center',
+        mb: { xs: '3rem', md: '4rem' },
+        mt: { xs: '-1rem', md: '-2rem' },
+        '&::before': {
+          content: '""',
+          display: 'block',
+          width: 2,
+          height: { xs: 48, md: 72 },
+          background:
+            'linear-gradient(180deg, rgba(17,181,228,0.5) 0%, rgba(17,181,228,0.05) 100%)',
+        },
+      },
+      timelineDateBadge: {
+        position: 'relative' as const,
+        zIndex: 1,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 1,
+        px: 2,
+        py: 0.75,
+        borderRadius: 999,
+        backgroundColor: 'rgba(17,181,228,0.12)',
+        border: `1px solid ${GLOBAL_TOKENS.accent}`,
+        fontFamily: FONT.robotoCondensed,
+        fontSize: '0.78rem',
+        fontWeight: 700,
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase' as const,
+        color: GLOBAL_TOKENS.accent,
+        mb: 2,
+      },
+      // ── Card destacado da Missão
+      missionCard: {
+        maxWidth: 760,
+        mx: 'auto',
+        mt: 1,
+        px: { xs: 3, md: 5 },
+        py: { xs: 4, md: 5 },
+        borderRadius: 3,
+        border: `1px solid ${GLOBAL_TOKENS.accent}`,
+        background:
+          'linear-gradient(135deg, rgba(17,181,228,0.08) 0%, rgba(14,18,65,0.7) 100%)',
+        boxShadow: '0 16px 40px rgba(17,181,228,0.12)',
+        textAlign: 'center' as const,
+      },
+      missionLead: {
+        fontFamily: FONT.roboto,
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: '0.95rem',
+        mb: 2,
+      },
+      missionStatement: {
+        fontFamily: FONT.russoOne,
+        fontSize: { xs: '1.35rem', md: '1.7rem' },
+        color: 'white',
+        lineHeight: 1.35,
+        letterSpacing: '0.01em',
+      },
+
+    },
+  } as const;
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tokens de componente — Quem Somos (carrossel de membros na página Sobre)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const QUEM_SOMOS_TOKENS = (() => {
+  const flagWidth = { xs: 260, sm: 280, md: 300 };
+  const flagHeight = { xs: 420, sm: 440, md: 460 };
+
+  return {
+    sx: {
+      sectionContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+      },
+
+      // ── Desktop carousel: 3 cards visíveis (centro + adjacentes)
+      desktopViewport: {
+        display: { xs: 'none', md: 'flex' },
+        position: 'relative',
+        width: '100%',
+        maxWidth: 1100,
+        height: 480,
+        alignItems: 'center',
+        justifyContent: 'center',
+        perspective: '1200px',
+        overflow: 'hidden',
+      },
+
+      desktopSlot: (offset: number) => {
+        const isCenter = offset === 0;
+        const isAdjacent = Math.abs(offset) === 1;
+        const isVisible = Math.abs(offset) <= 1;
+        return {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transformOrigin: 'center center',
+          transform: `
+            translate(-50%, -50%)
+            translateX(${offset * 280}px)
+            scale(${isCenter ? 1 : isAdjacent ? 0.78 : 0.6})
+          `,
+          opacity: isCenter ? 1 : isAdjacent ? 0.55 : 0,
+          filter: isCenter ? 'none' : 'blur(1px) saturate(0.85)',
+          pointerEvents: isVisible ? 'auto' : 'none',
+          transition:
+            'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease, filter 0.4s ease',
+          zIndex: isCenter ? 3 : 1,
+          cursor: isAdjacent ? 'pointer' : 'default',
+        } as const;
+      },
+
+      // ── Mobile: usa <HScrollSnap> compartilhado; aqui só os ajustes próprios
+      mobileViewport: {
+        display: { xs: 'flex', md: 'none' },
+        width: '100%',
+        gap: 2,
+        px: '15vw',
+        py: 4,
+      },
+
+      mobileSlot: {
+        flex: '0 0 auto',
+        scrollSnapAlign: 'center',
+      },
+
+      // ── Flag (bandeira) do membro
+      flag: {
+        width: flagWidth,
+        height: flagHeight,
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        backgroundColor: GLOBAL_TOKENS.surface,
+        border: `1px solid ${GLOBAL_TOKENS.border}`,
+        borderRadius: 3,
+        overflow: 'hidden',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+        transition:
+          'transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
+        '&:hover': {
+          transform: 'translateY(-10px)',
+          borderColor: GLOBAL_TOKENS.accent,
+          boxShadow: `0 18px 40px rgba(17,181,228,0.25), 0 0 0 1px ${GLOBAL_TOKENS.accent}`,
+        },
+        '&:hover .flag-gradient': {
+          opacity: 1,
+          transform: 'translateY(0)',
+        },
+      },
+
+      flagGradient: {
+        position: 'absolute',
+        inset: 0,
+        background:
+          'linear-gradient(180deg, transparent 55%, rgba(17,181,228,0.22) 85%, rgba(17,181,228,0.45) 100%)',
+        opacity: 0.55,
+        transform: 'translateY(4px)',
+        transition: 'opacity 0.4s ease, transform 0.4s ease',
+        pointerEvents: 'none',
+      },
+
+      flagContent: {
+        position: 'relative',
+        zIndex: 2,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        pt: 4,
+        pb: 3,
+        px: 2.5,
+      },
+
+      avatarWrapper: {
+        position: 'relative',
+        width: 120,
+        height: 120,
+        borderRadius: '50%',
+        overflow: 'visible',
+        border: `2px solid ${GLOBAL_TOKENS.accent}`,
+        boxShadow: '0 0 0 4px rgba(17,181,228,0.12)',
+        cursor: 'pointer',
+        transition: 'transform 0.3s ease',
+        '&:hover': { transform: 'scale(1.05)' },
+      },
+
+      avatarImageHolder: {
+        width: '100%',
+        height: '100%',
+        borderRadius: '50%',
+        overflow: 'hidden',
+        backgroundColor: GLOBAL_TOKENS.surfaceHigh,
+      },
+
+      githubBadge: {
+        position: 'absolute',
+        bottom: -2,
+        right: -2,
+        width: 32,
+        height: 32,
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: GLOBAL_TOKENS.bg,
+        color: GLOBAL_TOKENS.text,
+        border: `2px solid ${GLOBAL_TOKENS.accent}`,
+        zIndex: 3,
+      },
+
+      realName: {
+        mt: 2.5,
+        fontFamily: FONT.russoOne,
+        fontSize: '1.3rem',
+        color: GLOBAL_TOKENS.accent,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase' as const,
+        textAlign: 'center',
+        lineHeight: 1.15,
+      },
+
+      nickname: {
+        mt: 0.5,
+        fontFamily: FONT.roboto,
+        fontSize: '0.85rem',
+        color: 'rgba(255,255,255,0.7)',
+        textAlign: 'center',
+        fontStyle: 'italic',
+        '&::before': { content: '"\\""' },
+        '&::after': { content: '"\\""' },
+      },
+
+      shortBio: {
+        mt: 1.25,
+        fontFamily: FONT.roboto,
+        fontSize: '0.8rem',
+        lineHeight: 1.45,
+        color: 'rgba(255,255,255,0.7)',
+        textAlign: 'center',
+        fontStyle: 'italic',
+        px: 0.5,
+        display: '-webkit-box',
+        WebkitLineClamp: 3,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+      },
+
+      roleChip: {
+        mt: 2,
+        fontFamily: FONT.robotoCondensed,
+        fontSize: '0.72rem',
+        letterSpacing: '0.08em',
+        color: GLOBAL_TOKENS.accent,
+        borderColor: 'rgba(17,181,228,0.45)',
+        backgroundColor: 'rgba(17,181,228,0.06)',
+        height: 26,
+        textTransform: 'uppercase' as const,
+      },
+
+      flagFooter: {
+        mt: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+      },
+
+      infoButton: {
+        width: 42,
+        height: 42,
+        borderRadius: '50%',
+        border: `1px solid ${GLOBAL_TOKENS.border}`,
+        backgroundColor: 'rgba(255,255,255,0.04)',
+        color: GLOBAL_TOKENS.text,
+        transition: 'all 0.2s',
+        '&:hover': {
+          backgroundColor: GLOBAL_TOKENS.accent,
+          borderColor: GLOBAL_TOKENS.accent,
+        },
+      },
+
+      // ── Dialog de detalhes
+      dialogPaper: {
+        backgroundColor: GLOBAL_TOKENS.surface,
+        border: `1px solid ${GLOBAL_TOKENS.border}`,
+        borderRadius: 3,
+        backgroundImage: 'none',
+        color: GLOBAL_TOKENS.text,
+        maxWidth: 480,
+      },
+
+      dialogHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        px: 3,
+        pt: 3,
+        pb: 2,
+      },
+
+      dialogBody: {
+        px: 3,
+        pb: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+      },
+
+      dialogBodyText: {
+        fontFamily: FONT.roboto,
+        color: 'rgba(255,255,255,0.78)',
+        lineHeight: 1.65,
+        fontSize: '0.95rem',
       },
     },
   } as const;

@@ -170,14 +170,6 @@ const sx = {
     borderRadius: 3,
   },
 
-  /** Esconde scrollbar (carrossel mobile com swipe) */
-  hScrollNoScrollbar: {
-    display: 'flex',
-    overflowX: 'auto',
-    scrollSnapType: 'x mandatory',
-    scrollbarWidth: 'none',
-    '&::-webkit-scrollbar': { display: 'none' },
-  },
 } as const satisfies Record<string, SxProps<Theme>>;
 
 export const LOL_TOURNAMENT_SX = sx;
