@@ -111,7 +111,7 @@ function CtaBlock() {
 
       <Typography sx={{ ...T.caption, fontSize: { xs: '0.75rem', md: '0.8rem' } }}>
         Inscrições até{' '}
-        <Highlight>23 de abril</Highlight>
+        <Highlight>25 de maio</Highlight>
       </Typography>
       */
       }
@@ -173,7 +173,7 @@ export default function InfoBox() {
 
           <Typography sx={{ ...T.body, fontSize: { xs: '0.9rem', md: '1.1rem' }, textAlign: { xs: 'center', md: 'left' } }}>
             Formem suas equipes e se preparem, porque no dia{' '}
-            <Highlight>25 de abril</Highlight>{' '}
+            <Highlight>25 de maio</Highlight>{' '}
             começa a segunda edição da Rinha da UFPB!
           </Typography>
 

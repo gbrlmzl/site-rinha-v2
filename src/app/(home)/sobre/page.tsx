@@ -1,16 +1,7 @@
-import { Box, Container, Typography } from '@mui/material';
+import Sobre from "@/components/home/Sobre";
 
-export default function SobrePage() {
+export default function PaginaSobre() {
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
-      <Box>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Sobre
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Em breve.
-        </Typography>
-      </Box>
-    </Container>
+    <Sobre />
   );
 }
