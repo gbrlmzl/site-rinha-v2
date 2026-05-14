@@ -22,7 +22,7 @@ export default function MemberFlag({ member, onOpenInfo }: Props) {
       <Box className="flag-gradient" sx={sx.flagGradient} />
 
       <Box sx={sx.flagContent}>
-        <Tooltip title={`Abrir GitHub de ${member.nickname}`} arrow>
+        <Tooltip title={`Ir ao GitHub de ${member.realName}`} arrow>
           <Box
             component="a"
             href={githubUrl}

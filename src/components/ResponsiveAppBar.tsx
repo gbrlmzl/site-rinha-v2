@@ -51,11 +51,18 @@ function buildPages(gameRoute: GameRoute): NavPage[] {
       //{ title: 'NOTÍCIAS', url: '/noticias' },
       { title: 'SOBRE', url: '/sobre' },
     ];
+  }else if (gameRoute === 'lol') {
+    return [
+      { title: 'INÍCIO', url: '/lol' },
+      { title: 'TORNEIOS', url: '/lol/torneios' },
+      //{ title: 'NOTÍCIAS', url: '/noticias?filter=lol' },
+      { title: 'SOBRE', url: '/sobre' },
+    ];
   }
 
   return [
     { title: 'INÍCIO', url: `/${gameRoute}` },
-    { title: 'TORNEIOS', url: `/${gameRoute}/torneios` },
+    //{ title: 'TORNEIOS', url: `/${gameRoute}/torneios` },
     //{ title: 'NOTÍCIAS', url: `/noticias?filter=${gameRoute}` },
     { title: 'SOBRE', url: '/sobre' },
   ];

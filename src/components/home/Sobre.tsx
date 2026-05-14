@@ -66,7 +66,7 @@ const HISTORY: HistoryEvent[] = [
     },
   },
   {
-    date: 'Final · 2024',
+    date: '21 · 11 · 2024',
     title: 'A grande final',
     paragraphs: [
       <>

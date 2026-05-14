@@ -15,11 +15,11 @@ export const MEMBERS: Member[] = [
   {
     id: 'gbrlmzl',
     realName: 'Gabriel Mizael',
-    nickname: 'Hot For Teacher',
+    nickname: 'hot for teacher',
     githubUser: 'gbrlmzl',
     role: 'Fundador',
-    shortBio: 'Idealizador da Rinha — placeholder editável.',
-    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha — substituir manualmente.',
+    shortBio: 'Idealizador da Rinha',
+    bio: 'Metallica'
   },
   {
     id: 'victorhugosalv',
@@ -27,8 +27,8 @@ export const MEMBERS: Member[] = [
     nickname: 'Chico Kit Laska',
     githubUser: 'victorhugosalv',
     role: 'Desenvolvedor e DevOps',
-    shortBio: 'Cooperador na construção da plataforma — placeholder editável.',
-    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha — substituir manualmente.',
+    shortBio: 'Cooperador na construção da plataforma',
+    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha.',
   },
   {
     id: 'ryanpsouzaa',
@@ -36,8 +36,8 @@ export const MEMBERS: Member[] = [
     nickname: 'foxyTpk',
     githubUser: 'ryanpsouzaa',
     role: 'Desenvolvedor e Narrador',
-    shortBio: 'Voz e código por trás das transmissões — placeholder editável.',
-    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha — substituir manualmente.',
+    shortBio: 'Narrador principal e colaborador no desenvolvimento da plataforma',
+    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha.',
   },
   {
     id: 'JohnWesleyPinto',
@@ -45,8 +45,8 @@ export const MEMBERS: Member[] = [
     nickname: 'john',
     githubUser: 'JohnWesleyPinto',
     role: 'Organizador e Comentarista',
-    shortBio: 'Logística do torneio e análises ao vivo — placeholder editável.',
-    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha — substituir manualmente.',
+    shortBio: 'Logística do torneio e comentarista',
+    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha',
   },
   {
     id: 'JoseRyanBeserra',
@@ -54,7 +54,7 @@ export const MEMBERS: Member[] = [
     nickname: 'albed0o',
     githubUser: 'JoseRyanBeserra',
     role: 'Comentarista',
-    shortBio: 'Análises e leitura de partidas — placeholder editável.',
-    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha — substituir manualmente.',
+    shortBio: 'Análises e leitura de partidas durante as transmissões',
+    bio: 'Descrição mais detalhada sobre a atuação deste membro na Rinha',
   },
 ];
