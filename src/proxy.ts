@@ -2,91 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const authRoutes = ['/login', '/cadastro', '/recuperar-senha'];
 
-const protectedRoutePrefixes = ['/perfil', '/lol/inscricoes', '/configuracoes'];
+const protectedRoutePrefixes = ['/perfil', '/torneios/me', '/admin'];
 
-async function tryRefreshJwt(
-  request: NextRequest
-): Promise<NextResponse | null> {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!apiBaseUrl) {
-    return null;
-  }
-
-  try {
-    const refreshResponse = await fetch(`${apiBaseUrl}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        cookie: request.headers.get('cookie') ?? '',
-      },
-      cache: 'no-store',
-    });
-
-    if (!refreshResponse.ok) {
-      return null;
-    }
-
-    const response = NextResponse.next();
-    const setCookieHeader = refreshResponse.headers.get('set-cookie');
-
-    if (setCookieHeader) {
-      response.headers.set('set-cookie', setCookieHeader);
-    }
-
-    return response;
-  } catch {
-    return null;
-  }
+function isTournamentRegistrationRoute(pathname: string): boolean {
+  return /^\/lol\/torneios\/[^/]+\/inscricoes(?:\/.*)?$/.test(pathname);
 }
 
-export async function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+
+  //  Redirecionamento da raiz
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/inicio', request.url));
+  }
 
   const hasJwt = request.cookies.has('JWT');
-  const hasRefresh = request.cookies.has('REFRESH');
 
   const isAuthRoute = authRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
-  const isProtectedRoute = protectedRoutePrefixes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
+  const isProtectedRoute =
+    protectedRoutePrefixes.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`)
+    ) || isTournamentRegistrationRoute(pathname);
 
-  // Para páginas de auth, só bloqueia se já houver JWT ativo.
-  // Ter apenas REFRESH (possivelmente expirado) não deve impedir acesso ao login.
-
-  if (hasJwt) {
-    if (isAuthRoute) {
-      const homeUrl = new URL('/', request.url);
-      return NextResponse.redirect(homeUrl);
-    }
-
-    return NextResponse.next();
-  } else if (!hasJwt && hasRefresh) {
-    const refreshedResponse = await tryRefreshJwt(request);
-    if (refreshedResponse) {
-      //chama refresh
-      return refreshedResponse;
-    }
-
-    return NextResponse.next();
-  } else if (!hasRefresh) {
-    // Se não tem JWT nem REFRESH, bloqueia acesso às rotas protegidas e redireciona para login
+  //  Usuário logado tentando acessar login/cadastro → manda pra home
+  if (hasJwt && isAuthRoute) {
+    return NextResponse.redirect(new URL('/inicio', request.url));
   }
 
-  if (isProtectedRoute) {
-    if (hasRefresh) {
-      const refreshedResponse = await tryRefreshJwt(request);
-
-      if (refreshedResponse) {
-        return refreshedResponse;
-      }
-    }
-
+  //  Usuário NÃO logado tentando acessar rota protegida → manda pra login
+  if (!hasJwt && isProtectedRoute) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
-
+    loginUrl.searchParams.set('next', `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -95,17 +44,14 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:subpath*',
+    '/',
+    '/admin/:path*',
     '/login',
     '/cadastro',
     '/recuperar-senha',
-    '/nova-senha',
     '/nova-senha/:path*',
-    '/perfil',
     '/perfil/:path*',
-    '/lol/inscricoes',
-    '/lol/inscricoes/:path*',
-    '/configuracoes',
-    '/configuracoes/:path*',
+    '/lol/torneios/:path*/inscricoes/:path*',
+    '/torneios/me/:path*',
   ],
 };

@@ -1,0 +1,95 @@
+import { useCallback } from 'react'; // <-- Importe aqui
+import { apiFetch } from '@/services/interceptor';
+import {
+  MyTournamentsSummaryData,
+  Page,
+  TournamentDetailData,
+  TournamentPublicSummaryData,
+} from '@/types/lol/tournaments/tournament';
+
+export const useTournament = () => {
+  const getMyTournaments = useCallback(
+    async (
+      game: string
+    ): Promise<Page<MyTournamentsSummaryData> | undefined> => {
+      try {
+        const response = await apiFetch(
+          `/api/tournaments/me?game=${game}`,
+          { method: 'GET' }
+        );
+
+        if (!response.ok) {
+          throw new Error();
+        }
+
+        const data: Page<MyTournamentsSummaryData> = await response.json();
+        return data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+  const getPublicTournaments = useCallback(
+    async (
+      game: string
+    ): Promise<Page<TournamentPublicSummaryData> | undefined> => {
+      try {
+        const response = await fetch(
+          `/api/tournaments?game=${game}&status=OPEN,FULL,ONGOING&size=50`,
+          { method: 'GET' }
+        );
+        if (!response.ok) throw new Error();
+        return response.json();
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
+  /**
+   * Fetches full tournament detail by numeric ID (public endpoint).
+   */
+  const getTournamentDetail = useCallback(
+    async (id: number): Promise<TournamentDetailData | undefined> => {
+      try {
+        const response = await fetch(
+          `/api/tournaments/${id}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        );
+        if (!response.ok) throw new Error();
+        return response.json();
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
+  const getTournamentDetailBySlug = useCallback(
+    async (slug: string): Promise<TournamentDetailData | undefined> => {
+      try {
+        const response = await fetch(
+          `/api/tournaments/slug/${slug}`,
+          { method: 'GET', credentials: 'include' }
+        );
+        if (!response.ok) throw new Error();
+        return response.json();
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
+  return {
+    getMyTournaments,
+    getPublicTournaments,
+    getTournamentDetail,
+    getTournamentDetailBySlug,
+  };
+};

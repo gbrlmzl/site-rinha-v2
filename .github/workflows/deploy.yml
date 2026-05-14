@@ -1,0 +1,26 @@
+name: Deploy frontend
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Pull latest code
+        run: |
+          cd ~/projects/site-rinha-v2
+          git fetch origin
+          git reset --hard origin/main
+
+      - name: Rebuild frontend container
+        run: |
+          cd ~/projects/rinha-deploy
+          docker compose --profile full-stack up -d --build frontend
+
+      - name: Confirm startup
+        run: |
+          sleep 10
+          docker compose -f ~/projects/rinha-deploy/docker-compose.yml --profile full-stack ps frontend

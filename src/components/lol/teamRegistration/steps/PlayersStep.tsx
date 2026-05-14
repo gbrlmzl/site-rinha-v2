@@ -11,8 +11,8 @@ import { Player } from '@/types/teamRegistration';
 import { PlayerInfoForm } from './PlayerInfoForm';
 import {
   PLAYER_LABELS,
-  THEME_COLORS,
-} from '@/hooks/lol/teamRegistration/constants';
+} from '@/hooks/lol/teamRegistration/teamRegistrationConstants';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
 
 interface PlayersStepProps {
   data: Player[];
@@ -30,9 +30,9 @@ export function PlayersStep({
   error = {},
   disabled = false,
   currentPlayerIndex,
-  onCurrentPlayerIndexChange,
   onPositionKeyboardConfirm,
 }: PlayersStepProps) {
+   const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
   const isReservaStep = currentPlayerIndex === 5;
 
   const handleReserveToggle = (checked: boolean) => {
@@ -56,25 +56,6 @@ export function PlayersStep({
     });
   };
 
-  {
-    /* const handleNextPlayer = () => {
-    if (currentPlayerIndex < 5) {
-      onCurrentPlayerIndexChange(currentPlayerIndex + 1);
-    }
-  };
-
-  const handlePrevPlayer = () => {
-    if (currentPlayerIndex > 0) {
-      onCurrentPlayerIndexChange(currentPlayerIndex - 1);
-    }
-  };
-
-  const handlePlayerClick = (index: number) => {
-    onCurrentPlayerIndexChange(index);
-  };
-  */
-  }
-
   return (
     <Box
       sx={{
@@ -85,7 +66,7 @@ export function PlayersStep({
       }}
     >
       <Stack
-        spacing={3}
+        spacing={2}
         sx={{
           width: '100%',
           maxWidth: 600,

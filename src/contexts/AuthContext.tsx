@@ -23,7 +23,6 @@ interface AuthContextType {
 
 interface AuthProviderProps {
   children: ReactNode;
-  //hasToken: boolean; // vem do servidor — sem tocar no cookie no cliente
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -54,7 +53,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8080/auth/logout', {
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

@@ -38,7 +38,7 @@ export default function InDevelopmentCounterStrike() {
       }}
     >
       <Image
-        src={InDevArtDesktop}
+        src={isMobile ? inDevArtMobile : InDevArtDesktop}
         alt="Em desenvolvimento"
         fill
         loading="eager"
@@ -80,7 +80,7 @@ export default function InDevelopmentCounterStrike() {
               textShadow: '0 8px 30px rgba(0,0,0,0.65)',
             }}
           >
-            Em desenvolvimento...
+            Em breve...
           </Typography>
           <Box
             sx={{
@@ -117,8 +117,8 @@ export default function InDevelopmentCounterStrike() {
               py: 1,
               fontWeight: 700,
               letterSpacing: 0.3,
-              backgroundColor: '#E07F0A',
-              '&:hover': { backgroundColor: '#ad6307' },
+              backgroundColor: theme.appPalette.primary,
+              '&:hover': { backgroundColor: theme.appPalette.primaryHover },
             }}
           >
             Início

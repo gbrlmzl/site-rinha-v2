@@ -14,9 +14,22 @@ import {
   PaymentForm,
   TeamRegistrationState,
   StepType,
-  PaymentStatusMessage,
-  RegisterStatus,
+  RegisterStatusResponse,
+  GeneratedPaymentData,
+  CanceledTeamData,
+  CancelTournamentRegistrationResponse,
+  ExceptionResponse,
+  RegistrationUIState,
+  RegistrationData,
 } from '@/types/teamRegistration';
+
+import {
+  validatePlayer,
+  validateAllPLayers,
+  validatePaymentForm,
+  validateTeam,
+} from '@/schemas/teamRegistrationSchemas';
+
 import {
   subscribeToPayment,
   disconnectWebSocket,
@@ -29,42 +42,217 @@ import {
   INITIAL_PLAYERS,
   INITIAL_PAYMENT_FORM,
   STEP_LIST,
-} from './constants';
+  STEPS,
+} from './teamRegistrationConstants';
+import { useRouter } from 'next/navigation';
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
+
+type CacheEntry = { available: boolean; cachedAt: number };
 
 // ────────────────────────────────────────────────────────────────────────
 
 export const useTeamRegistration = () => {
-  // ─── State ───────────────────────────────────────────────────────────────
+  // ─── States ───────────────────────────────────────────────────────────────
+  const [step, setStep] = useState<StepType>('teamInfo');
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: number]: string;
+  }>({});
+  const [wsError, setWsError] = useState<string | null>(null);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
+  const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
+  const stepIndex: number = STEPS.findIndex((s) => s.key === step);
 
-  const [state, setState] = useState<TeamRegistrationState>({
-    team: INITIAL_TEAM,
-    players: INITIAL_PLAYERS,
-    paymentForm: INITIAL_PAYMENT_FORM,
-    currentStep: 'teamInfo',
-    shieldPreview: null,
+  const [tournamentId, setTournamentId] = useState<number>(0);
+  const [registrationData, setRegistrationData] =
+    useState<TeamRegistrationState>({
+      team: INITIAL_TEAM,
+      players: INITIAL_PLAYERS,
+      paymentForm: INITIAL_PAYMENT_FORM,
+      shieldPreview: null,
+    });
+  const [uiState, setUiState] = useState<RegistrationUIState>({
+    status: 'loading',
   });
 
   const [loading, setLoading] = useState(false);
   const [checkingRegisteredTeam, setCheckingRegisteredTeam] = useState(true);
+  const [cancelingRegistration, setCancelingRegistration] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentData, setPaymentData] = useState<{
-    uuid: string;
-    qrCode: string;
-    qrCodeBase64: string;
-    value: number;
-    expiresAt: string;
-  } | null>(null);
+  const [paymentData, setPaymentData] = useState<GeneratedPaymentData | null>(
+    null
+  );
   const [paymentApproved, setPaymentApproved] = useState(false);
-  const [paymentExpired, setPaymentExpired] = useState(false);
-  const [isRetryRegister, setIsRetryRegister] = useState(false); // Estado para controlar se é uma tentativa de re-registrar após falha ou expiração do pagamento
+  const [retryRegisterData, setRetryRegisterData] =
+    useState<RegistrationData | null>(null); // Estado para armazenar os dados da inscrição existente ao tentar re-registrar após expiração ou falha de pagamento
 
   const paymentSubscriptionRef = useRef<(() => void) | null>(null); // Ref para guardar função de cleanup do WebSocket
-  const teamNameAvailabilityCacheRef = useRef<Record<string, boolean>>({});
+  const teamNameAvailabilityCacheRef = useRef<Record<string, CacheEntry>>({});
+
+  const { showSnackbar } = useSnackbarContext();
+  const router = useRouter();
+
+  const CACHE_TTL_MS = 15_000;
+
+  useEffect(() => {
+    return () => {
+      unsubscribePayment();
+      disconnectWebSocket();
+    };
+  }, []);
+
+  //Step handlers
+  const handleNextStep = async () => {
+    if (loading || isCheckingTeamName) return;
+
+    switch (step) {
+      case 'teamInfo': {
+        // Validar equipe
+        const validation = validateTeam(registrationData.team);
+        if (!validation.success) {
+          const firstIssue = Array.isArray(validation.errors)
+            ? validation.errors[0]
+            : null;
+          const errorMsg = firstIssue?.message || 'Erro na validação';
+          setValidationErrors({
+            0: errorMsg,
+          });
+          return;
+        }
+
+        //Verificar se já existe uma equipe com o mesmo nome
+        setIsCheckingTeamName(true);
+        try {
+          const nameCheckResult = await checkTeamNameAvailability(
+            registrationData.team.teamName,
+            tournamentId
+          );
+          if (!nameCheckResult) {
+            showSnackbar({
+              message: `Já existe uma equipe com esse nome.\nPor favor, escolha outro.`,
+              severity: 'error',
+            });
+            return;
+          }
+
+          setValidationErrors({});
+          nextStep();
+        } finally {
+          setIsCheckingTeamName(false);
+        }
+        break;
+      }
+
+      case 'playersInfo': {
+        setValidationErrors({});
+        const isLastPlayer =
+          currentPlayerIndex === registrationData.players.length - 1;
+
+        if (!isLastPlayer) {
+          const currentValidation = validatePlayer(
+            registrationData.players[currentPlayerIndex],
+            currentPlayerIndex
+          );
+
+          if (!currentValidation.success) {
+            const firstIssue = Array.isArray(currentValidation.errors)
+              ? currentValidation.errors[0]
+              : null;
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados inválidos'}`,
+              severity: 'error',
+            });
+            return;
+          }
+
+          setCurrentPlayerIndex((prev) => prev + 1);
+          return;
+        }
+
+        // isLastPlayer === true, validar o conjunto completo antes de avançar
+        // No último jogador, valida o conjunto completo antes de avançar
+        const validation = validateAllPLayers(registrationData.players);
+        if (!validation.success) {
+          if (validation.playerIndex !== undefined) {
+            const firstIssue = Array.isArray(validation.errors)
+              ? validation.errors[0]
+              : null;
+            showSnackbar({
+              message: `${firstIssue?.message || 'Dados inválidos'}`,
+              severity: 'error',
+            });
+          } else {
+            showSnackbar({
+              message: `${validation.message || 'Erro na validação'}`,
+              severity: 'error',
+            });
+          }
+          return;
+        }
+
+        setCurrentPlayerIndex(0);
+        nextStep();
+        break;
+      }
+
+      case 'confirmation': {
+        setValidationErrors({});
+        if (!termsAccepted) {
+          showSnackbar({
+            message: 'Você deve concordar com os termos',
+            severity: 'error',
+          });
+          return;
+        }
+
+        nextStep();
+        break;
+      }
+
+      case 'payment': {
+        setValidationErrors({});
+        // Validar pagamento
+        const validation = validatePaymentForm(registrationData.paymentForm);
+        if (!validation.success) {
+          const firstIssue = Array.isArray(validation.errors)
+            ? validation.errors[0]
+            : null;
+          showSnackbar({
+            message: `${firstIssue?.message || 'Dados de pagamento inválidos'}`,
+            severity: 'error',
+          });
+          return;
+        }
+
+        // Enviar inscrição e gerar QR Code
+        const success = await submitRegistration();
+        if (!success) {
+          return;
+        }
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  };
+
+  const handlePrevStep = () => {
+    setValidationErrors({});
+
+    if (step === 'playersInfo' && currentPlayerIndex > 0) {
+      setCurrentPlayerIndex((prev) => prev - 1);
+      return;
+    }
+
+    prevStep();
+  };
 
   // ─── Handlers: Team ────────────────────────────────────────────────────
 
   const updateTeam = useCallback((updates: Partial<Team>) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       team: { ...prev.team, ...updates },
     }));
@@ -72,7 +260,7 @@ export const useTeamRegistration = () => {
   }, []);
 
   const setTeamShield = useCallback((file: File | null) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       team: { ...prev.team, teamShield: file },
     }));
@@ -81,7 +269,7 @@ export const useTeamRegistration = () => {
   // ─── Handlers: Shield File ─────────────────────────────────────────────
 
   const handleShieldFileSelected = useCallback((file: File | null) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       team: { ...prev.team, teamShield: file },
     }));
@@ -89,14 +277,14 @@ export const useTeamRegistration = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setState((prev) => ({
+        setRegistrationData((prev) => ({
           ...prev,
           shieldPreview: e.target?.result as string,
         }));
       };
       reader.readAsDataURL(file);
     } else {
-      setState((prev) => ({
+      setRegistrationData((prev) => ({
         ...prev,
         shieldPreview: null,
       }));
@@ -108,7 +296,7 @@ export const useTeamRegistration = () => {
 
   const updatePlayer = useCallback(
     (playerIndex: number, updates: Partial<Player>) => {
-      setState((prev) => {
+      setRegistrationData((prev) => {
         const newPlayers = [...prev.players];
         newPlayers[playerIndex] = { ...newPlayers[playerIndex], ...updates };
         return {
@@ -122,7 +310,7 @@ export const useTeamRegistration = () => {
   );
 
   const updateAllPlayers = useCallback((players: Player[]) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       players,
     }));
@@ -131,45 +319,34 @@ export const useTeamRegistration = () => {
   // ─── Handlers: Payment Form ────────────────────────────────────────────
 
   const updatePaymentForm = useCallback((updates: Partial<PaymentForm>) => {
-    setState((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       paymentForm: { ...prev.paymentForm, ...updates },
     }));
     setError(null);
   }, []);
 
-  const handleCancelPayment = () => {
-    setPaymentExpired(false);
-    resetForm();
+  const handleRetryPayment = () => {
+    setUiState({ status: 'can_register' });
+    setStep('payment');
   };
 
-  const handleRetryPayment = () => {
-    setPaymentExpired(false);
-    setIsRetryRegister(true);
-    setState((prev) => ({
-      ...prev,
-      currentStep: 'payment',
-    }));
+  const handleReturnToTournamentPage = (slug: string) => {
+    router.push(`/lol/torneios/${slug}`);
   };
 
   // ─── Handlers: Step Navigation ──────────────────────────────────────────
 
   const goToStep = useCallback((step: StepType) => {
-    setState((prev) => ({
-      ...prev,
-      currentStep: step,
-    }));
+    setStep(step);
     setError(null);
   }, []);
 
   const nextStep = useCallback(() => {
-    setState((prev) => {
-      const currentIdx = STEP_LIST.indexOf(prev.currentStep);
+    setStep((prev) => {
+      const currentIdx = STEP_LIST.indexOf(prev);
       if (currentIdx < STEP_LIST.length - 1) {
-        return {
-          ...prev,
-          currentStep: STEP_LIST[currentIdx + 1],
-        };
+        return STEP_LIST[currentIdx + 1];
       }
       return prev;
     });
@@ -177,13 +354,10 @@ export const useTeamRegistration = () => {
   }, []);
 
   const prevStep = useCallback(() => {
-    setState((prev) => {
-      const currentIdx = STEP_LIST.indexOf(prev.currentStep);
+    setStep((prev) => {
+      const currentIdx = STEP_LIST.indexOf(prev);
       if (currentIdx > 0) {
-        return {
-          ...prev,
-          currentStep: STEP_LIST[currentIdx - 1],
-        };
+        return STEP_LIST[currentIdx - 1];
       }
       return prev;
     });
@@ -207,7 +381,6 @@ export const useTeamRegistration = () => {
 
   const handlePaymentApproved = useCallback(() => {
     setPaymentApproved(true);
-    console.log('Pagamento aprovado! Atualizando status...');
     unsubscribePayment(); // cancela a inscrição — não precisa mais ouvir
   }, []);
 
@@ -220,95 +393,213 @@ export const useTeamRegistration = () => {
   }, []);
 
   // ─── Cleanup — cancela WebSocket ao desmontar o componente ────────────────
-  useEffect(() => {
-    return () => {
-      unsubscribePayment();
-      disconnectWebSocket();
-    };
-  }, []);
 
   const checkTeamNameAvailability = useCallback(
-    async (name: string): Promise<boolean> => {
+    async (name: string, tournamentId: number): Promise<boolean> => {
+      if (!tournamentId) return false;
       const normalizedName = name.trim();
-
-      if (!normalizedName) {
-        return false;
-      }
+      if (!normalizedName) return false;
 
       const cachedResult = teamNameAvailabilityCacheRef.current[normalizedName];
-      if (cachedResult !== undefined) {
-        return cachedResult;
+      if (cachedResult && Date.now() - cachedResult.cachedAt < CACHE_TTL_MS) {
+        //libera para tentar novamente com nomes já verificados após expiração do cache
+        return cachedResult.available; // retorna cache sem fazer requisição
       }
 
-      const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
-        `http://localhost:8080/tournaments/${tournamentId}/teams/check-name?name=${encodeURIComponent(normalizedName)}`,
+        `/api/tournaments/${tournamentId}/teams/name-availability?name=${encodeURIComponent(normalizedName)}`,
         { method: 'GET' }
       );
 
-      // 204 → disponível, 409 → já existe
-      const isAvailable = response.status === 204;
-      teamNameAvailabilityCacheRef.current[normalizedName] = isAvailable;
-
+      const isAvailable = response.status === 200;
+      teamNameAvailabilityCacheRef.current[normalizedName] = {
+        available: isAvailable,
+        cachedAt: Date.now(),
+      };
       return isAvailable;
     },
     []
   );
 
-  const checkRegisterStatus = async (tournamentId: number) => {
+  const checkRegisterStatus = async (tournamentSlug: string) => {
     const response = await apiFetch(
-      `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+      `/api/tournaments/${tournamentSlug}/registrations`,
       { method: 'GET' }
     );
     if (!response.ok) {
-      throw new Error('Erro ao verificar status de inscrição');
+      const data: ExceptionResponse = await response.json();
+      throw new Error(data.error || 'Erro ao verificar status de inscrição');
     }
-    const data: RegisterStatus = await response.json();
+    const data: RegisterStatusResponse = await response.json();
     return data;
   };
 
-  const checkRegisteredTeam = async () => {
+  const checkRegisteredTeam = async (slug: string) => {
     try {
       setCheckingRegisteredTeam(true);
-      const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
-      const registrationStatus = await checkRegisterStatus(tournamentId);
 
-      if (registrationStatus.registered) {
-        if (registrationStatus.paymentStatus === 'PENDING') {
-          setState((prev) => ({
-            ...prev,
-            currentStep: 'payment',
-          }));
-          setPaymentData({
-            uuid: registrationStatus.uuid,
-            qrCode: registrationStatus.qrCode,
-            qrCodeBase64: registrationStatus.qrCodeBase64,
-            value: registrationStatus.value,
-            expiresAt: registrationStatus.expiresAt,
-          });
+      let registrationStatus: RegisterStatusResponse;
 
-          await handlePaymentWebSocketSubscribe(registrationStatus.uuid);
-        } else if (registrationStatus.paymentStatus === 'APPROVED') {
-          setPaymentApproved(true);
-          setState((prev) => ({
-            ...prev,
-            currentStep: 'payment',
-          }));
-        } else if (registrationStatus.paymentStatus === 'CANCELED') {
-          setPaymentExpired(true);
-        } else {
-          //
+      try {
+        registrationStatus = await checkRegisterStatus(slug);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        // Trata exceções HTTP separadamente das lógicas de negócio
+        if (err) {
+          if (err.status === 404) {
+            setUiState({ status: 'error', message: 'Torneio não encontrado' });
+            return;
+          }
+          if (err.status === 409) {
+            // TournamentFullException — torneio encerrado ou não aberto
+            setUiState({
+              status: 'tournament_closed',
+              message: 'As inscrições para este torneio estão encerradas.',
+            });
+
+            return;
+          }
+          if (err.status === 401) {
+            showSnackbar({
+              message: 'Faça login para continuar com a inscrição.',
+              severity: 'info',
+            });
+            router.push('/login');
+            return;
+          }
         }
+        setUiState({
+          status: 'error',
+          message: 'Erro ao verificar status da inscrição. Tente novamente.',
+        });
+        return;
       }
-    } catch (err) {
-      console.error('Erro ao verificar inscrição registrada:', err);
-      //Mostrar snackbar de erro e redirecionar para a página do jogo em 3 segundos
-      // TODO: Implementar snackbar
+
+      const { registrationData, paymentData } = registrationStatus;
+      setTournamentId(registrationData.tournamentId);
+
+      // ── Torneio lotado (sem inscrição prévia) ──────────────────────────────
+      if (
+        !registrationData.registered &&
+        (registrationData.maxTeamsReached ||
+          registrationData.tournamentStatus === 'FULL')
+      ) {
+        setUiState({
+          status: 'tournament_full',
+          message: 'Não há mais vagas disponíveis para este torneio.',
+        });
+        return;
+      }
+
+      // ── Sem inscrição — pode registrar ─────────────────────────────────────
+      if (!registrationData.registered) {
+        setUiState({ status: 'can_register' });
+        return;
+      }
+
+      // ── Tem inscrição — analisa o status ───────────────────────────────────
+      switch (registrationData.teamStatus) {
+        case 'PENDING_PAYMENT':
+          if (paymentData) {
+            setPaymentData(paymentData);
+            setUiState({ status: 'pending_payment' });
+            goToStep('payment');
+            await handlePaymentWebSocketSubscribe(paymentData.uuid);
+            return;
+          } else {
+            // Inconsistência: PENDING sem paymentData → trata como erro
+            setUiState({
+              status: 'error',
+              message:
+                'Houve um erro ao processar a sua inscrição, tente novamente mais tarde.',
+            });
+          }
+          break;
+
+        case 'READY':
+          setUiState({ status: 'payment_approved' });
+          break;
+
+        case 'EXPIRED_PAYMENT':
+          setUiState({ status: 'payment_expired' });
+          setRetryRegisterData(registrationData); // Guarda os dados da inscrição existente para usar no retry
+          break;
+        case 'EXPIRED_PAYMENT_PROBLEM':
+          if (registrationData.maxTeamsReached) {
+            // Expirou mas torneio lotou → não pode fazer retry
+            setUiState({ status: 'tournament_full' });
+          } else {
+            setUiState({ status: 'payment_expired' });
+            goToStep('payment'); // volta para a etapa de pagamento com opção de retry
+          }
+          break;
+
+        case 'CANCELED':
+          // Cancelou antes → pode inscrever de novo
+          setUiState({ status: 'can_register' });
+          break;
+
+        default:
+          setUiState({
+            status: 'error',
+            message: 'Status de inscrição inválido.',
+          });
+          showSnackbar({
+            message: 'Status de inscrição inválido.',
+            severity: 'error',
+          });
+      }
+    } catch {
+      setUiState({
+        status: 'error',
+        message: 'Erro inesperado ao verificar inscrição.',
+      });
     } finally {
       setCheckingRegisteredTeam(false);
     }
   };
 
+  // ─── Cancel Registration ────────────────────────────────────────────────
+  const cancelTournamentRegistration =
+    async (): Promise<CancelTournamentRegistrationResponse> => {
+      try {
+        setCancelingRegistration(true);
+        const response = await apiFetch(
+          `/api/tournaments/${tournamentId}/registrations`,
+          { method: 'PUT', body: JSON.stringify({ cancelRegistration: true }) }
+        );
+        if (!response.ok) {
+          throw new Error('Erro ao cancelar inscrição');
+        }
+        const data: CanceledTeamData = await response.json();
+
+        return {
+          success: true,
+          message: 'Equipe cancelada com sucesso',
+          data: data,
+        };
+      } catch (err) {
+        setUiState({ status: 'error', message: 'Erro ao cancelar inscrição.' });
+        return {
+          success: false,
+          message: 'Erro ao cancelar inscrição',
+        };
+      } finally {
+        setCancelingRegistration(false);
+      }
+    };
+
+  const handleCancelPayment = async () => {
+    const response = await cancelTournamentRegistration();
+
+    if (response.success) {
+      setUiState({
+        status: 'canceled',
+        message: 'Inscrição cancelada com sucesso.',
+      });
+      resetForm();
+    }
+  };
   // ─── Submit Registration ────────────────────────────────────────────────
 
   const submitRegistration = useCallback(async (): Promise<boolean> => {
@@ -318,40 +609,43 @@ export const useTeamRegistration = () => {
     try {
       const payload = new FormData();
 
-      //Se o estado isRetryRegister for true, não precisa enviar os dados da equipe e dos jogadores, apenas gerar um novo pagamento para a inscrição existente. O backend deve ser capaz de identificar isso pela ausência dos dados da equipe e jogadores, e associar o novo pagamento à inscrição existente.
-      if (!isRetryRegister) {
-        // ✅ Blob com Content-Type application/json — Spring consegue deserializar
-        const activePlayers = state.players.filter((p) => !p.disabledPlayer);
+      /**
+       *Se não houver retryRegisterData, é um registro novo → envia dados completos (team + players + payment).
+       *Se houver retryRegisterData, é uma tentativa de re-registrar após expiração ou falha de pagamento → envia apenas payment, pois team + players já existem e não podem ser alterados nessa situação.
+       **/
+      if (!retryRegisterData) {
+        const activePlayers = registrationData.players.filter(
+          (p) => !p.disabledPlayer
+        );
 
         payload.append(
           'teamData',
           new Blob(
             [
               JSON.stringify({
-                teamName: state.team.teamName,
+                teamName: registrationData.team.teamName,
                 players: activePlayers,
               }),
             ],
             { type: 'application/json' }
           )
         );
+
+        // Arquivo direto — sem Blob, sem JSON
+        if (registrationData.team.teamShield) {
+          payload.append('teamShield', registrationData.team.teamShield);
+        }
       }
-      
 
       payload.append(
         'paymentData',
-        new Blob([JSON.stringify(state.paymentForm)], {
+        new Blob([JSON.stringify(registrationData.paymentForm)], {
           type: 'application/json',
         })
       );
 
-      // Arquivo direto — sem Blob, sem JSON
-      if (state.team.teamShield) {
-        payload.append('teamShield', state.team.teamShield);
-      }
-      const tournamentId = 1; //TODO: pegar tournamentId do path /lol/torneios/:tournamentId/inscricao
       const response = await apiFetch(
-        `http://localhost:8080/tournaments/${tournamentId}/registrations`,
+        `/api/tournaments/${tournamentId}/registrations`,
         {
           method: 'POST',
           body: payload,
@@ -364,7 +658,7 @@ export const useTeamRegistration = () => {
         throw new Error(errorBody.error ?? 'Erro ao enviar inscrição');
       }
 
-      const data = await response.json();
+      const data: GeneratedPaymentData = await response.json();
 
       if (!data.uuid || !data.qrCode) {
         throw new Error('Resposta inválida do servidor');
@@ -373,72 +667,90 @@ export const useTeamRegistration = () => {
       setPaymentData({
         uuid: data.uuid,
         qrCode: data.qrCode,
-        qrCodeBase64: data.qrCodeBase64 ?? null,
+        qrCodeBase64: data.qrCodeBase64,
         value: data.value,
         expiresAt: data.expiresAt,
       });
 
       await handlePaymentWebSocketSubscribe(data.uuid);
-      console.log(
-        'Inscrição enviada com sucesso. UUID do pagamento:',
-        data.uuid
-      );
 
       return true;
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Erro ao processar inscrição'
-      );
+      showSnackbar({
+        message:
+          err instanceof Error ? err.message : 'Erro ao processar inscrição',
+        severity: 'error',
+      });
       return false;
     } finally {
       setLoading(false);
     }
   }, [
-    state.team,
-    state.players,
-    state.paymentForm,
+    registrationData.team,
+    registrationData.players,
+    registrationData.paymentForm,
     handlePaymentWebSocketSubscribe,
   ]);
 
   // ─── Getters ────────────────────────────────────────────────────────────
 
   const getActivePlayers = useCallback((): Player[] => {
-    return state.players.filter((p) => !p.disabledPlayer);
-  }, [state.players]);
+    return registrationData.players.filter((p) => !p.disabledPlayer);
+  }, [registrationData.players]);
 
-  const getPaymentValue = useCallback((): number => {
+  const getPaymentValue = () => {
+    if (retryRegisterData && retryRegisterData.teamPlayersAmount) {
+      return retryRegisterData.teamPlayersAmount * 10; // R$10 por jogador, valor fixo para re-registrar após expiração ou falha de pagamento
+    }
     const active = getActivePlayers();
     return active.length * 10; // R$10 por jogador
-  }, [getActivePlayers]);
+  };
 
   // ─── Reset ──────────────────────────────────────────────────────────────
 
   const resetForm = useCallback(() => {
-    setState({
+    setRegistrationData({
       team: INITIAL_TEAM,
       players: INITIAL_PLAYERS,
       paymentForm: INITIAL_PAYMENT_FORM,
-      currentStep: 'teamInfo',
       shieldPreview: null,
     });
+    setStep('teamInfo');
     setLoading(false);
     setError(null);
     setPaymentData(null);
     setPaymentApproved(false);
-    setIsRetryRegister(false);
+    setRetryRegisterData(null);
   }, []);
 
   // ─────────────────────────────────────────────────────────────────────
 
   return {
     // State
-    state,
+    registrationData,
+    step,
     loading,
     checkingRegisteredTeam,
     error,
     paymentData,
     paymentApproved,
-    paymentExpired,
+    cancelingRegistration,
+    uiState,
+    termsAccepted,
+    setTermsAccepted,
+    wsError,
+    setWsError,
+    currentPlayerIndex,
+    setCurrentPlayerIndex,
+    isCheckingTeamName,
+    setIsCheckingTeamName,
+    stepIndex,
+    validationErrors,
+    setValidationErrors,
+
+    //Step Handlers
+    handlePrevStep,
+    handleNextStep,
 
     // Team
     updateTeam,
@@ -461,6 +773,7 @@ export const useTeamRegistration = () => {
     handlePaymentApproved,
     handleCancelPayment,
     handleRetryPayment,
+    handleReturnToTournamentPage,
 
     // Navigation
     goToStep,

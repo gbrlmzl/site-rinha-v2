@@ -5,7 +5,8 @@ import Navbar from '../components/ResponsiveAppBar';
 import AppThemeProvider from './theme-provider';
 
 import { AuthContextProvider } from '@/contexts/AuthContext';
-import { isAuthenticated } from '@/utils/auth';
+import { SnackbarProvider } from '@/contexts/SnackbarContext';
+import { ReactNode } from 'react';
 
 //const hasToken = await isAuthenticated();
 
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="pt-br" className={`${roboto.variable} ${russoOne.variable}`}>
@@ -39,16 +40,9 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <AppThemeProvider>
             <AuthContextProvider>
-              <Navbar></Navbar>
-              <main
-                style={
-                  {
-                    /*paddingTop: "64px"*/
-                  }
-                }
-              >
-                {children}
-              </main>
+              <SnackbarProvider>
+                  {children}
+              </SnackbarProvider>
             </AuthContextProvider>
           </AppThemeProvider>
         </AppRouterCacheProvider>

@@ -9,226 +9,82 @@
 import {
   useEffect,
   useRef,
-  useState,
   type KeyboardEvent,
   type MouseEvent,
 } from 'react';
+
 import {
   Box,
   Button,
   Stack,
   Alert,
   CircularProgress,
-  useMediaQuery,
-  useTheme,
   Container,
   Paper,
 } from '@mui/material';
+
 import { useTeamRegistration } from '@/hooks/lol/teamRegistration/useTeamRegistration';
-import {
-  validatePlayer,
-  validateAllPLayers,
-  validatePaymentForm,
-  validateTeam,
-} from '@/schemas/validationSchemas';
-import { STEPS, THEME_COLORS } from '@/hooks/lol/teamRegistration/constants';
+
+import { STEPS } from '@/hooks/lol/teamRegistration/teamRegistrationConstants';
 
 // Componentes de Passos
 import { StepIndicator } from './shared/StepIndicator';
 import { TeamInfoStep } from './steps/TeamInfoStep';
-import { TeamInfoStepSkeleton } from './steps/TeamInfoStepSkeleton';
 import { PlayersStep } from './steps/PlayersStep';
 import { ConfirmationStep } from './steps/ConfirmationStep';
 import { PaymentStep } from './steps/PaymentStep';
 import ExpiredPayment from './ExpiredPayment';
-
+import TeamRegistrationLoadingScreen from './TeamRegistrationLoadingScreen';
+import InfoScreen from '@/components/lol/teamRegistration/UI/InfoScreen';
+import { TEAM_REGISTRATION_TOKENS } from '@/theme';
+import { useSnackbarContext } from '@/contexts/SnackbarContext';
 // ─────────────────────────────────────────────────────────────────────────
+type TeamRegistrationWizardProps = {
+  slug: string;
+};
 
-export function TeamRegistrationWizard() {
+export function TeamRegistrationWizard({ slug }: TeamRegistrationWizardProps) {
   const {
-    state,
+    registrationData,
+    step,
     loading,
+    uiState,
     checkingRegisteredTeam,
-    error,
     paymentData,
     paymentApproved,
-    paymentExpired,
+    cancelingRegistration,
+    termsAccepted,
+    setTermsAccepted,
+    wsError,
+    currentPlayerIndex,
+    setCurrentPlayerIndex,
+    isCheckingTeamName,
+    stepIndex,
+    validationErrors,
+
+    handleNextStep,
+    handlePrevStep,
+
     updateTeam,
     handleShieldFileSelected,
     updatePlayer,
     updatePaymentForm,
     getPaymentValue,
-    submitRegistration,
-    nextStep,
-    prevStep,
-    resetForm,
-    checkTeamNameAvailability,
     checkRegisteredTeam,
     handleCancelPayment,
     handleRetryPayment,
+    handleReturnToTournamentPage,
   } = useTeamRegistration();
 
-  const [validationErrors, setValidationErrors] = useState<{
-    [key: number]: string;
-  }>({});
-
-  const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
-  const [wsError, setWsError] = useState<string | null>(null);
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
-  const [isCheckingTeamName, setIsCheckingTeamName] = useState<boolean>(false);
   const wizardCardRef = useRef<HTMLDivElement | null>(null);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const stepIndex: number = STEPS.findIndex((s) => s.key === state.currentStep);
+  const THEME_COLORS = TEAM_REGISTRATION_TOKENS.colors;
 
   useEffect(() => {
     // Verificar se o usuário já tem uma inscrição ativa
-    checkRegisteredTeam();
+    checkRegisteredTeam(slug);
   }, []);
+
   // ─── Step Handlers ────────────────────────────────────────────────────
-
-  const handleNextStep = async () => {
-    if (loading || isCheckingTeamName) return;
-
-    switch (state.currentStep) {
-      case 'teamInfo': {
-        // Validar equipe
-        const validation = validateTeam(state.team);
-        if (!validation.success) {
-          const firstIssue = Array.isArray(validation.errors)
-            ? validation.errors[0]
-            : null;
-          const errorMsg = firstIssue?.message || 'Erro na validação';
-          setValidationErrors({
-            0: errorMsg,
-          });
-          return;
-        }
-
-        //Verificar se já existe uma equipe com o mesmo nome
-        setIsCheckingTeamName(true);
-        try {
-          const nameCheckResult = await checkTeamNameAvailability(
-            state.team.teamName
-          );
-          if (!nameCheckResult) {
-            setValidationErrors({
-              0: 'Já existe uma equipe com esse nome. Por favor, escolha outro.',
-            });
-            return;
-          }
-
-          setValidationErrors({});
-          nextStep();
-        } finally {
-          setIsCheckingTeamName(false);
-        }
-        break;
-      }
-
-      case 'playersInfo': {
-        setValidationErrors({});
-        const isLastPlayer = currentPlayerIndex === state.players.length - 1;
-        const lastPlayerIndex = state.players.length - 1;
-
-        if (!isLastPlayer) {
-          const currentValidation = validatePlayer(
-            state.players[currentPlayerIndex],
-            currentPlayerIndex
-          );
-
-          if (!currentValidation.success) {
-            const firstIssue = Array.isArray(currentValidation.errors)
-              ? currentValidation.errors[0]
-              : null;
-            setValidationErrors({
-              [currentPlayerIndex]: firstIssue?.message || 'Dados inválidos',
-            });
-            return;
-          }
-
-          setCurrentPlayerIndex((prev) => prev + 1);
-          return;
-        }
-
-        // isLastPlayer === true, validar o conjunto completo antes de avançar
-        // No último jogador, valida o conjunto completo antes de avançar
-        const validation = validateAllPLayers(state.players);
-        if (!validation.success) {
-          console.log('Erro de validação dos jogadores:', validation.message);
-          if (validation.playerIndex !== undefined) {
-            const firstIssue = Array.isArray(validation.errors)
-              ? validation.errors[0]
-              : null;
-            setValidationErrors({
-              [validation.playerIndex]:
-                firstIssue?.message || 'Dados inválidos',
-            });
-          } else {
-            setValidationErrors({
-              [lastPlayerIndex]: validation.message || 'Erro na validação',
-            });
-          }
-          return;
-        }
-
-        setCurrentPlayerIndex(0);
-        nextStep();
-        break;
-      }
-
-      case 'confirmation': {
-        setValidationErrors({});
-        if (!termsAccepted) {
-          setValidationErrors({
-            0: 'Você deve concordar com os termos',
-          });
-          return;
-        }
-
-        nextStep();
-        break;
-      }
-
-      case 'payment': {
-        setValidationErrors({});
-        // Validar pagamento
-        const validation = validatePaymentForm(state.paymentForm);
-        if (!validation.success) {
-          const firstIssue = Array.isArray(validation.errors)
-            ? validation.errors[0]
-            : null;
-          setValidationErrors({
-            0: firstIssue?.message || 'Dados de pagamento inválidos',
-          });
-          return;
-        }
-
-        // Enviar inscrição e gerar QR Code
-        const success = await submitRegistration();
-        if (!success) {
-          return;
-        }
-
-        break;
-      }
-
-      default:
-        break;
-    }
-  };
-
-  const handlePrevStep = () => {
-    setValidationErrors({});
-
-    if (state.currentStep === 'playersInfo' && currentPlayerIndex > 0) {
-      setCurrentPlayerIndex((prev) => prev - 1);
-      return;
-    }
-
-    prevStep();
-  };
 
   // ─── Renderização Condicional ─────────────────────────────────────────
 
@@ -236,8 +92,8 @@ export function TeamRegistrationWizard() {
     const stepContentMap = {
       teamInfo: (
         <TeamInfoStep
-          data={state.team}
-          shieldPreview={state.shieldPreview}
+          data={registrationData.team}
+          shieldPreview={registrationData.shieldPreview}
           onTeamChange={updateTeam}
           onShieldFileSelected={handleShieldFileSelected}
           loading={loading}
@@ -246,7 +102,7 @@ export function TeamRegistrationWizard() {
       ),
       playersInfo: (
         <PlayersStep
-          data={state.players}
+          data={registrationData.players}
           onPlayerChange={updatePlayer}
           error={validationErrors}
           disabled={loading}
@@ -259,9 +115,9 @@ export function TeamRegistrationWizard() {
       ),
       confirmation: (
         <ConfirmationStep
-          team={state.team}
-          players={state.players}
-          shieldPreview={state.shieldPreview}
+          team={registrationData.team}
+          players={registrationData.players}
+          shieldPreview={registrationData.shieldPreview}
           termsAccepted={termsAccepted}
           onTermsChange={setTermsAccepted}
           error={validationErrors[0] || null}
@@ -269,7 +125,7 @@ export function TeamRegistrationWizard() {
       ),
       payment: (
         <PaymentStep
-          data={state.paymentForm}
+          data={registrationData.paymentForm}
           onDataChange={updatePaymentForm}
           paymentValue={getPaymentValue()}
           paymentData={paymentData}
@@ -280,21 +136,34 @@ export function TeamRegistrationWizard() {
       ),
     } as const;
 
-    return stepContentMap[state.currentStep] ?? null;
+    return stepContentMap[step] ?? null;
   };
 
   const isLastStep = stepIndex === STEPS.length - 1;
   const isPaymentScreen = paymentData !== null;
-  const isPaymentStep = state.currentStep === 'payment';
-  const isConfirmationBlocked =
-    state.currentStep === 'confirmation' && !termsAccepted;
+  const isPaymentStep = step === 'payment';
+  const isConfirmationBlocked = step === 'confirmation' && !termsAccepted;
 
+
+  /**
+   *  Gerenciador de Tecla Enter para Navegação no Wizard
+   * @param event 
+   * @returns @void
+   * 
+   * Só reage ao Enter: retorna imediatamente se a tecla não for Enter.
+   * Ignora Enter com modificadores (Shift/Ctrl/Alt/Meta).
+   * Descarta o evento quando o foco está em um textarea ou elemento editável (contentEditable).
+   * Descarta se o alvo está dentro de um botão ou link (evita interferir em controles clicáveis).
+   * Cancela a ação se qualquer condição de bloqueio estiver ativa: loading, isCheckingTeamName, isConfirmationBlocked ou paymentApproved.
+   * Se todas as checagens passarem, chama event.preventDefault() e dispara handleNextStep() (avança o wizard).
+   */
   const handleWizardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter') return;
     if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)
       return;
 
     const target = event.target as HTMLElement;
+    //verificação para evitar interferência em campos de texto multilinha ou elementos editáveis
     if (target.tagName === 'TEXTAREA' || target.isContentEditable) return;
     if (target.closest('button, [role="button"], a[href]')) return;
     if (
@@ -309,6 +178,14 @@ export function TeamRegistrationWizard() {
     void handleNextStep();
   };
 
+
+  /**
+   * 
+   * @param event 
+   * @returns @void
+   * Ao clicar numa área “vazia” do cartão, a função foca o cartão para habilitar navegação por teclado;
+   * Ao clicar em elementos interativos, ela evita roubar o foco desses elementos.
+   */
   const handleWizardCardClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     if (
@@ -323,70 +200,35 @@ export function TeamRegistrationWizard() {
   };
 
   const nextButtonLabel =
-    state.currentStep === 'playersInfo' &&
-    currentPlayerIndex < state.players.length - 1
+    step === 'playersInfo' &&
+    currentPlayerIndex < registrationData.players.length - 1
       ? 'Próximo'
       : isLastStep && !isPaymentScreen
         ? 'Gerar QR code PIX'
         : 'Próximo';
 
+  //======================================================================
 
+  //Se estiver verificando se o usuário já tem inscrição ativa, mostra tela de loading
   if (checkingRegisteredTeam) {
+    return <TeamRegistrationLoadingScreen />;
+  }
+
+  if (uiState.status === 'payment_expired') {
     return (
-      <Box
-        sx={{
-          width: '100%',
-          minHeight: '100vh',
-          backgroundColor: THEME_COLORS.bg,
-          py: { xs: 3, md: 4 },
-        }}
-      >
-        <Container maxWidth="md">
-          <Paper
-            elevation={0}
-            sx={{
-              backgroundColor: THEME_COLORS.surface,
-              borderRadius: 3,
-              border: `1px solid ${THEME_COLORS.border}`,
-              p: { xs: 0, md: 1 },
-              overflow: 'hidden',
-            }}
-          >
-            <Box sx={{ p: { xs: 2, md: 4 } }}>
-              {/*<StepIndicator steps={STEPS} activeStep={0} />*/}
-              <Box sx={{ mb: 4, minHeight: 400 }}>
-                <TeamInfoStepSkeleton />
-              </Box>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
+      <ExpiredPayment
+        loading={cancelingRegistration}
+        onCancel={handleCancelPayment}
+        onRetryPayment={handleRetryPayment}
+      />
     );
   }
 
-
-  if (paymentExpired) {
-    return (
-      <Box
-        sx={{
-          width: '100vw',
-          minHeight: '100vh',
-          backgroundColor: THEME_COLORS.bg,
-          py: { xs: 3, md: 4 },
-          //mt: { xs: 2, md: '10vh' },
-          pt: { xs: '0vh', md: '13vh' },
-          alignItems:{xs: 'center', md: 'flex-start'},
-          px: 2,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <ExpiredPayment
-          onCancel={handleCancelPayment}
-          onRetryPayment={handleRetryPayment}
-        />
-      </Box>
-    );
+  if (
+    uiState.status !== 'can_register' &&
+    uiState.status !== 'pending_payment'
+  ) {
+    return <InfoScreen event={uiState} slug={slug} />;
   }
 
   return (
@@ -396,7 +238,7 @@ export function TeamRegistrationWizard() {
         width: '100%',
         minHeight: '100vh',
         backgroundColor: THEME_COLORS.bg,
-        py: { xs: 3, md: 4 },
+        py: { xs: '10vh', md: '13vh' },
       }}
     >
       <Container maxWidth="md">
@@ -420,15 +262,8 @@ export function TeamRegistrationWizard() {
             {/* Step Indicator */}
             <StepIndicator steps={STEPS} activeStep={stepIndex} />
 
-            {/* Global Error Alert */}
-            {error && (
-              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                {error}
-              </Alert>
-            )}
-
             {/* Step Content */}
-            <Box sx={{ mb: 4, minHeight: 400 }}>
+            <Box sx={{ mb: 3, minHeight: 400 }}>
               {loading && stepIndex < 3 ? (
                 <Box
                   sx={{
@@ -438,8 +273,7 @@ export function TeamRegistrationWizard() {
                     minHeight: 400,
                   }}
                 >
-                  <CircularProgress />
-                  {/*Criar skeleton para o formulario de inscricao */}
+                  <CircularProgress size={100} />
                 </Box>
               ) : (
                 renderStepContent()
@@ -469,13 +303,10 @@ export function TeamRegistrationWizard() {
                     sx={{
                       backgroundColor: THEME_COLORS.accent,
                       color: THEME_COLORS.text,
-                      width: isMobile ? '33%' : '20%',
+                      width: { xs: '33%', md: '20%' },
                       '&:hover': {
                         backgroundColor: 'rgba(17, 181, 228, 0.1)',
                         borderColor: THEME_COLORS.accent,
-                      },
-                      '&:disabled': {
-                        opacity: 0.5,
                       },
                     }}
                   >
@@ -495,12 +326,8 @@ export function TeamRegistrationWizard() {
                       : THEME_COLORS.accent,
                     color: '#ffffff',
                     width: isPaymentStep
-                      ? isMobile
-                        ? '75%'
-                        : '33%'
-                      : isMobile
-                        ? '33%'
-                        : '25%',
+                      ? { xs: '75%', md: '33%' }
+                      : { xs: '33%', md: '25%' },
                     '&:hover': {
                       backgroundColor: isPaymentStep
                         ? '#15803d'
@@ -512,10 +339,9 @@ export function TeamRegistrationWizard() {
                   }}
                 >
                   {loading || isCheckingTeamName ? (
-                    <>
-                      <CircularProgress size={18} sx={{ mr: 1 }} />
-                      {loading && 'Processando...'}
-                    </>
+                    
+                    loading  && 'Processando...'
+                    
                   ) : (
                     `${nextButtonLabel}`
                   )}
@@ -529,21 +355,21 @@ export function TeamRegistrationWizard() {
                 spacing={2}
                 sx={{
                   textAlign: 'center',
+                  alignItems: 'center',
                 }}
               >
                 <Button
                   variant="contained"
-                  href="/"
+                  onClick={() => handleReturnToTournamentPage(slug)}
                   sx={{
-                    width: isMobile ? '100%' : '50%',
-                    alignSelf: 'center',
+                    width: { xs: '100%', md: '50%' },
                     backgroundColor: THEME_COLORS.accent,
                     '&:hover': {
                       backgroundColor: THEME_COLORS.accentHover,
                     },
                   }}
                 >
-                  Voltar para Início
+                  Voltar à página do torneio
                 </Button>
               </Stack>
             )}
