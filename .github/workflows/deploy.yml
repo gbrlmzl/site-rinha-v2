@@ -2,7 +2,7 @@ name: Deploy frontend
 
 on:
   push:
-    branches: [dev/gbrlmzl]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
         run: |
           cd ~/projects/site-rinha-v2
           git fetch origin
-          git reset --hard origin/dev/gbrlmzl
+          git reset --hard origin/main
 
       - name: Rebuild frontend container
         run: |
