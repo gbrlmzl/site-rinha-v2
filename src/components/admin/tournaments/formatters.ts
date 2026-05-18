@@ -5,7 +5,7 @@ export function formatDateOnly(iso: string): string {
 }
 
 export function formatDateTime(iso: string): string {
-  return dayjs(iso).format('DD/MM/YYYY, HH:mm');
+  return dayjs(iso).format('DD/MM/YYYY | HH:mm');
 }
 
 export function formatPrize(amount: number): string {

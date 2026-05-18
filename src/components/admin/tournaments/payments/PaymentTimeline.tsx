@@ -24,13 +24,13 @@ interface PaymentTimelineProps {
 const c = ADMIN_TOKENS.colors;
 
 const EVENT_PALETTE: Record<PaymentEventType, { color: string; label: string }> = {
-  PAYMENT_GENERATED: { color: c.statusOpen, label: 'PAYMENT GENERATED' },
-  PROCESSED: { color: c.paymentApproved, label: 'PROCESSED' },
-  IGNORED: { color: c.statusFinished, label: 'IGNORED' },
-  ERROR: { color: GLOBAL_TOKENS.danger, label: 'ERROR' },
-  EXPIRED_BY_JOB: { color: c.paymentPending, label: 'EXPIRED BY JOB' },
-  CANCELED_BY_USER: { color: c.paymentCanceled, label: 'CANCELED BY USER' },
-  CANCELED_BY_ADMIN: { color: c.paymentCanceled, label: 'CANCELED BY ADMIN' },
+  PAYMENT_GENERATED: { color: c.statusOpen, label: 'PAGAMENTO CRIADO' },
+  PROCESSED: { color: c.paymentApproved, label: 'APROVADO' },
+  IGNORED: { color: c.statusFinished, label: 'IGNORADO' },
+  ERROR: { color: GLOBAL_TOKENS.danger, label: 'ERRO' },
+  EXPIRED_BY_JOB: { color: c.paymentPending, label: 'EXPIRADO' },
+  CANCELED_BY_USER: { color: c.paymentCanceled, label: 'CANCELADO PELO USUÁRIO' },
+  CANCELED_BY_ADMIN: { color: c.paymentCanceled, label: 'CANCELADO PELO ADMIN' },
 };
 
 export default function PaymentTimeline({ paymentId }: PaymentTimelineProps) {

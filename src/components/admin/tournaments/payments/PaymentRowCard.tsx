@@ -19,9 +19,11 @@ import {
   PAYMENT_STATUS_PALETTE,
   STATUS_DETAIL_LABELS,
   paymentStyles,
+  translatePaymentStatus,
 } from '@/components/admin/tournaments/payments/paymentStyles';
 import {
   formatDateOnly,
+  formatDateTime,
   formatPrize,
 } from '@/components/admin/tournaments/formatters';
 import PaymentTimeline from '@/components/admin/tournaments/payments/PaymentTimeline';
@@ -55,6 +57,7 @@ export default function PaymentRowCard({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const statusEntry = PAYMENT_STATUS_PALETTE[payment.status];
+  const statusLabelPt = translatePaymentStatus(payment.status);
   const detailLabel = payment.statusDetail
     ? (STATUS_DETAIL_LABELS[payment.statusDetail] ?? payment.statusDetail)
     : null;
@@ -79,7 +82,7 @@ export default function PaymentRowCard({
           onToggleTimeline={onToggleTimeline}
           hideTeam={hideTeam}
           statusColor={statusEntry.color}
-          statusLabel={statusEntry.label}
+          statusLabel={statusLabelPt}
           detailLabel={detailLabel}
         />
       ) : (
@@ -89,7 +92,7 @@ export default function PaymentRowCard({
           onToggleTimeline={onToggleTimeline}
           hideTeam={hideTeam}
           statusColor={statusEntry.color}
-          statusLabel={statusEntry.label}
+          statusLabel={statusLabelPt}
           detailLabel={detailLabel}
         />
       )}
@@ -203,20 +206,21 @@ function DesktopLayout({
         <Typography sx={labelSx}>CRIADO / EXPIRA</Typography>
         <Box sx={{ fontSize: '0.78rem', lineHeight: 1.4 }}>
           <Box>
-            <Box component="span" sx={{ color: 'rgba(255,255,255,0.55)' }}>
+            {/*<Box component="span" sx={{ color: 'rgba(255,255,255,0.55)' }}>
               Criado:{' '}
-            </Box>
+            </Box>*/}
             <strong style={{ color: '#fff' }}>
-              {formatDateOnly(payment.createdAt)}
+              {formatDateTime(payment.createdAt)}
             </strong>
           </Box>
           {payment.expiresAt && (
             <Box>
+              {/*}
               <Box component="span" sx={{ color: 'rgba(255,255,255,0.55)' }}>
                 Expira:{' '}
-              </Box>
+              </Box>*/}
               <strong style={{ color: GLOBAL_TOKENS.danger }}>
-                {formatDateOnly(payment.expiresAt)}
+                {formatDateTime(payment.expiresAt)}
               </strong>
             </Box>
           )}
@@ -233,7 +237,17 @@ function DesktopLayout({
               fontSize: '0.82rem',
             }}
           >
-            {formatDateOnly(payment.paidAt)}
+            {formatDateTime(payment.paidAt)}
+          </Typography>
+        ) : payment.status === 'CANCELED' ? (
+          <Typography
+            sx={{
+              color: 'rgb(255, 0, 0)',
+              fontStyle: 'italic',
+              fontSize: '0.82rem',
+            }}
+          >
+            Cancelado
           </Typography>
         ) : (
           <Typography
