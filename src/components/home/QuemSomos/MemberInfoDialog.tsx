@@ -82,12 +82,14 @@ export default function MemberInfoDialog({ member, open, onClose }: Props) {
       </Box>
 
       <DialogContent sx={sx.dialogBody}>
+        {/*
         <Chip
           label={member.role}
           variant="outlined"
           size="small"
           sx={{ ...sx.roleChip, mt: 0, alignSelf: 'flex-start' }}
         />
+        */}
 
         <Typography sx={sx.dialogBodyText}>{member.bio}</Typography>
 
