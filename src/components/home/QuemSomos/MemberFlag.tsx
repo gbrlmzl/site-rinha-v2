@@ -22,7 +22,7 @@ export default function MemberFlag({ member, onOpenInfo }: Props) {
       <Box className="flag-gradient" sx={sx.flagGradient} />
 
       <Box sx={sx.flagContent}>
-        <Tooltip title={`Ir ao GitHub de ${member.realName}`} arrow>
+        <Tooltip title={`GitHub de ${member.realName}`} arrow>
           <Box
             component="a"
             href={githubUrl}
@@ -54,15 +54,21 @@ export default function MemberFlag({ member, onOpenInfo }: Props) {
 
         <Typography sx={sx.realName}>{member.realName}</Typography>
         <Typography sx={sx.nickname}>{member.nickname}</Typography>
-        <Typography sx={sx.shortBio}>{member.shortBio}</Typography>
+        {/* <Typography sx={sx.shortBio}>{member.shortBio}</Typography> */}
 
-        <Chip
-          label={member.role}
-          variant="outlined"
-          size="small"
-          sx={sx.roleChip}
-        />
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: 1, mt: 1 }}>
+          {member.roles.map((role) => (
+            <Chip
+              key={role}
+              label={role}
+              variant="outlined"
+              size="small"
+              sx={sx.roleChip}
+            />
+          ))}
+        </Box>
 
+        {/*  
         <Box sx={sx.flagFooter}>
           <Tooltip title="Mais informações" arrow>
             <IconButton
@@ -74,6 +80,7 @@ export default function MemberFlag({ member, onOpenInfo }: Props) {
             </IconButton>
           </Tooltip>
         </Box>
+        */}
       </Box>
     </Box>
   );

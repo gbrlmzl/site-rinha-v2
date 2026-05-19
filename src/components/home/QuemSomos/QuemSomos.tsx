@@ -9,15 +9,15 @@ import MemberFlag from './MemberFlag';
 import MemberInfoDialog from './MemberInfoDialog';
 
 // Ordem específica do desktop: com active=0 a vista inicial mostra
-// [Ryan | Gabriel (centro) | Victor]. Mobile mantém a ordem em MEMBERS.
+// [John | Gabriel (centro) | Victor]. Mobile mantém a ordem em MEMBERS.
 const DESKTOP_ORDER: Member[] = (() => {
   const byId = (id: string) => MEMBERS.find((m) => m.id === id)!;
   return [
     byId('gbrlmzl'),         // centro
     byId('victorhugosalv'),  // direita (+1)
-    byId('JohnWesleyPinto'), // oculto (+2)
+    byId('ryanpsouzaa'),     // oculto (+2)
     byId('JoseRyanBeserra'), // oculto (-2)
-    byId('ryanpsouzaa'),     // esquerda (-1, via wrap)
+    byId('JohnWesleyPinto'), // esquerda (-1, via wrap)
   ];
 })();
 
