@@ -392,6 +392,7 @@ export default function TournamentDetailPage({ slug }: Props) {
                 p: { xs: 2.5, md: 3 },
               }}
             >
+              {/*
               <Typography
                 sx={{
                   color: C.text,
@@ -403,6 +404,7 @@ export default function TournamentDetailPage({ slug }: Props) {
               >
                 Inscreva-se Agora!
               </Typography>
+              */}
 
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <FeeRow label="Taxa por Inscrição">
@@ -466,7 +468,7 @@ export default function TournamentDetailPage({ slug }: Props) {
                     py: 1.2,
                   }}
                 >
-                  Ler Regras Completas
+                  Regulamento
                 </Button>
               </Box>
             </Box>

@@ -171,7 +171,7 @@ export default function DesktopCarousel({
                 py: 1.3,
               }}
             >
-              Participar Agora
+              Inscreva-se
             </Button>
             <Button
               variant="outlined"
@@ -193,7 +193,7 @@ export default function DesktopCarousel({
                 },
               }}
             >
-              Ver Regras
+              Regulamento
             </Button>
           </Stack>
         </Box>

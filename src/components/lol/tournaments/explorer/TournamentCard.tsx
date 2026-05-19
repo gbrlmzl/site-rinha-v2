@@ -187,7 +187,7 @@ export default function TournamentCard({
               },
             }}
           >
-            Regras
+            Regulamento
           </Button>
           <Button
             variant="contained"
@@ -203,7 +203,7 @@ export default function TournamentCard({
               '&:hover': { backgroundColor: C.primaryHover },
             }}
           >
-            Inscrever
+            Inscreva-se
           </Button>
         </Box>
       </Box>
