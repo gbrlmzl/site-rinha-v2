@@ -370,12 +370,14 @@ function ResponsiveAppBar({ gameRoute }: ResponsiveAppBarProps) {
                   </ListItemIcon>
                   Minha conta
                 </MenuItem>
+                {/*
                 <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/torneios/me'); }}>
                   <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                     <EmojiEventsRoundedIcon sx={{ fontSize: '1.2rem' }} />
                   </ListItemIcon>
                   Meus torneios
                 </MenuItem>
+                */}
                 {user?.role === 'ADMIN' && (
                   <MenuItem onClick={() => { handleCloseNavOptions(); router.push('/admin'); }}>
                     <ListItemIcon sx={{ color: '#FF00EE', minWidth: 40 }}>
@@ -545,12 +547,15 @@ function ResponsiveAppBar({ gameRoute }: ResponsiveAppBarProps) {
               </ListItemIcon>
               Minha conta
             </MenuItem>
+            {/*
             <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/torneios/me'); }}>
               <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                 <EmojiEventsRoundedIcon sx={{ fontSize: '1.2rem' }} />
               </ListItemIcon>
               Meus torneios
             </MenuItem>
+            
+            */}
             {user?.role === 'ADMIN' && (
               <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/admin'); }}>
                 <ListItemIcon sx={{ color: '#FF00EE', minWidth: 40 }}>

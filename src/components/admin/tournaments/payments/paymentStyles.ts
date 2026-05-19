@@ -14,12 +14,22 @@ export const PAYMENT_STATUS_PALETTE: Record<
   CANCELED: { color: c.paymentCanceled, label: 'CANCELED' },
 };
 
+export const PAYMENT_STATUS_LABELS_PT: Record<PaymentStatus, string> = {
+  PENDING: 'PENDENTE',
+  APPROVED: 'APROVADO',
+  CANCELED: 'CANCELADO',
+};
+
 export const STATUS_DETAIL_LABELS: Record<string, string> = {
-  WAITING_TRANSFER: 'WAITING TRANSFER',
-  ACCREDITED: 'ACCREDITED',
-  EXPIRED: 'EXPIRED',
-  CANCELED_BY_USER: 'CANCELED BY USER',
-  CANCELED_BY_ADMIN: 'CANCELED BY ADMIN',
+  WAITING_TRANSFER: 'PENDENTE',
+  ACCREDITED: 'APROVADO',
+  EXPIRED: 'EXPIRADO',
+  CANCELED_BY_USER: 'CANCELADO PELO USUÁRIO',
+  CANCELED_BY_ADMIN: 'CANCELADO PELO ADMIN',
+};
+
+export const translatePaymentStatus = (status: PaymentStatus): string => {
+  return PAYMENT_STATUS_LABELS_PT[status] ?? status;
 };
 
 export const paymentStyles = {

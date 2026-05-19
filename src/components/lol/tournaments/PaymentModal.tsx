@@ -147,7 +147,7 @@ export default function PaymentModal({ torneioId }: PaymentModalProps) {
         <Typography
           sx={{ fontWeight: 700, fontSize: '1rem', letterSpacing: 0.4 }}
         >
-          Pagamento — Torneio #{torneioId}
+          Inscrição — Torneio #{torneioId}
         </Typography>
         <IconButton
           onClick={() => router.back()}

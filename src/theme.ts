@@ -534,7 +534,7 @@ export const QUEM_SOMOS_TOKENS = (() => {
       },
 
       roleChip: {
-        mt: 2,
+        mt: 0,
         fontFamily: FONT.robotoCondensed,
         fontSize: '0.72rem',
         letterSpacing: '0.08em',
