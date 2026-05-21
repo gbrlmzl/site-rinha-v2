@@ -68,9 +68,9 @@ function BackgroundImage({
 
 /** Lista de regras do torneio. */
 const RULES = [
-  'DIA 1: FASE DE GRUPOS',
-  'DIA 2: FASE FINAL',
-  'EQUIPES PODEM TER ATÉ 4 JOGADORES DE FORA DA UFPB',
+  'FORMATO SUIÇO',
+  '2 DIAS DE TORNEIO',
+  'JOGOS DAS 14H ATÉ AS 20H',
 ] as const;
 
 function RulesList() {
@@ -104,16 +104,16 @@ function CtaBlock() {
       </Link>
 
       {
-      /*
-      <Typography sx={{ ...T.caption, fontSize: { xs: '0.75rem', md: '0.8rem' } }}>
-        Ainda não tem uma equipe?
-      </Typography>
-
-      <Typography sx={{ ...T.caption, fontSize: { xs: '0.75rem', md: '0.8rem' } }}>
-        Inscrições até{' '}
-        <Highlight>25 de maio</Highlight>
-      </Typography>
-      */
+        /*
+        <Typography sx={{ ...T.caption, fontSize: { xs: '0.75rem', md: '0.8rem' } }}>
+          Ainda não tem uma equipe?
+        </Typography>
+  
+        <Typography sx={{ ...T.caption, fontSize: { xs: '0.75rem', md: '0.8rem' } }}>
+          Inscrições até{' '}
+          <Highlight>25 de maio</Highlight>
+        </Typography>
+        */
       }
     </Box>
   );
@@ -173,8 +173,8 @@ export default function InfoBox() {
 
           <Typography sx={{ ...T.body, fontSize: { xs: '0.9rem', md: '1.1rem' }, textAlign: { xs: 'center', md: 'left' } }}>
             Formem suas equipes e se preparem, porque no dia{' '}
-            <Highlight>25 de maio</Highlight>{' '}
-            começa a segunda edição da Rinha da UFPB!
+            <Highlight>4 de julho</Highlight>{' '}
+            começa a segunda edição da Rinha do Campus IV!
           </Typography>
 
           <Typography sx={{ ...T.subtitle, fontSize: { xs: '0.9rem', md: '1rem' } }}>

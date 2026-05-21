@@ -96,7 +96,7 @@ export default function Sobre() {
         <Typography sx={sx.heroSubtitle}>
           De um e-mail no mercado interno do campus a um torneio com equipes,
           transmissão e troféu — essa é a história, as pessoas e a missão
-          por trás da Rinha da UFPB.
+          por trás da Rinha do Campus IV.
         </Typography>
 
         <Box sx={sx.heroStatsRow}>
@@ -165,7 +165,7 @@ export default function Sobre() {
 
         <Box sx={sx.missionCard}>
           <Typography sx={sx.missionLead}>
-            A missão da Rinha da UFPB está muito bem definida:
+            A missão da Rinha do Campus IV está muito bem definida:
           </Typography>
           <Typography sx={sx.missionStatement}>
             Gerar entretenimento da mais alta qualidade para nossos espectadores
@@ -182,9 +182,10 @@ export default function Sobre() {
 
         <Box sx={sx.textContainer}>
           <Typography sx={sx.topicText}>
-            A organização da Rinha da UFPB procura sempre tornar o torneio mais
-            atrativo tanto para os espectadores como para os competidores. Para
-            isso, vamos buscar patrocínios com a finalidade de aumentar a
+            A organização da Rinha do Campus IV procura sempre tornar o torneio mais
+            atrativo tanto para os espectadores como para os competidores.
+            {'\n'}
+            Isso será possível através de patrocínios, que ajudarão a melhorar a
             premiação e aprimorar a estrutura da Rinha.
             {'\n\n'}
             Também queremos manter uma frequência de campeonatos e expandir
