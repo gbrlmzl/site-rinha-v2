@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
@@ -42,6 +43,7 @@
     "cypress": "^15.14.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "next-sitemap": "^4.2.3",
     "typescript": "^5"
   }
 }

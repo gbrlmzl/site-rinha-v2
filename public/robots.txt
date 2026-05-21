@@ -1,0 +1,15 @@
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /admin
+Disallow: /perfil
+Disallow: /api
+
+# Host
+Host: https://rinhacampusiv.org
+
+# Sitemaps
+Sitemap: https://rinhacampusiv.org/sitemap.xml
