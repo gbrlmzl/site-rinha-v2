@@ -1,14 +1,11 @@
 import type { Metadata } from 'next';
 import { Roboto, Russo_One } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import Navbar from '../components/ResponsiveAppBar';
 import AppThemeProvider from './theme-provider';
 
 import { AuthContextProvider } from '@/contexts/AuthContext';
 import { SnackbarProvider } from '@/contexts/SnackbarContext';
 import { ReactNode } from 'react';
-
-//const hasToken = await isAuthenticated();
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -31,7 +28,7 @@ export const metadata: Metadata = {
     template: '%s | Rinha do Campus IV',
   },
   description:
-    'Site oficial da Rinha do Campus IV — torneios universitários de League of Legends, CS2 e Valorant na UFPB.',
+    'Site oficial da Rinha do Campus IV — torneios de League of Legends, CS2 e Valorant.',
   keywords: [
     'rinha',
     'campus iv',
@@ -51,7 +48,7 @@ export const metadata: Metadata = {
     siteName: 'Rinha do Campus IV',
     title: 'Rinha do Campus IV',
     description:
-      'Site oficial da Rinha do Campus IV — torneios universitários de League of Legends, CS2 e Valorant na UFPB.',
+      'Site oficial da Rinha do Campus IV — torneios de League of Legends, CS2 e Valorant.',
     images: [
       {
         url: '/logoPng.png',
@@ -63,7 +60,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Rinha do Campus IV',
     description:
-      'Site oficial da Rinha do Campus IV — torneios universitários de League of Legends, CS2 e Valorant na UFPB.',
+      'Site oficial da Rinha do Campus IV — torneios de League of Legends, CS2 e Valorant.',
     images: ['/logoPng.png'],
   },
   robots: {

@@ -70,7 +70,7 @@ function BackgroundImage({
 const RULES = [
   'FORMATO SUIÇO',
   '2 DIAS DE TORNEIO',
-  'JOGOS DAS 14H ATÉ AS 20H',
+  'JOGOS NO FINAL DE SEMANA',
 ] as const;
 
 function RulesList() {

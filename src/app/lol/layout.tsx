@@ -6,11 +6,11 @@ import { ReactNode } from 'react';
 export const metadata: Metadata = {
   title: 'League of Legends',
   description:
-    'Torneios de League of Legends da Rinha do Campus IV na UFPB. Inscreva-se e represente o seu time!',
+    'Torneios de League of Legends da Rinha do Campus IV. Inscreva-se e represente o seu time!',
   openGraph: {
     title: 'LoL — Rinha do Campus IV',
     description:
-      'Torneios de League of Legends da Rinha do Campus IV na UFPB. Inscreva-se e represente o seu time!',
+      'Torneios de League of Legends da Rinha do Campus IV. Inscreva-se e represente o seu time!',
   },
 };
 
