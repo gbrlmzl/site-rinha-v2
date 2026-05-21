@@ -54,7 +54,7 @@ export const metadata: Metadata = {
       'Site oficial da Rinha do Campus IV — torneios universitários de League of Legends, CS2 e Valorant na UFPB.',
     images: [
       {
-        url: '/logo.svg',
+        url: '/logoPng.png',
         alt: 'Logo da Rinha do Campus IV',
       },
     ],
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     title: 'Rinha do Campus IV',
     description:
       'Site oficial da Rinha do Campus IV — torneios universitários de League of Legends, CS2 e Valorant na UFPB.',
-    images: ['/logo.svg'],
+    images: ['/logoPng.png'],
   },
   robots: {
     index: true,
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/favicon.ico',
-    apple: '/logo.svg',
+    apple: '/logoPng.png',
   },
   manifest: '/site.webmanifest',
 };
