@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 export const metadata: Metadata = {
   title: 'Início',
   description:
-    'Confira os torneios e novidades da Rinha do Campus IV na UFPB.',
+    'Confira os torneios e novidades da Rinha do Campus IV.',
 };
 
 
@@ -15,8 +15,8 @@ export default function HomeLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <AppThemeProvider palette="neutral">
-      <Navbar gameRoute="inicio"/>
-        {children}
+      <Navbar gameRoute="inicio" />
+      {children}
     </AppThemeProvider>
   );
 }
