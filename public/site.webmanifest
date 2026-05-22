@@ -1,0 +1,18 @@
+{
+  "name": "Rinha do Campus IV",
+  "short_name": "RinhaCIV",
+  "description": "Site oficial dos torneios de esports da Rinha do Campus IV — UFPB",
+  "start_url": "/inicio",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#7c3aed",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/logoPng.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
