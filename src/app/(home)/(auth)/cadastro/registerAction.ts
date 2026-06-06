@@ -53,7 +53,7 @@ export default async function registerAction(
     return {
       success: true,
       message: 'Usuário cadastrado com sucesso!',
-      secondaryMessage: 'Verifique seu email para ativar a conta.',
+      secondaryMessage: 'Verifique seu email para ativar a conta.\n(Verifique a caixa de spam se não encontrar o email na caixa de entrada.)',
     };
   } catch (error) {
     return {
