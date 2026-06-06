@@ -138,9 +138,24 @@ export default function RegisterForm() {
               color: 'text.secondary',
             }}
           >
-            {state.secondaryMessage}
+            {state.secondaryMessage}</Typography>
+        )}
+
+        {state.thirdMessage && (
+          <Typography
+            component="p"
+            mb={0.25}
+            sx={{
+              whiteSpace: 'pre-line',
+              textAlign: 'center',
+              fontSize: { xs: '0.6rem', sm: '0.8rem' },
+              color: 'text.secondary',
+            }}
+          >
+            {state.thirdMessage}
           </Typography>
         )}
+
         <div
           style={{
             width: '100%',
