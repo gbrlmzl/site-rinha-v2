@@ -105,23 +105,10 @@ export default function RegisterForm() {
         message: state.message || 'Não foi possível criar sua conta.',
         severity: 'error',
       });
-
-      setFormEntries({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
     }
   }, [state, showSnackbar]);
 
   if (state.success) {
-    setFormEntries({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
     return (
       <Card
         sx={{
