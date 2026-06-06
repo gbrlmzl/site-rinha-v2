@@ -36,6 +36,7 @@ type ChangePasswordProps = {
   passwordRequirements: {
     atLeast8Characters: boolean;
     hasNumberOrSymbol: boolean;
+    hasUppercase: boolean;
     passwordsMatch: boolean;
   };
   passwordFieldsValidated: boolean;
@@ -172,6 +173,12 @@ export default function ChangePassword({
                 <Condition
                   ok={passwordRequirements.hasNumberOrSymbol}
                   text="Deve conter um número ou símbolo"
+                  textColor="white"
+                  uncheckedColor="white"
+                />
+                <Condition
+                  ok={passwordRequirements.hasUppercase}
+                  text="Deve conter ao menos uma letra maiúscula"
                   textColor="white"
                   uncheckedColor="white"
                 />

@@ -37,6 +37,7 @@ type RegisterFormEntries = {
 type passwordConditions = {
   atLeast8Chars: boolean;
   hasNumberOrSymbol: boolean;
+  hasUppercase: boolean;
   passwordsMatch: boolean;
 };
 
@@ -61,6 +62,7 @@ export default function RegisterForm() {
     useState<passwordConditions>({
       atLeast8Chars: false,
       hasNumberOrSymbol: false,
+      hasUppercase: false,
       passwordsMatch: false,
     });
 
@@ -72,6 +74,7 @@ export default function RegisterForm() {
     formEntries.email.trim().length > 0 &&
     passwordConditions.atLeast8Chars &&
     passwordConditions.hasNumberOrSymbol &&
+    passwordConditions.hasUppercase &&
     passwordConditions.passwordsMatch &&
     formEntries.username.trim().length > 0;
 
@@ -83,6 +86,10 @@ export default function RegisterForm() {
     setPasswordConditions((prev) => ({
       ...prev,
       hasNumberOrSymbol: /[\d\W]/.test(formEntries.password),
+    }));
+    setPasswordConditions((prev) => ({
+      ...prev,
+      hasUppercase: /[A-Z]/.test(formEntries.password),
     }));
     setPasswordConditions((prev) => ({
       ...prev,
@@ -263,6 +270,10 @@ export default function RegisterForm() {
           <Condition
             ok={passwordConditions.hasNumberOrSymbol}
             text="Deve conter um número ou símbolo"
+          />
+          <Condition
+            ok={passwordConditions.hasUppercase}
+            text="Deve conter ao menos uma letra maiúscula"
           />
           <Condition
             ok={passwordConditions.passwordsMatch}
