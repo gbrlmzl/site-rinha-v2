@@ -93,16 +93,6 @@ export default function RegisterForm() {
   }, [formEntries.password, formEntries.confirmPassword]);
 
   useEffect(() => {
-    if (state.success) {
-      setFormEntries({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
-      return;
-    }
-
     if (state.success === false) {
       showSnackbar({
         message: state.message || 'Não foi possível criar sua conta.',
@@ -119,6 +109,12 @@ export default function RegisterForm() {
   }, [state, showSnackbar]);
 
   if (state.success) {
+    setFormEntries({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
     return (
       <Card
         sx={{
