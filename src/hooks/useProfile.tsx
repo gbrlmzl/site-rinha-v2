@@ -22,6 +22,7 @@ export interface PasswordVisibility {
 export interface PasswordRequirements {
   atLeast8Characters: boolean;
   hasNumberOrSymbol: boolean;
+  hasUppercase: boolean;
   passwordsMatch: boolean;
 }
 
@@ -59,6 +60,7 @@ export function useProfile() {
     useState<PasswordRequirements>({
       atLeast8Characters: false,
       hasNumberOrSymbol: false,
+      hasUppercase: false,
       passwordsMatch: false,
     });
   const [passwordSuccess, setPasswordSuccess] = useState(false);
@@ -231,6 +233,7 @@ export function useProfile() {
   const passwordFieldsValidated =
     passwordRequirements.atLeast8Characters &&
     passwordRequirements.hasNumberOrSymbol &&
+    passwordRequirements.hasUppercase &&
     passwordRequirements.passwordsMatch &&
     passwordForm.currentPassword.length > 0;
 
@@ -238,6 +241,7 @@ export function useProfile() {
     setPasswordRequirements({
       atLeast8Characters: passwordForm.newPassword.length >= 8,
       hasNumberOrSymbol: /[\d\W]/.test(passwordForm.newPassword),
+      hasUppercase: /[A-Z]/.test(passwordForm.newPassword),
       passwordsMatch:
         passwordForm.newPassword === passwordForm.confirmPassword &&
         passwordForm.newPassword.length > 0,
@@ -316,6 +320,7 @@ export function useProfile() {
           setPasswordRequirements({
             atLeast8Characters: false,
             hasNumberOrSymbol: false,
+            hasUppercase: false,
             passwordsMatch: false,
           });
           goToProfile();

@@ -13,6 +13,7 @@ type NewPasswordFormEntries = {
 type PasswordCriteria = {
   atLeast8Chars: boolean;
   hasNumberOrSymbol: boolean;
+  hasUppercase: boolean;
   passwordsMatch: boolean;
 };
 
@@ -27,6 +28,7 @@ export default function useNewPassword() {
     const [passwordCriteria, setPasswordCriteria] = useState<PasswordCriteria>({
       atLeast8Chars: false,
       hasNumberOrSymbol: false,
+      hasUppercase: false,
       passwordsMatch: false,
     });
   const [pageState, setPageState] = useState<PageState>('validating');

@@ -43,6 +43,7 @@ export default function NewPasswordPage() {
       ...prev,
       atLeast8Chars: formEntries.newPassword.length >= 8,
       hasNumberOrSymbol: /[\d\W]/.test(formEntries.newPassword),
+      hasUppercase: /[A-Z]/.test(formEntries.newPassword),
       passwordsMatch:
         formEntries.newPassword.length !== 0 &&
         formEntries.newPassword === formEntries.confirmPass,
@@ -225,6 +226,10 @@ export default function NewPasswordPage() {
               <Condition
                 ok={passwordCriteria.hasNumberOrSymbol}
                 text="Deve conter um número ou símbolo"
+              />
+              <Condition
+                ok={passwordCriteria.hasUppercase}
+                text="Deve conter ao menos uma letra maiúscula"
               />
               <Condition
                 ok={passwordCriteria.passwordsMatch}
