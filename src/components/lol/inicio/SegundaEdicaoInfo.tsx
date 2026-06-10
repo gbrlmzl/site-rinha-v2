@@ -97,7 +97,7 @@ function CtaBlock() {
         width: { xs: '100%', md: 'auto' },
       }}
     >
-      <Link href="/lol/torneios/" passHref>
+      <Link href="/lol/torneios/rinha-do-campus-iv-edicao-ii" passHref>
         <Button variant="contained" size="large" sx={S.ctaButton}>
           Mais informações
         </Button>
