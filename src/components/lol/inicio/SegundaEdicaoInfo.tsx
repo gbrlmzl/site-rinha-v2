@@ -7,7 +7,7 @@ import Link from 'next/link';
 import gravesBackground from '@/assets/imgs/gravesSplashFHD.jpg';
 import gravesBackgroundMobile from '@/assets/imgs/gravesSplashMobile.jpg';
 import { LOL_HOME_TOKENS } from '@/theme';
-
+import {WhatsApp} from '@mui/icons-material';
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-componentes
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,9 +97,18 @@ function CtaBlock() {
         width: { xs: '100%', md: 'auto' },
       }}
     >
-      <Link href="/lol/torneios/rinha-do-campus-iv-edicao-ii" passHref>
-        <Button variant="contained" size="large" sx={S.ctaButton}>
-          Mais informações
+      <Link href="https://chat.whatsapp.com/LRSVVOsbRae3i1uRHC2xpl" passHref>
+        <Button
+          variant="contained"
+          size="large"
+          sx={{
+            ...S.ctaButton,
+            backgroundColor: '#25D366',
+            '&:hover': { backgroundColor: '#1DA851' },
+          }}
+          endIcon={<WhatsApp sx={{ fontSize: { xs: 28, md: 32 } }} />}
+        >
+          Entrar no grupo
         </Button>
       </Link>
 
@@ -152,7 +161,7 @@ export default function InfoBox() {
             mb: { xs: 2, md: 4 },
           }}
         >
-          A SEGUNDA EDIÇÃO VEM AÍ!
+          ESTAMOS TRABALHANDO NISSO...
         </Typography>
 
         {/* Corpo de texto */}
@@ -168,13 +177,11 @@ export default function InfoBox() {
           <Typography sx={{ ...T.subtitle, fontSize: { xs: '1rem', md: '1.1rem' } }}>
             {/* Texto ligeiramente diferente entre mobile e desktop no original —
                 unificado aqui na versão desktop (mais completa). */}
-            Isso mesmo, meus amigos.
+            Meus amigos,
           </Typography>
 
           <Typography sx={{ ...T.body, fontSize: { xs: '0.9rem', md: '1.1rem' }, textAlign: { xs: 'center', md: 'left' } }}>
-            Formem suas equipes e se preparem, porque no dia{' '}
-            <Highlight>22 de agosto</Highlight>{' '}
-            começa a segunda edição da Rinha do Campus IV!
+            Estamos analisando os cenários e planejando a <Highlight>Segunda Edição</Highlight> da Rinha do Campus IV.  Em breve teremos novidades sobre o formato, datas e inscrições.
           </Typography>
 
           <Typography sx={{ ...T.subtitle, fontSize: { xs: '0.9rem', md: '1rem' } }}>
