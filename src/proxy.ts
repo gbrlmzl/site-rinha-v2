@@ -16,6 +16,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/inicio', request.url));
   }
 
+  //  Redirecionamento da rota /lol/torneios para /lol por enquanto que resolvemos a data do torneio
+  if (pathname === '/lol/torneios') {
+    return NextResponse.redirect(new URL('/lol', request.url));
+  }
+
   const hasJwt = request.cookies.has('JWT');
 
   const isAuthRoute = authRoutes.some(
@@ -53,5 +58,6 @@ export const config = {
     '/perfil/:path*',
     '/lol/torneios/:path*/inscricoes/:path*',
     '/torneios/me/:path*',
+    '/lol/torneios'
   ],
 };

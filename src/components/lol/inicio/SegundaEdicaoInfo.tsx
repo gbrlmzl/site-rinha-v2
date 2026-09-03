@@ -97,7 +97,12 @@ function CtaBlock() {
         width: { xs: '100%', md: 'auto' },
       }}
     >
-      <Link href="https://chat.whatsapp.com/LRSVVOsbRae3i1uRHC2xpl" passHref>
+      <Link
+        href="https://chat.whatsapp.com/LRSVVOsbRae3i1uRHC2xpl"
+        target="_blank"
+        rel="noopener noreferrer"
+        passHref
+      >
         <Button
           variant="contained"
           size="large"
