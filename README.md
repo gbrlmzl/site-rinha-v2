@@ -13,9 +13,12 @@
 ![Docker](https://img.shields.io/badge/Docker-alpine-2496ED?style=for-the-badge&logo=docker)
 ![Cypress](https://img.shields.io/badge/Cypress-15.14.2-69D3A7?style=for-the-badge&logo=cypress)
 ![License](https://img.shields.io/badge/Licença-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-v2%20estável%20%7C%20v3%20planejada-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-fora%20do%20ar%20%7C%20v3%20em%20implementação-orange?style=for-the-badge)
 
 </div>
+
+> [!WARNING]
+> **O site está fora do ar.** A atualização para a v3 está sendo implementada e o projeto está em manutenção.
 
 ---
 
@@ -23,6 +26,7 @@
 
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Status do Projeto](#-status-do-projeto)
+- [Mudanças da v3](#-mudanças-da-v3)
 - [Funcionalidades](#-funcionalidades)
 - [Acesso ao Projeto](#-acesso-ao-projeto)
 - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
@@ -45,7 +49,18 @@ O projeto se comunica com a [`api-rinha-v2`](https://github.com/gbrlmzl/api-rinh
 
 ## 🚀 Status do Projeto
 
-O projeto encontra-se atualmente na **v2**, em estado estável. A **v3** está em fase de planejamento, com novas funcionalidades sendo mapeadas.
+🚧 **Em manutenção.** O site está fora do ar porque a atualização para a **v3** está sendo implementada.
+
+Este repositório contém o código da **v2**, que continua disponível para consulta e pode ser executado localmente.
+
+---
+
+## 🔄 Mudanças da v3
+
+| Área | v2 (atual) | v3 |
+|---|---|---|
+| **Infraestrutura** | Servidor próprio com Docker Compose | **AWS** |
+| **Armazenamento de imagens** | **Imgur** | **Bucket S3 da AWS** |
 
 ---
 
@@ -73,7 +88,7 @@ O projeto encontra-se atualmente na **v2**, em estado estável. A **v3** está e
 
 ## 🔗 Acesso ao Projeto
 
-
+> ⚠️ O endereço abaixo está fora do ar durante a implementação da v3.
 
 ```
 https://rinhacampusiv.org
